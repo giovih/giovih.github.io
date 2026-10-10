@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>La nostra spesa</title>
+  <meta name="theme-color" content="#f6f5f1" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0c0f0d" media="(prefers-color-scheme: dark)">
+  <meta name="description" content="La lista della spesa di famiglia: Gio, Bea, Luca e Ori">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icona.svg" type="image/svg+xml">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Spesa">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="barra">
+    <div class="marchio">
+      <img src="icons/icon-192.png" alt="" width="30" height="30">
+      <span>La nostra spesa</span>
+    </div>
+    <div class="barra-destra">
+      <button id="stato" class="stato" type="button"></button>
+      <button id="io" class="io" type="button" aria-label="Cambia persona"></button>
+    </div>
+  </header>
+
+  <main id="pagina"></main>
+
+  <nav class="tabs" id="tabs" aria-label="Liste"></nav>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="chiSei" class="foglio benvenuto"></dialog>
+  <dialog id="modifica" class="foglio"></dialog>
+  <dialog id="info" class="foglio"></dialog>
+  <dialog id="server" class="foglio"></dialog>
+  <dialog id="accesso" class="accesso"></dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -13,7 +13,16 @@
 //   },
 
 export const CONFIG = {
-  firebase: null,
+  // Progetto Firebase della famiglia (questi dati sono pubblici: la lista è protetta
+  // dalla password della famiglia, non da questi).
+  firebase: {
+    apiKey: "AIzaSyAnUZJZB_CTHsYb51d5FqMK5HejVLQEv2A",
+    authDomain: "spesa-famiglia-2fc44.firebaseapp.com",
+    projectId: "spesa-famiglia-2fc44",
+    storageBucket: "spesa-famiglia-2fc44.firebasestorage.app",
+    messagingSenderId: "409742204392",
+    appId: "1:409742204392:web:c541c6c39edda380d0185d"
+  },
 
   // colore e colore2 formano la sfumatura dell'avatar e della pagina di ognuno
   persone: [

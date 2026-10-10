@@ -24,6 +24,10 @@ export const CONFIG = {
     appId: "1:409742204392:web:c541c6c39edda380d0185d"
   },
 
+  // false = la famiglia esiste già: nella schermata della password non compare
+  // "Crea la famiglia" (serve solo se si perde la password e si ricomincia da capo).
+  creaFamiglia: false,
+
   // colore e colore2 formano la sfumatura dell'avatar e della pagina di ognuno
   persone: [
     { id: "gio",   nome: "Gio",   colore: "#4f8cff", colore2: "#1d4ed8" },

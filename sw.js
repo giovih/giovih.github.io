@@ -1,5 +1,5 @@
 // Fa aprire l'app anche senza internet (le pagine vengono tenute in memoria).
-const CACHE = "spesa-v5";
+const CACHE = "spesa-v6";
 const FILE = [
   "./", "index.html", "style.css", "app.js", "store.js", "reparti.js", "config.js",
   "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png",

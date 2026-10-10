@@ -1011,6 +1011,8 @@ function chiediPassword() {
           ? "Scegli la password che userete tutti per entrare."
           : "Inserisci la password della famiglia per entrare."),
         form,
+        // a famiglia già creata sul server di famiglia il pulsante non serve (vedi config.js)
+        CONFIG.creaFamiglia === false && server.condiviso ? null :
         h("button", { type: "button", class: "link-tenue", onclick: () => { crea = !crea; disegnaAccesso(); } },
           crea ? "Ho già una password" : "È la prima volta? Crea la famiglia"),
         h("div", { class: "accesso-server" + (server.condiviso ? " ok" : "") },

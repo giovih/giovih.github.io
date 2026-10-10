@@ -1,5 +1,5 @@
 // Fa aprire l'app anche senza internet (le pagine vengono tenute in memoria).
-const CACHE = "spesa-v6";
+const CACHE = "spesa-v7";
 const FILE = [
   "./", "index.html", "style.css", "app.js", "store.js", "reparti.js", "config.js",
   "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png",
@@ -23,7 +23,9 @@ self.addEventListener("fetch", e => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
   e.respondWith(
-    fetch(e.request)
+    // "no-cache": chiede sempre al sito se c'è una versione nuova (GitHub Pages
+    // altrimenti fa tenere i file vecchi al browser per 10 minuti)
+    fetch(e.request, { cache: "no-cache" })
       .then(r => {
         const copia = r.clone();
         caches.open(CACHE).then(c => c.put(e.request, copia));

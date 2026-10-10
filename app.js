@@ -727,6 +727,8 @@ function apriInfo() {
     h("div", { class: "info-righe" },
       c ? h("button", { type: "button", class: "info-riga", onclick: () => { d.close(); apriServer2(); } },
         icona("nuvola"), h("span", {}, "Server", h("small", {}, server.nome)), icona("freccia")) : null,
+      c ? h("button", { type: "button", class: "info-riga", onclick: () => { d.close(); apriBlocco(); } },
+        icona("lucchetto"), h("span", {}, "Riserva il server alla famiglia", h("small", {}, "Nessun altro potrà usarlo")), icona("freccia")) : null,
       h("button", {
         type: "button", class: "info-riga rossa", onclick: () => {
           if (!confirm("Uscire dalla famiglia su questo telefono? Per rientrare servirà la password.")) return;
@@ -735,6 +737,49 @@ function apriInfo() {
         }
       }, icona("esci"), h("span", {}, "Esci dalla famiglia"), icona("freccia"))
     )
+  );
+  chiudiFuori(d);
+  d.showModal();
+}
+
+// ---------- server riservato: regole che accettano solo la nostra famiglia ----------
+
+function apriBlocco() {
+  const id = famigliaSalvata();
+  const regole = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /famiglie/{famiglia}/{documento=**} {
+      allow read, write: if famiglia == "${id}";
+    }
+  }
+}`;
+  const d = $("#server");
+  const passo = (n, titolo, ...corpo) => h("li", { class: "passo" },
+    h("span", { class: "passo-n" }, String(n)),
+    h("div", {}, h("h4", {}, titolo), ...corpo));
+  riempi(d,
+    h("div", { class: "maniglia" }),
+    h("div", { class: "foglio-testa" },
+      h("div", {}, h("div", { class: "occhiello" }, "Solo Gio, Bea, Luca e Ori"), h("h2", {}, "Riserva il server")),
+      h("button", { type: "button", class: "tondo", "aria-label": "Chiudi", onclick: () => d.close() }, icona("chiudi"))
+    ),
+    h("p", { class: "sotto-titolo" }, "Con queste regole il server accetta soltanto la vostra famiglia: chi non sa la password non può né leggere né scrivere niente, e nessuno può usarlo per altre cose. Dentro c'è il codice segreto della famiglia (ricavato dalla password): non mandarlo a nessuno."),
+    h("ol", { class: "passi" },
+      passo(1, "Copia le regole",
+        h("pre", { class: "regole" }, regole),
+        h("button", {
+          type: "button", class: "btn secondario piccolo", onclick: async () => {
+            try { await navigator.clipboard.writeText(regole); toast("Regole copiate"); } catch { prompt("Copia le regole:", regole); }
+          }
+        }, icona("copia"), "Copia le regole")),
+      passo(2, "Incollale su Firebase",
+        h("p", {}, "Apri Firebase → ", h("b", {}, "Firestore Database"), " → scheda ", h("b", {}, "Regole"), ". Cancella tutto, incolla e premi ", h("b", {}, "Pubblica"), "."),
+        h("a", { class: "btn secondario piccolo", href: `https://console.firebase.google.com/project/${encodeURIComponent(server.nome)}/firestore/rules`, target: "_blank", rel: "noopener" }, "Apri le regole", icona("freccia"))),
+      passo(3, "Fatto",
+        h("p", {}, "L'app continua a funzionare come prima per tutti voi. Se un giorno cambiate password, bisognerà rifare questi passi."))
+    ),
+    h("div", { class: "foglio-azioni" }, h("button", { type: "button", class: "btn primario", onclick: () => d.close() }, "Ho capito"))
   );
   chiudiFuori(d);
   d.showModal();
@@ -945,7 +990,9 @@ function chiediPassword() {
             fine(id);
           } catch (err) {
             console.error(err);
-            msg.textContent = server.condiviso
+            msg.textContent = err.code === "permission-denied"
+              ? "Il server è riservato alla famiglia: usa la vostra password (tocca «Ho già una password»)."
+              : server.condiviso
               ? "Non riesco a contattare il server: per entrare la prima volta serve internet."
               : "Qualcosa è andato storto. Riprova.";
             btn.disabled = false; btn.textContent = crea ? "Crea la famiglia" : "Entra";

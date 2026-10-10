@@ -75,7 +75,13 @@ async function serverFirebase(firebase) {
     condiviso: true,
     nome: firebase.projectId,
     async esiste(id) {
-      return (await fs.getDocFromServer(segno(id))).exists();
+      try {
+        return (await fs.getDocFromServer(segno(id))).exists();
+      } catch (e) {
+        // server "bloccato" su un'altra famiglia: per noi è una password sbagliata
+        if (e.code === "permission-denied") return false;
+        throw e;
+      }
     },
     async crea(id) {
       await fs.setDoc(segno(id), { creata: Date.now() });

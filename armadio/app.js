@@ -642,7 +642,7 @@ function paginaImpostazioni() {
       h("div", { class: "azioni" },
         h("button", { type: "button", class: "btn", onclick: esportaCopia }, icona("scarica"), "Salva una copia"),
         h("label", { class: "btn" }, icona("carica"), "Ripristina",
-          h("input", { type: "file", accept: "application/json,.json", hidden: true, onchange: e => importaCopia(e.target) })))
+          h("input", { type: "file", hidden: true, onchange: e => importaCopia(e.target) })))
     ),
     h("section", { class: "carta" },
       h("h3", {}, "Come funziona"),
@@ -656,10 +656,25 @@ function paginaImpostazioni() {
   ];
 }
 
+// Dentro l'APK (Capacitor) ci sono i plugin nativi; nel browser no.
+const nativo = window.Capacitor?.isNativePlatform?.() ? window.Capacitor.Plugins : null;
+
 async function esportaCopia() {
   toast("Preparo la copia…");
   const blob = await archivio.esporta({ impostazioni });
-  const a = h("a", { href: URL.createObjectURL(blob), download: `armadio-${oggi()}.json` });
+  const nomeFile = `armadio-${oggi()}.json`;
+  if (nativo) {
+    // nell'app Android i download non esistono: si salva il file e si apre "Condividi"
+    // (da lì si può mettere su Drive, nei File, mandarlo per email…)
+    try {
+      const { uri } = await nativo.Filesystem.writeFile({ path: nomeFile, data: await blob.text(), directory: "CACHE", encoding: "utf8" });
+      await nativo.Share.share({ title: "Copia dell'armadio", files: [uri], dialogTitle: "Dove salvo la copia?" });
+    } catch (e) {
+      if (!/cancel/i.test(e?.message || "")) toast("Non sono riuscito a salvare la copia");
+    }
+    return;
+  }
+  const a = h("a", { href: URL.createObjectURL(blob), download: nomeFile });
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
@@ -732,4 +747,12 @@ async function avvia() {
 }
 avvia();
 
-if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+// Tasto "indietro" di Android nell'APK: chiude il foglio aperto, poi torna alla settimana, poi esce.
+nativo?.App?.addListener("backButton", () => {
+  const aperto = document.querySelector("dialog[open]");
+  if (aperto) aperto.close();
+  else if (pagina !== "settimana") { pagina = "settimana"; scrivi("armadio:pagina", pagina); disegna(); scrollTo({ top: 0 }); }
+  else nativo.App.exitApp();
+});
+
+if (!nativo && "serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});

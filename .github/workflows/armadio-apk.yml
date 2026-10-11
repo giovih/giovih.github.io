@@ -1,0 +1,72 @@
+# Compila l'APK Android di Armadio e lo pubblica nelle Release del repository.
+# Link fisso per scaricare l'ultima versione:
+#   https://github.com/giovih/giovih.github.io/releases/download/armadio-apk/Armadio.apk
+name: APK Armadio
+
+on:
+  push:
+    paths:
+      - "armadio/**"
+      - "armadio-android/**"
+      - ".github/workflows/armadio-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: armadio-apk
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: armadio-android/package-lock.json
+
+      - name: Prepara il progetto Android
+        working-directory: armadio-android
+        env:
+          VERSIONE: ${{ github.run_number }}
+        run: |
+          npm ci --no-audit --no-fund
+          bash prepara.sh
+
+      - name: Compila
+        working-directory: armadio-android/android
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Firma
+        working-directory: armadio-android/android
+        run: |
+          bt=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$bt/zipalign" -p -f 4 app/build/outputs/apk/release/app-release-unsigned.apk allineato.apk
+          "$bt/apksigner" sign --ks ../armadio.keystore --ks-key-alias armadio \
+            --ks-pass pass:armadio-giovih --key-pass pass:armadio-giovih \
+            --out "$GITHUB_WORKSPACE/Armadio.apk" allineato.apk
+          "$bt/apksigner" verify --print-certs "$GITHUB_WORKSPACE/Armadio.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Armadio-apk
+          path: Armadio.apk
+
+      - name: Pubblica nelle Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          note="Versione 1.${{ github.run_number }} — scarica Armadio.apk dal telefono Android e aprilo per installarlo."
+          gh release delete armadio-apk --cleanup-tag --yes 2>/dev/null || true
+          gh release create armadio-apk Armadio.apk --target "$GITHUB_SHA" \
+            --title "Armadio per Android (1.${{ github.run_number }})" --notes "$note" --latest=false

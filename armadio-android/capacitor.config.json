@@ -1,0 +1,14 @@
+{
+  "appId": "io.github.giovih.armadio",
+  "appName": "Armadio",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#f7f4ef"
+  },
+  "plugins": {
+    "SystemBars": {
+      "insetsHandling": "css",
+      "initialViewportFitValueHint": "cover"
+    }
+  }
+}

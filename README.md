@@ -20,6 +20,12 @@ mattino, pioggia) con i vestiti fotografati del proprio armadio.
 
 **App:** https://giovih.github.io/armadio/ — su Android: apri il link con Chrome → ⋮ → **Installa app**.
 
+**APK per Android:** https://github.com/giovih/giovih.github.io/releases/download/armadio-apk/Armadio.apk
+— scaricalo dal telefono, aprilo e consenti "Installa app sconosciute" quando Android lo chiede.
+L'APK si ricompila da solo (GitHub Actions, `.github/workflows/armadio-apk.yml`) a ogni modifica
+di `armadio/`; le nuove versioni si installano sopra la vecchia senza perdere l'armadio.
+Il progetto Android (Capacitor) è in `armadio-android/`.
+
 - **Armadio**: fotografa i capi o caricane tanti insieme dalla galleria; il colore viene
   riconosciuto dalla foto. Per ogni capo: tipo, quanto tiene caldo, stile, impermeabile.
 - **Settimana**: un outfit per ogni giorno, senza ripetere la stessa maglia e con colori che

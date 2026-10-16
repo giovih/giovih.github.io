@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Scheda Palestra</title>
+  <meta name="theme-color" content="#0b1220">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Palestra">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="vista"></main>
+  <div id="timer" class="timer nascosto"></div>
+  <nav class="tab">
+    <button data-tab="oggi">🏠<span>Oggi</span></button>
+    <button data-tab="scheda">📋<span>Scheda</span></button>
+    <button data-tab="storico">📈<span>Storico</span></button>
+    <button data-tab="impostazioni">⚙️<span>Altro</span></button>
+  </nav>
+  <dialog id="dialogo"></dialog>
+  <script src="dati.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

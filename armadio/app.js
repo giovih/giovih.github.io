@@ -1,5 +1,6 @@
-import { CATEGORIE, categoria, CALORE, STILI, ORDINE, CLIMI, proponi, bisogni, mancanze, spiegazione, nomeColore, climaDi } from "./stilista.js";
+import { CATEGORIE, categoria, CALORE, STILI, ORDINE, CLIMI, proponi, bisogni, mancanze, spiegazione, climaDi } from "./stilista.js";
 import * as archivio from "./archivio.js";
+import { VERSIONE_DISEGNO } from "./disegno.js";
 import { previsioni, cercaCitta, posizioneAttuale, descrizione } from "./meteo.js";
 
 const $ = s => document.querySelector(s);
@@ -62,26 +63,32 @@ function icona(nome, cls = "") {
   return t.content.firstChild;
 }
 
-// Le foto si mostrano tramite URL temporanei, creati una volta sola per capo.
+// Le immagini si mostrano tramite URL temporanei, creati una volta sola per capo.
+// Di solito si vede il disegno stile cartone ricavato dalla foto; nelle Impostazioni si può scegliere la foto.
 const urlFoto = new Map();
-function foto(capo) {
-  if (!capo?.foto) return null;
-  let u = urlFoto.get(capo.id);
-  if (!u || u.blob !== capo.foto) {
+function immagine(capo, quale = vista()) {
+  const blob = quale === "disegno" && capo?.disegno ? capo.disegno : capo?.foto;
+  if (!blob) return null;
+  const k = `${capo.id}:${blob === capo.disegno ? "d" : "f"}`;
+  let u = urlFoto.get(k);
+  if (!u || u.blob !== blob) {
     if (u) URL.revokeObjectURL(u.url);
-    u = { url: URL.createObjectURL(capo.foto), blob: capo.foto };
-    urlFoto.set(capo.id, u);
+    u = { url: URL.createObjectURL(blob), blob };
+    urlFoto.set(k, u);
   }
   return u.url;
 }
-function miniatura(capo, cls = "") {
-  const u = foto(capo);
+const vista = () => impostazioni.vista === "foto" ? "foto" : "disegno";
+function miniatura(capo, cls = "", quale = vista()) {
+  const u = immagine(capo, quale);
+  const disegnato = u && quale === "disegno" && capo.disegno;
   return u
-    ? h("img", { class: `foto ${cls}`, src: u, alt: nomeCapo(capo), loading: "lazy", decoding: "async" })
-    : h("span", { class: `foto vuota ${cls}`, style: `--col:${capo.colore || "#999"}` }, categoria(capo.categoria)?.icona || "👚");
+    ? h("img", { class: `foto ${disegnato ? "disegno" : ""} ${cls}`, src: u, alt: nomeCapo(capo), loading: "lazy", decoding: "async" })
+    : h("span", { class: `foto vuota ${cls}` }, categoria(capo.categoria)?.icona || "👚");
 }
 
-const nomeCapo = c => c.nome?.trim() || `${categoria(c.categoria)?.uno || "Capo"} ${nomeColore(c.colore)}`;
+// Il nome è quello scritto da te; se manca, solo il tipo di capo (niente colori).
+const nomeCapo = c => c.nome?.trim() || categoria(c.categoria)?.uno || "Capo";
 const lavaggioOgni = c => c.lavaggioOgni ?? categoria(c.categoria)?.usi ?? 1;
 
 // ---------- date ----------
@@ -459,8 +466,8 @@ async function aggiungiFoto(input) {
   const nuovi = [];
   for (const f of files) {
     try {
-      const { foto: blob, colore } = await archivio.preparaFoto(f);
-      const c = { id: archivio.nuovoId(), foto: blob, colore, nome: "", categoria: null, calore: 3, stile: "casual",
+      const { foto: blob, disegno, colore } = await archivio.preparaFoto(f);
+      const c = { id: archivio.nuovoId(), foto: blob, disegno, versioneDisegno: VERSIONE_DISEGNO, colore, nome: "", categoria: null, calore: 3, stile: "casual",
         impermeabile: false, preferito: false, stato: "pulito", usi: 0, lavaggioOgni: null, creato: Date.now() + nuovi.length };
       await archivio.salva(c);
       capi.push(c); nuovi.push(c);
@@ -484,9 +491,6 @@ function schedaCapo(capo, inSequenza = false) {
   const rimasti = () => capi.filter(x => !x.categoria && x.id !== capo.id).length;
 
   const nome = h("input", { class: "campo", value: capo.nome || "", placeholder: "Nome (facoltativo)", maxlength: 60 });
-  const colore = h("input", { type: "color", class: "colore", value: capo.colore || "#888888", "aria-label": "Colore" });
-  const nomeCol = h("span", { class: "tenue" }, nomeColore(colore.value));
-  colore.addEventListener("input", () => { bozza.colore = colore.value; nomeCol.textContent = nomeColore(colore.value); });
 
   function gruppo(valori, chiave, etichetta, onPick) {
     const box = h("div", { class: "segmenti", role: "radiogroup", "aria-label": etichetta });
@@ -511,14 +515,18 @@ function schedaCapo(capo, inSequenza = false) {
 
   const imperm = h("input", { type: "checkbox", checked: !!capo.impermeabile });
   const pref = h("input", { type: "checkbox", checked: !!capo.preferito });
+  let mostra = vista();
+  let fotoScheda = miniatura(capo, "grande", mostra);
+  const testoVista = h("span", {}, mostra === "disegno" ? "Vedi la foto" : "Vedi il disegno");
+  const aggiornaTestoVista = () => { testoVista.textContent = mostra === "disegno" ? "Vedi la foto" : "Vedi il disegno"; };
 
   async function salva(e) {
     e?.preventDefault();
     if (!bozza.categoria) { toast("Scegli che tipo di capo è"); return; }
-    const cambiaScelta = ["categoria", "calore", "stile", "colore"].some(k => capo[k] !== bozza[k])
+    const cambiaScelta = ["categoria", "calore", "stile"].some(k => capo[k] !== bozza[k])
       || capo.impermeabile !== imperm.checked || capo.preferito !== pref.checked;
     Object.assign(capo, bozza, {
-      nome: nome.value.trim(), colore: colore.value, impermeabile: imperm.checked, preferito: pref.checked,
+      nome: nome.value.trim(), impermeabile: imperm.checked, preferito: pref.checked,
       lavaggioOgni: lavaggio.value === "" ? null : Math.max(0, Math.min(99, +lavaggio.value))
     });
     await archivio.salva(capo);
@@ -529,14 +537,17 @@ function schedaCapo(capo, inSequenza = false) {
   }
 
   riempi(d, h("form", { method: "dialog", onsubmit: salva },
-    h("div", { class: "scheda-foto" }, miniatura(capo, "grande"),
+    h("div", { class: "scheda-foto" }, fotoScheda,
+      capo.disegno && capo.foto ? h("button", { type: "button", class: "chip su-foto-sx", onclick: () => {
+        mostra = mostra === "disegno" ? "foto" : "disegno";
+        fotoScheda.replaceWith(fotoScheda = miniatura(capo, "grande", mostra));
+        aggiornaTestoVista();
+      } }, testoVista) : null,
       h("button", { type: "button", class: "chiudi su-foto", "aria-label": "Chiudi", onclick: () => d.close() }, icona("chiudi"))),
     h("div", { class: "scheda-corpo" },
       inSequenza && rimasti() ? h("p", { class: "occhiello" }, `Ancora ${rimasti()} dopo questa`) : null,
       h("label", { class: "etichetta-campo" }, "Che cos'è?"), cat,
       h("label", { class: "etichetta-campo" }, "Quanto tiene caldo?"), calBox,
-      h("label", { class: "etichetta-campo" }, "Colore"),
-      h("div", { class: "riga" }, colore, nomeCol, h("small", { class: "tenue destra" }, "riconosciuto dalla foto: toccalo per cambiarlo")),
       h("label", { class: "etichetta-campo" }, "Stile"), gruppo(STILI, "stile", "Stile"),
       h("label", { class: "interruttore" }, imperm, h("span", {}, "Va bene con la pioggia (impermeabile)")),
       h("label", { class: "interruttore" }, pref, h("span", {}, "Uno dei miei preferiti")),
@@ -875,6 +886,14 @@ function paginaImpostazioni() {
       fred, h("p", { class: "centro" }, etFred)
     ),
     h("section", { class: "carta" },
+      h("h3", {}, "Come vedo i capi"),
+      h("p", { class: "tenue" }, "Il disegno è ricavato dalla tua foto: stesso capo, senza lo sfondo."),
+      h("div", { class: "segmenti" }, [["disegno", "🎨 Disegno"], ["foto", "📷 Foto"]].map(([id, nome]) => h("button", {
+        type: "button", class: `seg ${vista() === id ? "attivo" : ""}`,
+        onclick: () => { impostazioni.vista = id; salvaImpostazioni(); disegna(); }
+      }, nome)))
+    ),
+    h("section", { class: "carta" },
       h("h3", {}, "Stile per la settimana"),
       h("p", { class: "tenue" }, "Preferisco i capi di questo stile (per esempio Elegante per l'ufficio)."),
       segStile
@@ -930,7 +949,7 @@ async function importaCopia(input) {
     if (j.impostazioni && !impostazioni.citta) { impostazioni = { ...impostazioni, ...j.impostazioni }; salvaImpostazioni(); }
     if (j.valigia && !valigia?.ids.length) { valigia = j.valigia; salvaValigia(); caricaMeteoValigia(); }
     capi = await archivio.tutti();
-    rifaiSettimana();
+    rifaiSettimana(); preparaDisegni();
     toast(`Ripristinati ${j.capi.length} capi`);
     await caricaMeteo();
   } catch (e) { toast(e.message || "Copia non valida"); }
@@ -983,10 +1002,30 @@ for (const d of document.querySelectorAll("dialog")) {
   d.addEventListener("click", e => { if (e.target === d) d.close(); });
 }
 
+// In sottofondo, un capo alla volta, così l'app resta usabile.
+let disegnando = false;
+async function preparaDisegni() {
+  if (disegnando) return;
+  disegnando = true;
+  try {
+    for (const c of capi) {
+      if (!c.foto || c.versioneDisegno === VERSIONE_DISEGNO) continue;
+      try {
+        const { disegno, colore } = await archivio.disegnoDi(c.foto);
+        Object.assign(c, { disegno, colore: colore || c.colore, versioneDisegno: VERSIONE_DISEGNO });
+        await archivio.salva(c);
+        if (!document.querySelector("dialog[open]")) disegna();
+      } catch {}
+      await new Promise(r => setTimeout(r, 30));
+    }
+  } finally { disegnando = false; }
+}
+
 async function avvia() {
   try { capi = await archivio.tutti(); }
   catch { toast("Non riesco ad aprire l'archivio del telefono"); }
   disegna();
+  preparaDisegni();
   await Promise.all([caricaMeteo(), caricaMeteoValigia()]);
   // Quando si riapre l'app il giorno dopo, si aggiorna da sola.
   document.addEventListener("visibilitychange", () => { if (!document.hidden) { caricaMeteo(); caricaMeteoValigia(); } });

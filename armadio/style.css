@@ -281,3 +281,8 @@ main > * { animation: sale .4s var(--morbido) both; }
 .centro-flex { justify-content: center; margin: 18px 0 4px; }
 .centro-flex .btn.primario { margin-left: 0; }
 .tab span { white-space: nowrap; }
+
+/* ---------- disegni dei capi ---------- */
+.foto.disegno { object-fit: contain; padding: 9%; background: radial-gradient(80% 70% at 50% 40%, var(--carta), var(--carta2)); }
+.foto.grande.disegno { padding: 4%; }
+.su-foto-sx { position: absolute; left: 12px; bottom: 12px; }

@@ -1,7 +1,7 @@
 // Fa aprire l'app anche senza internet (le pagine vengono tenute in memoria).
-const CACHE = "armadio-v2";
+const CACHE = "armadio-v3";
 const FILE = [
-  "./", "index.html", "style.css", "app.js", "stilista.js", "archivio.js", "meteo.js",
+  "./", "index.html", "style.css", "app.js", "stilista.js", "archivio.js", "meteo.js", "disegno.js",
   "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"
 ];
 

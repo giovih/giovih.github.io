@@ -42,9 +42,18 @@ ed eseguire comandi nel terminale. Tutto **gratis**: Oracle Cloud Free + Gemini 
    ```
    curl -fsSL https://raw.githubusercontent.com/giovih/giovih.github.io/main/botlab/install.sh | bash
    ```
-4. Ti chiede la **chiave Gemini** e una **password** a tua scelta. Alla fine ti scrive l'indirizzo
-   tipo `https://123-45-67-89.sslip.io`. **Aprilo dal telefono**, metti la password, fatto!
+4. Ti chiede la **chiave Gemini** e una **password** a tua scelta (senza spazi). Ci mette 5–10 minuti.
+   Alla fine ti scrive l'indirizzo, tipo `https://123-45-67-89.sslip.io` (oppure `…nip.io`).
+   **Aprilo dal telefono**, metti la password, fatto!
    (Su iPhone: Condividi → *Aggiungi a Home* per averla come app.)
+
+### Se qualcosa non va
+- **L'indirizzo non si apre**: quasi sempre mancano le porte 80/443 nella *Security List* (passo 2.3).
+  Aggiungile e aspetta 2–3 minuti: il certificato HTTPS si sistema da solo.
+- **"Gemini non disponibile"**: hai finito la quota gratuita del momento; riprova dopo qualche minuto.
+  BotLab prova da solo più modelli Gemini gratuiti uno dopo l'altro.
+- **Vedere cosa succede** (per chi vuole): `cd ~/botlab/botlab && sudo docker compose logs -f server`
+- **Cambiare password o chiave**: `nano ~/botlab/botlab/.env`, salva, poi `bash ~/botlab/botlab/aggiorna.sh`.
 
 ---
 
@@ -61,6 +70,8 @@ bash ~/botlab/botlab/aggiorna.sh
 ```
 
 ## Limiti del gratis
+- Oracle può spegnere le istanze gratuite che restano **quasi inutilizzate per 7 giorni**. Se succede, riaccendila
+  dalla console (Instances → Start): bot e file restano.
 - Gemini free ha un limite di richieste al minuto/giorno: se lo superi il bot aspetta e riprova, oppure ti dice di riprovare più tardi.
 - I bot possono fare tutto **dentro** il loro computer, ma sono isolati dal server e tra loro.
 - Non dare la password ad altri: chi entra può usare i bot (e la tua quota Gemini).

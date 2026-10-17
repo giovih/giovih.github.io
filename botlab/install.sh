@@ -8,7 +8,15 @@ BRANCH="${BRANCH:-main}"
 DIR="$HOME/botlab"
 BOT_SUBNET="172.31.250.0/24"
 say() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
-ask() { local v=""; while [ -z "$v" ]; do printf '%s ' "$1" >&2; read -r v </dev/tty || true; done; printf '%s' "$v"; }
+ask() {
+  local v=""
+  while [ -z "$v" ]; do
+    printf '%s ' "$1" >&2
+    if ! read -r v </dev/tty; then echo "Non riesco a leggere la risposta: esegui lo script da un terminale." >&2; exit 1; fi
+    v="${v//[$'\t\r ']/}"
+  done
+  printf '%s' "$v"
+}
 
 say "Installo Docker e git (se mancano)"
 if ! command -v docker >/dev/null; then
@@ -46,8 +54,8 @@ RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target
 UNIT
-sudo systemctl daemon-reload
-sudo systemctl enable --now botlab-firewall.service >/dev/null
+sudo systemctl daemon-reload >/dev/null 2>&1 || true
+sudo systemctl enable --now botlab-firewall.service >/dev/null 2>&1 || sudo /usr/local/sbin/botlab-firewall
 
 say "Scarico BotLab"
 if [ -d "$DIR/.git" ]; then
@@ -60,13 +68,19 @@ cd "$DIR/botlab"
 if [ ! -f .env ]; then
   say "Configurazione"
   echo "Ti servono due cose: la chiave Gemini (da https://aistudio.google.com/apikey) e una password a tua scelta."
-  GEMINI_API_KEY=$(ask "Incolla la chiave Gemini e premi Invio:")
-  BOTLAB_PASSWORD=$(ask "Scegli una password per entrare nell'app e premi Invio:")
-  IP=$(curl -fsS https://api.ipify.org || curl -fsS https://ifconfig.me)
+  GEMINI_API_KEY="${GEMINI_API_KEY:-$(ask "Incolla la chiave Gemini e premi Invio:")}"
+  BOTLAB_PASSWORD="${BOTLAB_PASSWORD:-$(ask "Scegli una password per entrare nell'app (senza spazi) e premi Invio:")}"
+  IP="${PUBLIC_IP:-}"
+  [ -n "$IP" ] || IP=$(curl -fsS --max-time 10 https://api.ipify.org || curl -fsS --max-time 10 https://ifconfig.me || true)
+  if ! [[ "$IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    IP=$(ask "Non riesco a trovare l'IP pubblico: scrivilo tu (lo trovi nella pagina dell'istanza Oracle):")
+  fi
   umask 077
+  # valori tra apici singoli: così simboli come $ o # nella password non danno problemi
+  GEMINI_API_KEY="${GEMINI_API_KEY//\'/}"; BOTLAB_PASSWORD="${BOTLAB_PASSWORD//\'/}"
   cat > .env <<ENV
-GEMINI_API_KEY=$GEMINI_API_KEY
-BOTLAB_PASSWORD=$BOTLAB_PASSWORD
+GEMINI_API_KEY='$GEMINI_API_KEY'
+BOTLAB_PASSWORD='$BOTLAB_PASSWORD'
 DOMAIN=${IP//./-}.sslip.io
 DOMAIN2=${IP//./-}.nip.io
 BOT_MEMORY=1g
@@ -86,7 +100,7 @@ say "Attendo il certificato HTTPS (fino a 3 minuti)"
 URL=""
 for _ in $(seq 1 36); do
   for d in "$DOMAIN" "$DOMAIN2"; do
-    if curl -fsS -o /dev/null --max-time 5 "https://$d/"; then URL="https://$d"; break 2; fi
+    if curl -fs -o /dev/null --max-time 5 "https://$d/"; then URL="https://$d"; break 2; fi
   done
   sleep 5
 done

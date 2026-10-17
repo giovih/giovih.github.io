@@ -136,6 +136,8 @@
     { id: "deepseek/deepseek-chat-v3-0324:free", name: "DeepSeek V3 (free)" },
     { id: "google/gemma-3-27b-it:free", name: "Gemma 3 27B (free)" },
   ];
+  // Sandboxed pages (file://, iframes) report origin "null": fall back to a valid URL
+  const REFERER = /^https?:/.test(location.origin) ? location.origin : "https://localhost";
   const LS = { key: "orchat.apiKey", model: "orchat.model", history: "orchat.history", system: "orchat.system" };
 
   const $ = (id) => document.getElementById(id);
@@ -218,21 +220,32 @@
     const messages = (sys ? [{ role: "system", content: sys }] : []).concat(history);
 
     try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + key,
-          "Content-Type": "application/json",
-          "HTTP-Referer": location.origin,
-          "X-Title": "AI Chat",
-        },
-        body: JSON.stringify({ model: getModel(), messages }),
-      });
+      let res;
+      try {
+        res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + key,
+            "Content-Type": "application/json",
+            "HTTP-Referer": REFERER,
+            "X-Title": "AI Chat",
+          },
+          body: JSON.stringify({ model: getModel(), messages }),
+        });
+      } catch (netErr) {
+        // fetch() rejects only when the request never got a response: offline,
+        // DNS/CORS failure, or the page's Content-Security-Policy blocking openrouter.ai
+        throw new Error("Errore di rete: impossibile contattare OpenRouter (" + (netErr.message || netErr) + "). " +
+          "Se la pagina è aperta dentro claude.ai, il browser blocca le chiamate esterne: apri l'app da GitHub Pages o dal file in locale.");
+      }
+      const raw = await res.text();
       let data = null;
-      try { data = await res.json(); } catch {}
+      try { data = JSON.parse(raw); } catch {}
 
       if (!res.ok || data?.error) {
-        const apiMsg = data?.error?.message || res.statusText || "Errore sconosciuto";
+        const meta = data?.error?.metadata?.raw;
+        const apiMsg = (data?.error?.message || raw.slice(0, 300) || res.statusText || "Errore sconosciuto") +
+          (meta ? " — " + (typeof meta === "string" ? meta : JSON.stringify(meta)).slice(0, 300) : "");
         const hints = {
           401: "API Key non valida o revocata.",
           402: "Credito insufficiente.",
@@ -256,8 +269,7 @@
       typing.remove();
       // Remove the unanswered user message so it doesn't pollute context
       history.pop(); saveHistory();
-      const msg = err instanceof TypeError ? "Errore di rete: impossibile contattare OpenRouter." : err.message;
-      showError(msg);
+      showError(err.message || String(err));
       els.input.value = els.input.value || text;
     } finally {
       busy = false; els.send.disabled = false;

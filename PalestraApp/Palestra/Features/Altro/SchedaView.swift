@@ -1,13 +1,13 @@
 import SwiftUI
 import SwiftData
 
-/// Step 1: mostra il calendario (modificabile) e la scheda precaricata.
+/// Calendario (modificabile) e scheda: tocca un esercizio per cambiarlo.
 struct SchedaView: View {
     @Query(sort: \ScheduleDay.weekdayRaw) private var days: [ScheduleDay]
     @Query(sort: \WorkoutTemplate.order) private var templates: [WorkoutTemplate]
+    @State private var editing: TemplateItem?
 
     var body: some View {
-        NavigationStack {
             List {
                 Section("Calendario (tocca per cambiare)") {
                     ForEach(days) { day in
@@ -20,7 +20,8 @@ struct SchedaView: View {
                 ForEach(templates) { t in
                     Section {
                         ForEach(t.sortedItems) { item in
-                            ItemRow(item: item)
+                            Button { editing = item } label: { ItemRow(item: item) }
+                                .foregroundStyle(.primary)
                         }
                     } header: {
                         Text("\(t.name) · \(t.subtitle)")
@@ -30,12 +31,14 @@ struct SchedaView: View {
                 }
 
                 Section {
+                    Text("Tocca un esercizio per cambiarlo nella scheda.")
+                        .font(.footnote).foregroundStyle(.secondary)
                     Text("SS = superserie: i due esercizi di fila senza pausa, poi recuperi.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
             }
-            .navigationTitle("Scheda palestra")
-        }
+            .navigationTitle("Scheda e calendario")
+            .sheet(item: $editing) { ChangeTemplateExercise(item: $0) }
     }
 
     private func set(_ plan: [Weekday: String]) {
@@ -71,9 +74,7 @@ private struct ItemRow: View {
                 HStack(spacing: 6) {
                     Text(item.exercise?.name ?? "?")
                     if item.supersetGroup != nil {
-                        Text("SS").font(.caption2.bold())
-                            .padding(.horizontal, 5).padding(.vertical, 1)
-                            .background(.yellow.opacity(0.25), in: Capsule())
+                        SSBadge()
                     }
                 }
                 if let eq = item.exercise?.equipment {
@@ -86,6 +87,37 @@ private struct ItemRow: View {
             Text(item.restLabel)
                 .font(.callout).foregroundStyle(.secondary)
                 .frame(width: 70, alignment: .trailing)
+        }
+    }
+}
+
+/// Cambia per sempre l'esercizio di una riga della scheda.
+private struct ChangeTemplateExercise: View {
+    let item: TemplateItem
+    @Environment(\.dismiss) private var dismiss
+    @Query(sort: \Exercise.name) private var all: [Exercise]
+    @State private var showAll = false
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Toggle("Mostra tutti i gruppi muscolari", isOn: $showAll)
+                ForEach(all.filter { $0 != item.exercise && (showAll || $0.muscle == item.exercise?.muscle) }) { ex in
+                    Button {
+                        item.exercise = ex
+                        dismiss()
+                    } label: {
+                        HStack {
+                            Text(ex.name).foregroundStyle(.primary)
+                            Spacer()
+                            Text(ex.equipment.label).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+            .navigationTitle(item.exercise?.name ?? "Esercizio")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Chiudi") { dismiss() } } }
         }
     }
 }

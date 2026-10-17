@@ -65,7 +65,7 @@ final class TemplateItem {
     var restMaxSec: Int       // es. 180
     /// Stesso numero = stessa superserie (si fanno di fila, recupero a fine coppia).
     var supersetGroup: Int?
-    /// Drop set sull'ultima serie a partire dalla settimana 5.
+    /// Drop set sull'ultima serie dalla settimana 5.
     var dropSet: Bool
 
     init(order: Int, exercise: Exercise, sets: Int, repMin: Int, repMax: Int,
@@ -81,20 +81,8 @@ final class TemplateItem {
         self.dropSet = dropSet
     }
 
-    /// "4 x 6-8" oppure "3 x 15".
-    var setsRepsLabel: String {
-        repMin == repMax ? "\(sets) x \(repMin)" : "\(sets) x \(repMin)-\(repMax)"
-    }
-
-    /// "2-3 min", "90 s", "60-90 s".
-    var restLabel: String { Self.formatRest(restMinSec, restMaxSec) }
-
-    static func formatRest(_ a: Int, _ b: Int) -> String {
-        if a >= 120 && a % 60 == 0 && b % 60 == 0 {
-            return a == b ? "\(a / 60) min" : "\(a / 60)-\(b / 60) min"
-        }
-        return a == b ? "\(a) s" : "\(a)-\(b) s"
-    }
+    var setsRepsLabel: String { Format.setsReps(sets, repMin, repMax) }
+    var restLabel: String { Format.rest(restMinSec, restMaxSec) }
 }
 
 // MARK: - Calendario
@@ -113,47 +101,191 @@ final class ScheduleDay {
     }
 }
 
-// MARK: - Sedute registrate (usate dallo step 2)
+// MARK: - Sedute registrate
 
-/// Un allenamento fatto davvero.
+/// Un allenamento. Finché `endDate` è nil è quello in corso.
 @Model
 final class WorkoutSession {
     var date: Date
     var endDate: Date?
     var templateCode: String
     var templateName: String
-    /// Settimana del ciclo (1-8) in cui è stata fatta.
-    var cycleWeek: Int
-    var notes: String = ""
-    @Relationship(deleteRule: .cascade, inverse: \SetLog.session)
-    var sets: [SetLog] = []
+    var colorHex: String
+    var week: Int          // settimana totale (1, 2, 3...)
+    var cycleWeek: Int     // 1...8
+    var isDeload: Bool
+    @Relationship(deleteRule: .cascade, inverse: \SessionExercise.session)
+    var exercises: [SessionExercise] = []
 
-    init(date: Date, templateCode: String, templateName: String, cycleWeek: Int) {
+    var sortedExercises: [SessionExercise] { exercises.sorted { $0.order < $1.order } }
+
+    init(date: Date, templateCode: String, templateName: String, colorHex: String,
+         week: Int, cycleWeek: Int, isDeload: Bool) {
         self.date = date
         self.templateCode = templateCode
         self.templateName = templateName
+        self.colorHex = colorHex
+        self.week = week
         self.cycleWeek = cycleWeek
+        self.isDeload = isDeload
     }
 }
 
-/// Una serie registrata (solo serie di lavoro: niente riscaldamento, niente drop).
+/// Un esercizio dentro una seduta (copia della riga di scheda, così le modifiche alla scheda non cambiano lo storico).
+@Model
+final class SessionExercise {
+    var session: WorkoutSession?
+    var order: Int
+    var name: String
+    var equipmentRaw: String
+    var repMin: Int
+    var repMax: Int
+    var restMinSec: Int
+    var restMaxSec: Int
+    var supersetGroup: Int?
+    var dropSet: Bool
+    var cleanTechnique: Bool = true
+    /// Consiglio della doppia progressione per oggi.
+    var hint: String
+    @Relationship(deleteRule: .cascade, inverse: \SetLog.exercise)
+    var sets: [SetLog] = []
+
+    var equipment: Equipment { Equipment(rawValue: equipmentRaw) ?? .machine }
+    var sortedSets: [SetLog] { sets.sorted { $0.index < $1.index } }
+    var doneSets: [SetLog] { sortedSets.filter { $0.done && $0.reps > 0 } }
+
+    init(order: Int, name: String, equipment: Equipment, repMin: Int, repMax: Int,
+         restMinSec: Int, restMaxSec: Int, supersetGroup: Int?, dropSet: Bool, hint: String) {
+        self.order = order
+        self.name = name
+        self.equipmentRaw = equipment.rawValue
+        self.repMin = repMin
+        self.repMax = repMax
+        self.restMinSec = restMinSec
+        self.restMaxSec = restMaxSec
+        self.supersetGroup = supersetGroup
+        self.dropSet = dropSet
+        self.hint = hint
+    }
+}
+
+/// Una serie di lavoro (niente riscaldamento, niente parte drop).
 @Model
 final class SetLog {
-    var session: WorkoutSession?
-    var exerciseName: String       // salvato come testo: lo storico resta anche se rinomini
-    var itemOrder: Int             // posizione nella seduta
-    var setIndex: Int              // 0, 1, 2...
+    var exercise: SessionExercise?
+    var index: Int
     var kg: Double
     var reps: Int
-    var completed: Bool
+    var done: Bool
 
-    init(exerciseName: String, itemOrder: Int, setIndex: Int, kg: Double = 0, reps: Int = 0, completed: Bool = false) {
-        self.exerciseName = exerciseName
-        self.itemOrder = itemOrder
-        self.setIndex = setIndex
+    init(index: Int, kg: Double, reps: Int, done: Bool = false) {
+        self.index = index
         self.kg = kg
         self.reps = reps
-        self.completed = completed
+        self.done = done
+    }
+}
+
+/// Diario ogni 4 settimane (settimane 1, 4, 8, 12...).
+@Model
+final class DiaryEntry {
+    var date: Date
+    var week: Int
+    var bodyKg: Double
+    var bench: String
+    var squat: String
+    var row: String
+    var notes: String
+
+    init(date: Date, week: Int, bodyKg: Double, bench: String, squat: String, row: String, notes: String) {
+        self.date = date
+        self.week = week
+        self.bodyKg = bodyKg
+        self.bench = bench
+        self.squat = squat
+        self.row = row
+        self.notes = notes
+    }
+}
+
+// MARK: - Cibo, acqua, creatina, peso
+
+enum Meal: String, Codable, CaseIterable, Identifiable {
+    case colazione, spuntino, pranzo, merenda, cena, notte
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .colazione: "Colazione"
+        case .spuntino: "Spuntino a scuola"
+        case .pranzo: "Pranzo · pre-allenamento (1-1,5 h prima)"
+        case .merenda: "Merenda · post-allenamento"
+        case .cena: "Cena"
+        case .notte: "Prima di dormire"
+        }
+    }
+    var icon: String {
+        switch self {
+        case .colazione: "🥣"
+        case .spuntino: "🍎"
+        case .pranzo: "🍝"
+        case .merenda: "🥛"
+        case .cena: "🍽️"
+        case .notte: "🌙"
+        }
+    }
+}
+
+/// Un cibo mangiato.
+@Model
+final class FoodEntry {
+    var day: String          // "2026-10-17"
+    var mealRaw: String
+    var createdAt: Date
+    var text: String
+    var kcal: Int
+    var protein: Int
+    var carbs: Int
+    var fat: Int
+    @Attribute(.externalStorage) var photo: Data?
+
+    var meal: Meal { Meal(rawValue: mealRaw) ?? .pranzo }
+
+    init(day: String, meal: Meal, text: String, kcal: Int, protein: Int, carbs: Int, fat: Int, photo: Data?) {
+        self.day = day
+        self.mealRaw = meal.rawValue
+        self.createdAt = .now
+        self.text = text
+        self.kcal = kcal
+        self.protein = protein
+        self.carbs = carbs
+        self.fat = fat
+        self.photo = photo
+    }
+}
+
+/// Acqua e creatina di un giorno.
+@Model
+final class DayLog {
+    @Attribute(.unique) var day: String
+    var waterMl: Int
+    var creatine: Bool
+
+    init(day: String) {
+        self.day = day
+        self.waterMl = 0
+        self.creatine = false
+    }
+}
+
+/// Peso corporeo (una volta a settimana, mattina a digiuno).
+@Model
+final class BodyWeight {
+    var date: Date
+    var kg: Double
+
+    init(date: Date, kg: Double) {
+        self.date = date
+        self.kg = kg
     }
 }
 
@@ -169,6 +301,8 @@ final class AppSettings {
     var kcalMin: Int
     var kcalMax: Int
     var proteinMin: Int
+    var carbsTarget: Int
+    var fatTarget: Int
 
     init(programStart: Date) {
         self.programStart = programStart
@@ -177,5 +311,14 @@ final class AppSettings {
         self.kcalMin = 3000
         self.kcalMax = 3300
         self.proteinMin = 120
+        self.carbsTarget = 400
+        self.fatTarget = 85
     }
 }
+
+/// Tutti i modelli, per creare il database.
+let allModels: [any PersistentModel.Type] = [
+    Exercise.self, WorkoutTemplate.self, TemplateItem.self, ScheduleDay.self,
+    WorkoutSession.self, SessionExercise.self, SetLog.self, DiaryEntry.self,
+    FoodEntry.self, DayLog.self, BodyWeight.self, AppSettings.self,
+]

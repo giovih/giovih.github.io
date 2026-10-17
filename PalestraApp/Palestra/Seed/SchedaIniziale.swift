@@ -152,17 +152,3 @@ enum SchedaIniziale {
         try? context.save()
     }
 }
-
-extension Calendar {
-    /// Calendario con la settimana che inizia di lunedì.
-    static var italian: Calendar {
-        var c = Calendar(identifier: .gregorian)
-        c.firstWeekday = 2
-        c.locale = Locale(identifier: "it_IT")
-        return c
-    }
-
-    func startOfWeek(for date: Date) -> Date {
-        dateInterval(of: .weekOfYear, for: date)?.start ?? startOfDay(for: date)
-    }
-}

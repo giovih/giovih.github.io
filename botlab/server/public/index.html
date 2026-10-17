@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BotLab</title>
 <meta name="theme-color" content="#0c0f0d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BotLab">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E🤖%3C/text%3E%3C/svg%3E">
 <style>
 :root {
   --sfondo: #f6f5f1; --carta: #fff; --carta2: #efede7; --testo: #15171a; --tenue: #7b8089;
@@ -21,7 +25,7 @@ button, input, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; border: 0; border-radius: 10px; padding: 9px 14px; background: var(--carta2); }
 button.primario { background: var(--accento); color: #fff; font-weight: 600; }
 button.pericolo { color: var(--rosso); }
-input, textarea { width: 100%; border: 1px solid var(--bordo); background: var(--carta); border-radius: 10px; padding: 10px 12px; }
+input, textarea { font-size: 16px; width: 100%; border: 1px solid var(--bordo); background: var(--carta); border-radius: 10px; padding: 10px 12px; }
 textarea { resize: vertical; }
 .nascosto { display: none !important; }
 
@@ -275,12 +279,14 @@ $("#form").onsubmit = async (e) => {
   if (!testo || !attuale || occupato) return;
   $("#testo").value = ""; $("#testo").style.height = "auto";
   occupato = true; $("#invia").disabled = true;
+  const botId = attuale.id;
+  const visibile = () => attuale?.id === botId; // l'utente potrebbe aprire un altro bot nel frattempo
   try {
     if (modoTerminale) {
       const t = mostra({ type: "tool", name: "run_command", args: { command: testo } });
       t.open = true; scorri();
       const r = await (await api(`/api/bots/${attuale.id}/exec`, { method: "POST", body: JSON.stringify({ command: testo }) })).json();
-      mostra({ type: "tool_result", result: r }, t);
+      if (visibile()) mostra({ type: "tool_result", result: r }, t);
     } else {
       mostra({ type: "user", text: testo });
       const att = document.createElement("div"); att.className = "lavora"; att.textContent = "Sta lavorando…";
@@ -298,6 +304,7 @@ $("#form").onsubmit = async (e) => {
           if (!riga) continue;
           const ev = JSON.parse(riga);
           if (ev.type === "done") continue;
+          if (!visibile()) continue;
           ultimoTool = mostra(ev, ultimoTool);
           $("#messaggi").appendChild(att); scorri();
         }
@@ -306,7 +313,7 @@ $("#form").onsubmit = async (e) => {
     }
   } catch (err) {
     document.querySelector(".lavora")?.remove();
-    mostra({ type: "error", error: err.message });
+    if (visibile()) mostra({ type: "error", error: err.message });
   } finally {
     occupato = false; $("#invia").disabled = false; scorri();
   }

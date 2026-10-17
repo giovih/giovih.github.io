@@ -8,7 +8,11 @@ import { execFile } from "node:child_process";
 const PORT = Number(process.env.PORT || 8080);
 const PASSWORD = process.env.BOTLAB_PASSWORD || "";
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+// Modelli provati in ordine: se uno non esiste più o ha finito la quota gratuita si passa al successivo
+const MODELS = (process.env.GEMINI_MODEL || "gemini-flash-latest,gemini-2.5-flash,gemini-flash-lite-latest,gemini-2.5-flash-lite")
+  .split(",").map((m) => m.trim()).filter(Boolean);
+let MODEL = MODELS[0];
+const GEMINI_BASE = process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com";
 const SEARX_URL = process.env.SEARX_URL || "http://searxng:8080";
 const DATA_DIR = process.env.DATA_DIR || "./data";
 const SANDBOX_IMAGE = process.env.SANDBOX_IMAGE || "botlab-sandbox";
@@ -45,8 +49,21 @@ function run(cmd, args, { timeout = 60000, input } = {}) {
 }
 const containerName = (id) => `botlab-${id}`;
 
+const BOT_NETWORK = process.env.BOT_NETWORK || "botlab-bots";
+let networkReady = false;
+async function ensureNetwork() {
+  if (networkReady) return;
+  if ((await run("docker", ["network", "inspect", BOT_NETWORK])).code !== 0) {
+    // rete solo per i bot: hanno internet ma non possono parlarsi tra loro
+    await run("docker", ["network", "create", "--subnet", process.env.BOT_SUBNET || "172.31.250.0/24",
+      "-o", "com.docker.network.bridge.enable_icc=false", "--label", "botlab=1", BOT_NETWORK]);
+  }
+  networkReady = true;
+}
+
 async function ensureContainer(id) {
   const name = containerName(id);
+  await ensureNetwork();
   const st = await run("docker", ["inspect", "-f", "{{.State.Running}}", name]);
   if (st.code === 0) {
     if (st.stdout.trim() !== "true") await run("docker", ["start", name]);
@@ -59,6 +76,10 @@ async function ensureContainer(id) {
     "--pids-limit", "256",
     "--restart", "unless-stopped",
     "--label", "botlab=1",
+    "--network", BOT_NETWORK,
+    // DNS pubblici: così i bot non usano il DNS interno di Oracle (che è bloccato per loro)
+    ...(process.env.BOT_DNS || "1.1.1.1,8.8.8.8").split(",").flatMap((d) => ["--dns", d.trim()]),
+    "--security-opt", "no-new-privileges",
     SANDBOX_IMAGE,
   ]);
   if (r.code !== 0) throw new Error("Impossibile creare il mini PC: " + r.stderr);
@@ -70,10 +91,14 @@ function clip(s, n = 8000) {
 
 async function execInBot(id, command, timeoutSec = 60) {
   await ensureContainer(id);
-  const r = await run("docker", ["exec", "-w", "/root", containerName(id), "bash", "-lc", command], {
-    timeout: Math.min(Math.max(timeoutSec, 1), 300) * 1000,
+  const secs = Math.min(Math.max(Math.round(timeoutSec) || 60, 1), 300);
+  // "timeout" ferma il comando dentro il mini PC, il timer esterno è solo una sicurezza
+  const r = await run("docker", ["exec", "-w", "/root", containerName(id), "timeout", "-k", "5", String(secs), "bash", "-lc", command], {
+    timeout: (secs + 15) * 1000,
   });
-  return { exit_code: r.code, stdout: clip(r.stdout), stderr: clip(r.stderr, 3000) };
+  const out = { exit_code: r.code, stdout: clip(r.stdout), stderr: clip(r.stderr, 3000) };
+  if (r.code === 124 || r.code === 137 || r.code === "timeout") out.note = `Comando interrotto dopo ${secs} secondi`;
+  return out;
 }
 
 // ---------- strumenti ----------
@@ -112,14 +137,39 @@ const tools = [{
   ],
 }];
 
-async function webSearch(query) {
-  const u = `${SEARX_URL}/search?format=json&q=${encodeURIComponent(query)}`;
-  const res = await fetch(u, { signal: AbortSignal.timeout(20000) });
-  if (!res.ok) return { error: `ricerca fallita (${res.status})` };
+async function searx(query) {
+  const res = await fetch(`${SEARX_URL}/search?format=json&q=${encodeURIComponent(query)}`, { signal: AbortSignal.timeout(20000) });
+  if (!res.ok) throw new Error(`ricerca fallita (${res.status})`);
   const data = await res.json();
-  return {
-    results: (data.results || []).slice(0, 8).map((r) => ({ title: r.title, url: r.url, snippet: (r.content || "").slice(0, 300) })),
-  };
+  return (data.results || []).map((r) => ({ title: r.title, url: r.url, snippet: (r.content || "").slice(0, 300) }));
+}
+
+// Riserva: versione HTML semplice di DuckDuckGo
+async function duckduckgo(query) {
+  const res = await fetch("https://html.duckduckgo.com/html/?q=" + encodeURIComponent(query), {
+    signal: AbortSignal.timeout(20000),
+    headers: { "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36" },
+  });
+  const html = await res.text();
+  const out = [];
+  const re = /<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
+  for (let m; (m = re.exec(html)) && out.length < 8;) {
+    let url = m[1].replace(/&amp;/g, "&");
+    const uddg = url.match(/[?&]uddg=([^&]+)/);
+    if (uddg) url = decodeURIComponent(uddg[1]);
+    out.push({ title: htmlToText(m[2]), url, snippet: htmlToText(m[3]).slice(0, 300) });
+  }
+  return out;
+}
+
+async function webSearch(query) {
+  let results = [];
+  try { results = await searx(query); } catch (e) { console.warn("SearXNG:", e.message); }
+  if (!results.length) {
+    try { results = await duckduckgo(query); } catch (e) { console.warn("DuckDuckGo:", e.message); }
+  }
+  if (!results.length) return { results: [], note: "Nessun risultato. Prova parole diverse o usa fetch_url su un sito specifico." };
+  return { results: results.slice(0, 8) };
 }
 
 function htmlToText(html) {
@@ -159,27 +209,57 @@ function systemPrompt(bot) {
   ].join("\n");
 }
 
-async function gemini(bot, contents) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent`;
-  for (let attempt = 0; attempt < 4; attempt++) {
+async function geminiCall(model, bot, contents) {
+  const url = `${GEMINI_BASE}/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+  for (let attempt = 0; attempt < 3; attempt++) {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_KEY },
       body: JSON.stringify({ systemInstruction: { parts: [{ text: systemPrompt(bot) }] }, contents, tools }),
       signal: AbortSignal.timeout(120000),
     });
+    let data = {};
+    try { data = await res.json(); } catch {}
+    if (res.status === 404) return { skip: true, error: data.error?.message || "modello non trovato" };
     if (res.status === 429 || res.status >= 500) {
-      // limite del piano gratuito: aspetta e riprova
-      await new Promise((r) => setTimeout(r, 5000 * (attempt + 1)));
-      continue;
+      // limite del piano gratuito o server occupato: aspetta e riprova
+      if (attempt < 2) { await new Promise((r) => setTimeout(r, 6000 * (attempt + 1))); continue; }
+      return { skip: true, error: data.error?.message || `Errore Gemini ${res.status}` };
     }
-    const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message || `Errore Gemini ${res.status}`);
-    const content = data.candidates?.[0]?.content;
-    if (!content?.parts) throw new Error("Gemini non ha risposto (" + (data.candidates?.[0]?.finishReason || "sconosciuto") + ")");
-    return content;
+    const cand = data.candidates?.[0];
+    if (!cand?.content?.parts?.length) {
+      if (cand?.finishReason === "MALFORMED_FUNCTION_CALL" && attempt < 2) continue;
+      throw new Error("Gemini non ha risposto (" + (cand?.finishReason || data.promptFeedback?.blockReason || "sconosciuto") + ")");
+    }
+    return { content: cand.content };
   }
-  throw new Error("Limite gratuito di Gemini raggiunto, riprova tra un minuto.");
+}
+
+// Manda a Gemini solo la parte recente della conversazione (risparmia quota),
+// iniziando sempre da un messaggio scritto dall'utente.
+function recent(contents, max = Number(process.env.MAX_HISTORY || 40)) {
+  if (contents.length <= max) return contents;
+  let i = contents.length - max;
+  while (i < contents.length - 1 && !(contents[i].role === "user" && contents[i].parts?.some((p) => p.text))) i++;
+  return contents.slice(i);
+}
+
+async function gemini(bot, contents) {
+  contents = recent(contents);
+  const order = [MODEL, ...MODELS.filter((m) => m !== MODEL)];
+  let lastError = "";
+  for (const model of order) {
+    const r = await geminiCall(model, bot, contents);
+    if (r.content) {
+      if (model !== MODEL) console.log(`Passo al modello ${model}`);
+      MODEL = model;
+      return r.content;
+    }
+    console.warn(`Modello ${model} non disponibile: ${r.error}`);
+    lastError = r.error;
+  }
+  throw new Error("Gemini non disponibile al momento (limite gratuito?). Riprova tra qualche minuto. Dettaglio: " + lastError);
 }
 
 const busy = new Set();

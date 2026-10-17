@@ -1,5 +1,7 @@
+FROM docker:cli AS dockercli
+
 FROM node:22-alpine
-RUN apk add --no-cache docker-cli
+COPY --from=dockercli /usr/local/bin/docker /usr/local/bin/docker
 WORKDIR /app
 COPY package.json server.js ./
 COPY public ./public

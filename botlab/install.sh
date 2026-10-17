@@ -6,13 +6,16 @@ set -euo pipefail
 REPO="https://github.com/giovih/giovih.github.io.git"
 BRANCH="${BRANCH:-main}"
 DIR="$HOME/botlab"
+BOT_SUBNET="172.31.250.0/24"
 say() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
+ask() { local v=""; while [ -z "$v" ]; do printf '%s ' "$1" >&2; read -r v </dev/tty || true; done; printf '%s' "$v"; }
 
-say "Installo Docker (se manca)"
+say "Installo Docker e git (se mancano)"
 if ! command -v docker >/dev/null; then
   curl -fsSL https://get.docker.com | sudo sh
 fi
-sudo apt-get install -y git >/dev/null 2>&1 || true
+command -v git >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq git; }
+sudo systemctl enable --now docker >/dev/null 2>&1 || true
 
 say "Apro le porte 80 e 443 nel firewall interno di Ubuntu"
 for p in 80 443; do
@@ -20,36 +23,80 @@ for p in 80 443; do
 done
 if command -v netfilter-persistent >/dev/null; then sudo netfilter-persistent save >/dev/null 2>&1 || true; fi
 
+say "Proteggo il server dai bot"
+# I bot non possono raggiungere i servizi interni di Oracle (metadati) né la rete privata.
+sudo tee /usr/local/sbin/botlab-firewall >/dev/null <<FW
+#!/bin/sh
+for d in 169.254.0.0/16 10.0.0.0/8 192.168.0.0/16; do
+  iptables -C DOCKER-USER -s $BOT_SUBNET -d \$d -j DROP 2>/dev/null || iptables -I DOCKER-USER -s $BOT_SUBNET -d \$d -j DROP
+done
+FW
+sudo chmod +x /usr/local/sbin/botlab-firewall
+sudo tee /etc/systemd/system/botlab-firewall.service >/dev/null <<'UNIT'
+[Unit]
+Description=BotLab: blocca l'accesso dei bot alla rete interna
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/botlab-firewall
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+sudo systemctl daemon-reload
+sudo systemctl enable --now botlab-firewall.service >/dev/null
+
 say "Scarico BotLab"
-if [ -d "$DIR/.git" ]; then git -C "$DIR" pull --ff-only; else git clone --depth 1 -b "$BRANCH" "$REPO" "$DIR"; fi
+if [ -d "$DIR/.git" ]; then
+  git -C "$DIR" pull --ff-only
+else
+  git clone --depth 1 -b "$BRANCH" "$REPO" "$DIR"
+fi
 cd "$DIR/botlab"
 
 if [ ! -f .env ]; then
   say "Configurazione"
-  echo "Incolla la tua chiave API di Gemini (da https://aistudio.google.com/apikey):"
-  read -r GEMINI_API_KEY </dev/tty
-  echo "Scegli una password per entrare nell'app:"
-  read -r BOTLAB_PASSWORD </dev/tty
-  IP=$(curl -fsS https://api.ipify.org)
-  DOMAIN="${IP//./-}.sslip.io"
+  echo "Ti servono due cose: la chiave Gemini (da https://aistudio.google.com/apikey) e una password a tua scelta."
+  GEMINI_API_KEY=$(ask "Incolla la chiave Gemini e premi Invio:")
+  BOTLAB_PASSWORD=$(ask "Scegli una password per entrare nell'app e premi Invio:")
+  IP=$(curl -fsS https://api.ipify.org || curl -fsS https://ifconfig.me)
+  umask 077
   cat > .env <<ENV
 GEMINI_API_KEY=$GEMINI_API_KEY
 BOTLAB_PASSWORD=$BOTLAB_PASSWORD
-GEMINI_MODEL=gemini-2.5-flash
-DOMAIN=$DOMAIN
+DOMAIN=${IP//./-}.sslip.io
+DOMAIN2=${IP//./-}.nip.io
 BOT_MEMORY=1g
 BOT_CPUS=1
 ENV
-  chmod 600 .env
 fi
 DOMAIN=$(grep '^DOMAIN=' .env | cut -d= -f2)
+DOMAIN2=$(grep '^DOMAIN2=' .env | cut -d= -f2)
 
 say "Preparo il mini PC dei bot (qualche minuto la prima volta)"
-sudo docker build -t botlab-sandbox ./sandbox
+sudo docker build -q -t botlab-sandbox ./sandbox >/dev/null
 
 say "Avvio BotLab"
 sudo docker compose up -d --build
 
-say "Fatto! 🎉"
-echo "Apri sul telefono o sul PC:  https://$DOMAIN"
-echo "(Se non si apre subito, aspetta 1 minuto: sta creando il certificato HTTPS.)"
+say "Attendo il certificato HTTPS (fino a 3 minuti)"
+URL=""
+for _ in $(seq 1 36); do
+  for d in "$DOMAIN" "$DOMAIN2"; do
+    if curl -fsS -o /dev/null --max-time 5 "https://$d/"; then URL="https://$d"; break 2; fi
+  done
+  sleep 5
+done
+
+if [ -n "$URL" ]; then
+  say "Fatto! 🎉"
+  echo "Apri sul telefono o sul PC:  $URL"
+  echo "e inserisci la password che hai scelto."
+else
+  say "BotLab è avviato, ma il certificato HTTPS non è ancora pronto."
+  echo "Prova ad aprire tra qualche minuto:  https://$DOMAIN  oppure  https://$DOMAIN2"
+  echo "Se non si apre mai, controlla di aver aperto le porte 80 e 443 nella Security List di Oracle (vedi la guida)."
+fi

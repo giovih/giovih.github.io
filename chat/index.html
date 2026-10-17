@@ -61,6 +61,11 @@
     border: 1px solid var(--ok); padding: 8px 14px; border-radius: 10px; font-size: 14px; opacity: 0;
     transition: opacity .25s; pointer-events: none; }
   #toast.show { opacity: 1; }
+  #lock { position: fixed; inset: 0; z-index: 99; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 16px; }
+  #lock form { width: min(340px, 100%); background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 22px; text-align: center; }
+  #lock h2 { margin: 0 0 14px; font-size: 18px; }
+  #lock button { width: 100%; margin-top: 10px; }
+  #lockMsg { font-size: 13px; color: var(--danger); min-height: 20px; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -104,6 +109,15 @@
 </dialog>
 
 <div id="toast"></div>
+
+<div id="lock">
+  <form id="lockForm">
+    <h2>🔒 Accesso protetto</h2>
+    <input id="pwd" type="password" placeholder="Password" autocomplete="current-password" autofocus>
+    <button class="primary" id="pwdBtn">Entra</button>
+    <div id="lockMsg"></div>
+  </form>
+</div>
 
 <script>
 (() => {
@@ -292,8 +306,39 @@
     }
   };
 
-  render();
-  if (!store.get(LS.key)) openSettings();
+  // Password gate: 3 attempts, then permanently locked on this browser
+  const PWD_HASH = "caabb5671318567c087aeb9e533fabe99a8a9c60320b2e247e70f6ee2b159ee4";
+  const MAX_TRIES = 3;
+  const lock = $("lock"), lockMsg = $("lockMsg"), pwd = $("pwd"), pwdBtn = $("pwdBtn");
+  const sha256 = async (s) => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)))]
+    .map((b) => b.toString(16).padStart(2, "0")).join("");
+  const fails = () => parseInt(store.get("orchat.fails", "0"), 10) || 0;
+  function setBlocked() {
+    pwd.disabled = pwdBtn.disabled = true;
+    lockMsg.textContent = "Accesso bloccato definitivamente.";
+  }
+  function unlock() {
+    lock.remove();
+    render();
+    if (!store.get(LS.key)) openSettings();
+  }
+  if (sessionStorage.getItem("orchat.ok") === "1") unlock();
+  else if (fails() >= MAX_TRIES) setBlocked();
+  $("lockForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (fails() >= MAX_TRIES) return setBlocked();
+    if (await sha256(pwd.value) === PWD_HASH) {
+      store.set("orchat.fails", "0");
+      try { sessionStorage.setItem("orchat.ok", "1"); } catch {}
+      unlock();
+    } else {
+      const n = fails() + 1;
+      store.set("orchat.fails", String(n));
+      pwd.value = "";
+      if (n >= MAX_TRIES) setBlocked();
+      else lockMsg.textContent = `Password errata. Tentativi rimasti: ${MAX_TRIES - n}`;
+    }
+  });
 })();
 </script>
 </body>

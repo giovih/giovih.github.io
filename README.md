@@ -26,10 +26,8 @@ L'APK si ricompila da solo (GitHub Actions, `.github/workflows/armadio-apk.yml`)
 di `armadio/`; le nuove versioni si installano sopra la vecchia senza perdere l'armadio.
 Il progetto Android (Capacitor) è in `armadio-android/`.
 
-- **Armadio**: fotografa i capi o caricane tanti insieme dalla galleria. Da ogni foto l'app
-  ricava un disegno stile cartone del capo (stessa forma, colori e stampe, senza lo sfondo); nelle
-  Impostazioni si può scegliere di vedere le foto. Per ogni capo: tipo, quanto tiene caldo, stile,
-  impermeabile.
+- **Armadio**: fotografa i capi o caricane tanti insieme dalla galleria; il colore viene
+  riconosciuto dalla foto. Per ogni capo: tipo, quanto tiene caldo, stile, impermeabile.
 - **Settimana**: un outfit per ogni giorno, senza ripetere la stessa maglia e con colori che
   stanno bene insieme. Tocca un capo → "È sporco" (va nel bucato e viene sostituito in tutti i
   giorni), "Non mi va" (cambia solo quel giorno) o "Scelgo io". "Altro outfit" propone

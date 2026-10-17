@@ -1,5 +1,3 @@
-import { disegnaCapo } from "./disegno.js";
-
 // L'armadio vive nel telefono (IndexedDB): le foto restano qui e funzionano anche offline.
 
 const DB = "armadio";
@@ -53,18 +51,7 @@ export async function preparaFoto(file, lato = 900) {
   const cx = cv.getContext("2d");
   cx.drawImage(img, 0, 0, w, hh);
   const foto = await new Promise(ok => cv.toBlob(ok, "image/jpeg", .82));
-  try {
-    const { disegno, colore } = await disegnaCapo(cv);
-    return { foto, disegno, colore: colore || coloreDominante(cx, w, hh) };
-  } catch {
-    return { foto, disegno: null, colore: coloreDominante(cx, w, hh) };
-  }
-}
-
-// Il disegno per i capi fotografati prima che esistesse.
-export async function disegnoDi(foto) {
-  const img = await leggiImmagine(foto);
-  return disegnaCapo(img);
+  return { foto, colore: coloreDominante(cx, w, hh) };
 }
 
 // Il colore del capo: si scarta lo sfondo (il colore dei bordi) e si prende il più frequente al centro.
@@ -103,7 +90,7 @@ const daBase64 = url => fetch(url).then(r => r.blob());
 export async function esporta(extra) {
   const capi = await tutti();
   const lista = [];
-  for (const c of capi) lista.push({ ...c, foto: c.foto ? await aBase64(c.foto) : null, disegno: c.disegno ? await aBase64(c.disegno) : null });
+  for (const c of capi) lista.push({ ...c, foto: c.foto ? await aBase64(c.foto) : null });
   return new Blob([JSON.stringify({ app: "armadio", versione: 1, capi: lista, ...extra })], { type: "application/json" });
 }
 
@@ -111,7 +98,7 @@ export async function importa(file) {
   const j = JSON.parse(await file.text());
   if (j.app !== "armadio" || !Array.isArray(j.capi)) throw new Error("Questo file non è una copia dell'armadio");
   const capi = [];
-  for (const c of j.capi) capi.push({ ...c, foto: c.foto ? await daBase64(c.foto) : null, disegno: c.disegno ? await daBase64(c.disegno) : null });
+  for (const c of j.capi) capi.push({ ...c, foto: c.foto ? await daBase64(c.foto) : null });
   await salvaTanti(capi);
   return j;
 }

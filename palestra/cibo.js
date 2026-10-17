@@ -83,10 +83,7 @@ function cibo() {
       <button class="aggiungi" data-a="nuovo-cibo" data-v="${k}">+ Aggiungi</button></section>`;
   }
 
-  h += `<section class="card"><div class="card-testa"><h2>⚖️ Peso corporeo</h2><span>1 volta a settimana</span></div>
-    <div class="peso-riga"><input id="peso" class="campo" inputmode="decimal" placeholder="kg a digiuno"><button data-a="salva-peso">Salva</button></div>
-    ${graficoPeso()}
-    <p class="nota">${consiglioPeso()}</p></section>`;
+  h += `<button class="secondario" style="color:var(--grigio)" data-a="vai" data-v="progressi">⚖️ Peso corporeo e foto → Progressi</button>`;
   return h;
 }
 

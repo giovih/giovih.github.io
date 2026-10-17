@@ -1,6 +1,6 @@
 // Fa funzionare l'app anche senza internet (in palestra spesso non c'è campo).
-const CACHE = "palestra-v2";
-const FILE = ["./", "index.html", "style.css", "app.js", "dati.js", "cibo.js", "manifest.webmanifest",
+const CACHE = "palestra-v3";
+const FILE = ["./", "index.html", "style.css", "app.js", "dati.js", "cibo.js", "extra.js", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
 self.addEventListener("install", e => {

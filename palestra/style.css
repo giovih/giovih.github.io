@@ -152,3 +152,42 @@ dialog input, dialog select { width: 100%; padding: 12px; margin-bottom: 8px; bo
 textarea.campo { font: inherit; color: inherit; resize: vertical; }
 .promemoria { display: block; width: 100%; text-align: left; font-weight: 500; color: var(--testo); }
 dialog .scelte > * { color: var(--testo); }
+
+/* Progressi */
+.segmenti { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--card); border-radius: 12px; padding: 4px; margin-bottom: 14px; }
+.segmenti button { background: none; padding: 10px 4px; font-size: 15px; }
+.segmenti button.on { background: #374151; }
+.body-hero { background: radial-gradient(120% 80% at 50% 0%, #0f2a1f 0%, var(--card) 70%); border-radius: 20px; padding: 18px 16px 8px; margin-bottom: 14px; }
+.body-titolo { font-size: 46px; font-weight: 900; letter-spacing: -2px; line-height: 1; }
+.body-peso { font-size: 64px; font-weight: 800; letter-spacing: -2px; font-variant-numeric: tabular-nums; margin-top: 6px; }
+.body-peso small { font-size: 20px; color: var(--grigio); margin-left: 6px; font-weight: 600; }
+.body-info { color: #86efac; font-size: 15px; margin-bottom: 4px; }
+.body-hero .graf { padding: 8px 0; }
+.body-hero .peso-riga { padding: 8px 0; }
+.confronto { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 12px; }
+.confronto.uno { grid-template-columns: 1fr; }
+.confronto figure { margin: 0; }
+.confronto img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 12px; background: var(--riga); }
+.confronto figcaption { font-size: 13px; color: var(--grigio); text-align: center; margin-top: 4px; }
+.miniature { display: flex; gap: 8px; overflow-x: auto; padding: 4px 12px; }
+.miniature button { padding: 0; background: none; flex: none; border-radius: 10px; border: 2px solid transparent; }
+.miniature button.on { border-color: var(--arancio); }
+.miniature img { width: 64px; height: 84px; object-fit: cover; border-radius: 8px; display: block; }
+.miniature span { font-size: 11px; color: var(--grigio); font-weight: 400; }
+.diario div { margin-top: 4px; }
+.etichetta { display: block; font-size: 13px; color: var(--grigio); }
+.etichetta .campo { margin-top: 4px; margin-bottom: 8px; color: var(--testo); }
+.pad .campo { margin-bottom: 8px; }
+.codice { white-space: pre-wrap; font-size: 11px; background: var(--sfondo); padding: 8px; border-radius: 8px; overflow-x: auto; }
+
+/* Coach */
+.testa { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.testa .sotto { width: 100%; }
+.esempi { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.esempi button { text-align: left; font-weight: 500; }
+.chat { display: flex; flex-direction: column; gap: 8px; padding-bottom: 80px; }
+.bolla { background: var(--card); padding: 10px 14px; border-radius: 16px; max-width: 88%; align-self: flex-start; font-size: 16px; }
+.bolla.io { background: var(--arancio); color: #111; align-self: flex-end; }
+.chat-input { position: fixed; left: 12px; right: 12px; bottom: calc(70px + env(safe-area-inset-bottom)); display: flex; gap: 8px; max-width: 616px; margin: 0 auto; z-index: 4; }
+.chat-input textarea { flex: 1; resize: none; font: inherit; color: inherit; }
+.chat-input button { flex: none; width: 54px; font-size: 22px; background: var(--arancio); color: #111; }

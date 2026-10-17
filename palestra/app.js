@@ -29,7 +29,12 @@ function statoIniziale() {
 
 let S;
 try { S = JSON.parse(localStorage.getItem(CHIAVE)) || statoIniziale(); } catch { S = statoIniziale(); }
-const salva = () => { try { localStorage.setItem(CHIAVE, JSON.stringify(S)); } catch {} };
+// Salva sul telefono; se il salvataggio online è attivo, lo manda anche a Supabase (vedi extra.js).
+const salva = (daRemoto = false) => {
+  if (!daRemoto) S.aggiornato = Date.now();
+  try { localStorage.setItem(CHIAVE, JSON.stringify(S)); } catch {}
+  if (!daRemoto) window.dopoSalva?.();
+};
 
 // ---------- Utilità ----------
 
@@ -218,7 +223,7 @@ function vai(v, p = null) {
 }
 
 function disegna() {
-  const V = { oggi, allenamento, riepilogo, scheda, storico, impostazioni, cibo: window.cibo }[vista] || oggi;
+  const V = { oggi, allenamento, riepilogo, scheda, storico, impostazioni, cibo: window.cibo, progressi: window.progressi, coach: window.coach }[vista] || oggi;
   $("#vista").innerHTML = V();
   disegnaTimer();
   aggiornaDurata();
@@ -363,7 +368,7 @@ function grafico(punti, chiave, colore, etichetta) {
 function storico() {
   const nomi = [...new Set(S.sedute.flatMap(s => s.voci.filter(v => v.sets.some(x => x.fatto)).map(v => v.ex)))];
   const scelto = param && nomi.includes(param) ? param : nomi[0];
-  let h = `<header class="testa"><h1>Storico</h1><div class="sotto">${S.sedute.length} allenamenti</div></header>`;
+  let h = `<div class="sotto" style="margin:4px">${S.sedute.length} allenamenti</div>`;
   if (!nomi.length) return h + `<section class="card riposo"><p>Ancora niente: fai il primo allenamento!</p></section>`;
   const pts = storia(scelto).reverse().map(x => ({
     kg: Math.max(...x.sets.map(s => s.kg ?? 0)), reps: x.sets.reduce((t, s) => t + s.reps, 0)
@@ -379,6 +384,8 @@ function storico() {
 
 function impostazioni() {
   return `<header class="testa"><h1>Altro</h1></header>
+    <button class="grande" data-a="vai" data-v="scheda">📋 Scheda e calendario</button>
+    ${window.sezioneSync?.() ?? ""}
     <section class="card"><div class="card-testa"><h2>Programma</h2></div>
     <label class="riga"><span>Inizio settimana 1</span><input type="date" data-a="inizio" value="${S.inizio}"></label>
     <p class="nota">Ora sei alla settimana ${settimana().n} (ciclo ${settimana().ciclo}/8).</p></section>
@@ -386,7 +393,7 @@ function impostazioni() {
     <p class="nota">I dati sono solo in questo telefono. Fai un backup ogni tanto: servirà anche per passarli all'app iPhone.</p>
     <div class="scelte"><button data-a="esporta">Salva backup</button>
     <label class="bottone">Carica backup<input type="file" accept=".json,application/json" data-a="importa" hidden></label></div></section>
-    <section class="card"><div class="card-testa"><h2>Chiave AI (conta cibo)</h2></div>
+    <section class="card"><div class="card-testa"><h2>Chiave AI (cibo e coach)</h2></div>
     <p class="nota">Incolla la chiave API di Anthropic. Resta solo su questo telefono, non va nel backup e non è nel codice del sito.
     ${(() => { try { return localStorage.getItem("palestra-api-key") ? "✅ Chiave salvata." : "Nessuna chiave."; } catch { return ""; } })()}</p>
     <div style="padding:0 12px"><input id="chiave" class="campo" type="password" placeholder="sk-ant-..." autocomplete="off"></div>
@@ -493,7 +500,7 @@ document.addEventListener("click", e => {
     case "reset":
       if (confirm("Cancellare TUTTI i dati? Non si può annullare.")) { S = statoIniziale(); salva(); vai("oggi"); }
       return;
-    default: window.azioneCibo?.(a, b);
+    default: window.azioneCibo?.(a, b); window.azioneExtra?.(a, b);
   }
 });
 
@@ -511,7 +518,7 @@ document.addEventListener("change", e => {
   if (a === "pulita") { S.attiva.voci[+t.dataset.v].pulita = t.checked; salva(); }
   if (a === "inizio" && t.value) { S.inizio = isoData(lunedi(new Date(t.value + "T12:00"))); salva(); disegna(); }
   if (a === "storico-es") { param = t.value; disegna(); }
-  window.cambioCibo?.(t);
+  window.cambioCibo?.(t); window.cambioExtra?.(t);
   if (a === "importa" && t.files[0]) {
     t.files[0].text().then(txt => {
       const d = JSON.parse(txt);
@@ -525,6 +532,7 @@ document.addEventListener("change", e => {
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { disegnaTimer(); tieniSchermoAcceso(); } });
 
 function avvia() {
+  window.avviaSync?.();
   vai(S.attiva ? "allenamento" : "oggi");
   if (S.attiva) tieniSchermoAcceso();
 }

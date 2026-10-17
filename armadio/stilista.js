@@ -187,7 +187,7 @@ export function proponi(capi, meteo, ctx = {}) {
   for (const t of tutte) {
     const ids = idsDi(t.outfit);
     if (scelte.every(s => differenza(s.ids, ids) >= 2)) scelte.push({ ...t, ids });
-    if (scelte.length >= 12) break;
+    if (scelte.length >= (ctx.max || 12)) break;
   }
   return scelte;
 }
@@ -206,6 +206,18 @@ export function mancanze(capi) {
   if (!(ha("sopra") && ha("sotto")) && !ha("intero")) m.push("almeno una maglia e un paio di pantaloni (o un vestito intero)");
   if (!ha("scarpe")) m.push("un paio di scarpe");
   return m;
+}
+
+// Climi tipici, per gli abbinamenti della valigia quando le previsioni non arrivano a quei giorni.
+export const CLIMI = [
+  { id: "caldo",  nome: "☀️ Caldo",  meteo: { tMin: 22, tMax: 31, pioggiaProb: 0 } },
+  { id: "mite",   nome: "🌤️ Mite",   meteo: { tMin: 15, tMax: 23, pioggiaProb: 0 } },
+  { id: "fresco", nome: "🍂 Fresco", meteo: { tMin: 8,  tMax: 15, pioggiaProb: 0 } },
+  { id: "freddo", nome: "❄️ Freddo", meteo: { tMin: 0,  tMax: 7,  pioggiaProb: 0 } }
+];
+export function climaDi(meteo) {
+  const t = bisogni(meteo).t;
+  return t >= 25 ? "caldo" : t >= 17 ? "mite" : t >= 9 ? "fresco" : "freddo";
 }
 
 // Due righe per spiegare perché ha scelto così.

@@ -32,6 +32,9 @@ Il progetto Android (Capacitor) è in `armadio-android/`.
   stanno bene insieme. Tocca un capo → "È sporco" (va nel bucato e viene sostituito in tutti i
   giorni), "Non mi va" (cambia solo quel giorno) o "Scelgo io". "Altro outfit" propone
   un'alternativa, il lucchetto la fissa.
+- **Valigia**: scegli i capi che porti in vacanza; l'app propone gli abbinamenti solo tra quelli,
+  giorno per giorno col meteo della meta (se le date sono entro le previsioni) oppure per tipo di
+  tempo (caldo, mite, fresco, freddo). Segnala anche i capi che non stanno bene con nient'altro.
 - **Bucato**: con "L'ho indossato" i capi contano gli utilizzi e vanno da soli nel bucato;
   "Lavato" li rimette nell'armadio.
 - Meteo da [Open-Meteo](https://open-meteo.com) (gratuito, senza chiavi). Foto e dati restano

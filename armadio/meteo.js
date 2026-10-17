@@ -37,14 +37,15 @@ export function posizioneAttuale() {
 }
 
 // Restituisce { giorni: { "2026-10-12": {...} }, aggiornato, offline }.
-export async function previsioni(citta) {
+// "cache" separa il meteo di casa da quello della meta della vacanza.
+export async function previsioni(citta, cache = CACHE) {
   const chiave = `${citta.lat},${citta.lon}`;
   let vecchio = null;
-  try { vecchio = JSON.parse(localStorage.getItem(CACHE)); } catch {}
+  try { vecchio = JSON.parse(localStorage.getItem(cache)); } catch {}
   if (vecchio?.chiave === chiave && Date.now() - vecchio.aggiornato < 30 * 60000) return vecchio;
 
   const u = "https://api.open-meteo.com/v1/forecast?" + new URLSearchParams({
-    latitude: citta.lat, longitude: citta.lon, timezone: "auto", past_days: 6, forecast_days: 14,
+    latitude: citta.lat, longitude: citta.lon, timezone: "auto", past_days: 6, forecast_days: 16,
     daily: "weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max"
   });
   try {
@@ -63,7 +64,7 @@ export async function previsioni(citta) {
       };
     });
     const nuovo = { chiave, giorni, aggiornato: Date.now() };
-    try { localStorage.setItem(CACHE, JSON.stringify(nuovo)); } catch {}
+    try { localStorage.setItem(cache, JSON.stringify(nuovo)); } catch {}
     return nuovo;
   } catch {
     if (vecchio?.chiave === chiave) return { ...vecchio, offline: true };

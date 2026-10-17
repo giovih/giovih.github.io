@@ -93,7 +93,7 @@ details > summary::-webkit-details-marker { display: none; }
 
 /* Barra in basso */
 .tab {
-  position: fixed; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, 1fr);
+  position: fixed; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(5, 1fr);
   background: rgba(17, 24, 39, .96); border-top: 1px solid #1f2937; padding-bottom: env(safe-area-inset-bottom); z-index: 6;
 }
 .tab button { background: none; border-radius: 0; padding: 8px 0 10px; display: flex; flex-direction: column; align-items: center; font-size: 22px; opacity: .55; }
@@ -117,3 +117,38 @@ dialog input, dialog select { width: 100%; padding: 12px; margin-bottom: 8px; bo
 .lista button { text-align: left; display: flex; justify-content: space-between; }
 .lista small { color: var(--grigio); font-weight: 400; }
 .riga.col em { text-align: left; }
+
+/* Barra in alto durante l'allenamento */
+.barra-all { position: sticky; top: 0; z-index: 4; margin: 0 -16px; padding: calc(env(safe-area-inset-top) + 10px) 16px 10px; background: rgba(11, 18, 32, .97); border-bottom: 1px solid #1f2937; }
+.ba-riga { display: flex; justify-content: space-between; font-size: 19px; font-variant-numeric: tabular-nums; }
+.ba-riga.piccola { font-size: 14px; color: var(--grigio); margin-top: 2px; }
+.progresso { height: 10px; background: #1f2937; border-radius: 6px; overflow: hidden; margin-top: 6px; }
+.progresso > div { height: 100%; border-radius: 6px; transition: width .3s; }
+.cambia { display: block; width: 100%; margin-top: 4px; background: #2b3548; color: #fdba74; }
+.riga.tocca { cursor: pointer; }
+.campo { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #374151; background: var(--sfondo); font-size: 16px; }
+.passi { margin: 0; padding: 0 16px 12px 34px; font-size: 15px; color: #d1d5db; }
+.passi li { margin-bottom: 8px; }
+
+/* Cibo */
+.pad { padding: 12px 14px; }
+.macro { margin-bottom: 10px; }
+.nav-giorno { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.nav-giorno button { width: 56px; font-size: 22px; }
+.nav-giorno button:disabled { opacity: .3; }
+.creatina { display: block; width: 100%; margin-top: 4px; background: #2b3548; }
+.creatina.presa { background: rgba(22, 163, 74, .25); color: #86efac; }
+.card-testa h2.pasto { font-size: 17px; }
+.cibo-riga { display: flex; gap: 10px; align-items: center; padding: 8px 14px; cursor: pointer; }
+.cibo-riga img, .noimg { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; background: var(--riga); display: grid; place-items: center; flex: none; }
+.cibo-riga small { color: var(--grigio); }
+.aggiungi { display: block; width: calc(100% - 24px); margin: 6px 12px; background: transparent; border: 1px dashed #374151; color: var(--grigio); }
+.anteprima { width: 100%; border-radius: 12px; margin-bottom: 8px; max-height: 240px; object-fit: cover; }
+.macro-campi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.macro-campi label { font-size: 13px; color: var(--grigio); }
+.macro-campi input { font-size: 20px; font-weight: 700; text-align: center; }
+.peso-riga { display: flex; gap: 8px; padding: 12px; }
+.peso-riga button { flex: none; }
+textarea.campo { font: inherit; color: inherit; resize: vertical; }
+.promemoria { display: block; width: 100%; text-align: left; font-weight: 500; color: var(--testo); }
+dialog .scelte > * { color: var(--testo); }

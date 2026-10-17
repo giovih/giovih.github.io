@@ -131,6 +131,7 @@ function inizia(codice) {
     voci: sc.righe.map(r => creaVoce(r, scarico))
   };
   salva();
+  tieniSchermoAcceso();
   vai("allenamento");
 }
 
@@ -145,8 +146,28 @@ function fine() {
     S.sedute.push(a);
   }
   S.attiva = null; S.timerFine = null;
-  salva();
+  salva(); blocco?.release();
   fatte ? vai("riepilogo", a.id) : vai("oggi");
+}
+
+// ---------- Durata e schermo acceso ----------
+
+// Lo schermo resta acceso durante l'allenamento: così il timer suona sempre.
+let blocco = null;
+async function tieniSchermoAcceso() {
+  try { if (S.attiva && !blocco && navigator.wakeLock) { blocco = await navigator.wakeLock.request("screen"); blocco.addEventListener("release", () => blocco = null); } } catch {}
+}
+let tickDurata;
+function aggiornaDurata() {
+  clearInterval(tickDurata);
+  if (!S.attiva || vista !== "allenamento") return;
+  const agg = () => {
+    const el = $("#durata"); if (!el) return clearInterval(tickDurata);
+    const sec = Math.floor((Date.now() - new Date(S.attiva.data)) / 1000);
+    const h = Math.floor(sec / 3600), m = Math.floor(sec / 60) % 60, s = String(sec % 60).padStart(2, "0");
+    el.textContent = h ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
+  };
+  agg(); tickDurata = setInterval(agg, 1000);
 }
 
 // ---------- Timer di recupero ----------
@@ -157,11 +178,11 @@ function sbloccaAudio() {
 }
 function bip() {
   if (!audio) return;
-  [0, 0.25, 0.5].forEach(t => {
+  [0, 0.3, 0.6, 1.2, 1.5, 1.8].forEach(t => {
     const o = audio.createOscillator(), g = audio.createGain();
-    o.frequency.value = 880; o.connect(g); g.connect(audio.destination);
-    g.gain.setValueAtTime(0.3, audio.currentTime + t);
-    o.start(audio.currentTime + t); o.stop(audio.currentTime + t + 0.15);
+    o.type = "square"; o.frequency.value = 1046; o.connect(g); g.connect(audio.destination);
+    g.gain.setValueAtTime(0.6, audio.currentTime + t);
+    o.start(audio.currentTime + t); o.stop(audio.currentTime + t + 0.2);
   });
   navigator.vibrate?.([200, 100, 200]);
 }
@@ -197,9 +218,10 @@ function vai(v, p = null) {
 }
 
 function disegna() {
-  const V = { oggi, allenamento, riepilogo, scheda, storico, impostazioni }[vista] || oggi;
+  const V = { oggi, allenamento, riepilogo, scheda, storico, impostazioni, cibo: window.cibo }[vista] || oggi;
   $("#vista").innerHTML = V();
   disegnaTimer();
+  aggiornaDurata();
 }
 
 function avvisiSettimana(w) {
@@ -226,6 +248,8 @@ function oggi() {
   }).join("")}</div>`;
   h += avvisiSettimana(w);
 
+  const cr = S.cibo?.[isoData(new Date())]?.creatina;
+  if (!cr) h += `<button class="avviso promemoria" data-a="vai" data-v="cibo">💊 Ricordati la creatina (5 g, anche nei giorni di riposo)</button>`;
   if (S.attiva) {
     h += `<button class="grande" style="background:${S.attiva.colore}" data-a="riprendi">▶︎ Riprendi ${esc(S.attiva.nome)}</button>`;
     return h;
@@ -252,8 +276,15 @@ function oggi() {
 function allenamento() {
   const a = S.attiva;
   if (!a) return oggi();
-  let h = `<header class="testa" style="border-color:${a.colore}"><h1>${esc(a.nome)}</h1>
-    <div class="sotto">Settimana ${a.settimana} · ciclo ${a.ciclo}/8${a.scarico ? " · SCARICO" : ""}</div></header>
+  const tot = a.voci.reduce((t, v) => t + v.sets.length, 0);
+  const fatte = a.voci.reduce((t, v) => t + v.sets.filter(x => x.fatto).length, 0);
+  const pct = tot ? Math.round(fatte / tot * 100) : 0;
+  let h = `<div class="barra-all">
+      <div class="ba-riga"><b>${esc(a.nome)}</b><span>⏱ <span id="durata">0:00</span></span></div>
+      <div class="ba-riga piccola"><span>${fatte}/${tot} serie</span><span>${pct}%</span></div>
+      <div class="progresso"><div style="width:${pct}%;background:${a.colore}"></div></div>
+    </div>
+    <div class="sotto" style="margin:8px 4px">Settimana ${a.settimana} · ciclo ${a.ciclo}/8${a.scarico ? " · SCARICO" : ""}</div>
     <details class="regole"><summary>📌 Regole di esecuzione</summary><ul>${REGOLE.map(x => `<li>${x}</li>`).join("")}</ul></details>`;
 
   a.voci.forEach((v, i) => {
@@ -265,7 +296,7 @@ function allenamento() {
     const dropOn = v.drop && a.ciclo >= 5 && !a.scarico;
     h += `<section class="card es ${conSucc ? "ss-su" : ""} ${conPrec ? "ss-giu" : ""}">
       <div class="es-testa"><h3>${esc(v.ex)}${v.ss ? ` <i class="ss">SUPERSERIE ${conSucc ? "→ poi " + esc(a.voci[i + 1].ex) : ""}</i>` : ""}</h3>
-        <button class="piccolo" data-a="sostituisci" data-v="${i}">⇄ Cambia</button></div>
+</div>
       <div class="es-info"><b>${ripTxt({ serie: v.sets.length, min: v.min, max: v.max })}</b> · rec ${recTxt(v.recMin, v.recMax)}${conSucc ? " (a fine coppia)" : ""}
         · <span class="${eq === "man" ? "evid" : ""}">${A.nome}: ${A.peso}</span></div>
       <div class="ultima">Ultima volta: ${ultima}</div>
@@ -280,6 +311,7 @@ function allenamento() {
         </div>
         ${dropOn && j === v.sets.length - 1 ? `<div class="drop">🔥 DROP SET: cedimento → -25% (${kgTxt(arrot((num(x.kg) || 0) * 0.75))} kg) → di nuovo cedimento. Nel diario segna solo la serie normale.</div>` : ""}`).join("")}
       <label class="pulita"><input type="checkbox" data-a="pulita" data-v="${i}" ${v.pulita ? "checked" : ""}> Tecnica pulita in tutte le serie</label>
+      <button class="cambia" data-a="sostituisci" data-v="${i}">⇄ Macchina occupata? Cambia esercizio</button>
     </section>`;
   });
   h += `<button class="grande verde" data-a="fine">Fine allenamento</button>
@@ -309,15 +341,16 @@ function scheda() {
       <select data-a="cal" data-v="${d}">${opzioni(S.calendario[d])}</select></label>`).join("")}
     <div class="scelte"><button data-a="cal-base">Lun A · Mer B · Ven G · Sab C</button>
     <button data-a="cal-alt">Lun G · Mer A · Ven B · Dom C</button></div></section>
-    ${Object.values(S.schede).map(sc => `<section class="card"><div class="card-testa" style="background:${sc.colore}">
+    <p class="nota">Tocca un esercizio per cambiarlo nella scheda.</p>
+    ${Object.entries(S.schede).map(([cod, sc]) => `<section class="card"><div class="card-testa" style="background:${sc.colore}">
       <h2>${sc.nome}</h2><span>${sc.sotto}</span></div>
-      ${sc.righe.map(r => `<div class="riga"><span>${esc(r.ex)}${r.ss ? ' <i class="ss">SS</i>' : ""}${attrezzo(r.ex) === "man" ? '<small>peso per manubrio</small>' : ""}</span>
+      ${sc.righe.map((r, k) => `<div class="riga tocca" data-a="sostituisci-scheda" data-v="${cod}" data-i="${k}"><span>${esc(r.ex)}${r.ss ? ' <i class="ss">SS</i>' : ""}${attrezzo(r.ex) === "man" ? '<small>peso per manubrio</small>' : ""}</span>
         <b>${ripTxt(r)}</b><em>${recTxt(r.recMin, r.recMax)}</em></div>`).join("")}</section>`).join("")}
     <p class="nota">SS = superserie: i due esercizi di fila senza pausa, poi recuperi.</p>`;
 }
 
 function grafico(punti, chiave, colore, etichetta) {
-  if (punti.length < 2) return `<p class="nota">${etichetta}: servono almeno 2 sedute per il grafico.</p>`;
+  if (punti.length < 2) return `<p class="nota">${etichetta}: servono almeno 2 valori per il grafico.</p>`;
   const W = 320, H = 120, p = 24;
   const vals = punti.map(x => x[chiave]);
   const lo = Math.min(...vals), hi = Math.max(...vals), sp = hi - lo || 1;
@@ -353,20 +386,32 @@ function impostazioni() {
     <p class="nota">I dati sono solo in questo telefono. Fai un backup ogni tanto: servirà anche per passarli all'app iPhone.</p>
     <div class="scelte"><button data-a="esporta">Salva backup</button>
     <label class="bottone">Carica backup<input type="file" accept=".json,application/json" data-a="importa" hidden></label></div></section>
-    <section class="card"><div class="card-testa"><h2>In arrivo</h2></div>
-    <p class="nota">Conta cibo con foto, peso corporeo, acqua, creatina, diario ogni 4 settimane. Il blocco di TikTok/Instagram si può fare solo nell'app iPhone vera (Swift), non sul web.</p></section>
+    <section class="card"><div class="card-testa"><h2>Chiave AI (conta cibo)</h2></div>
+    <p class="nota">Incolla la chiave API di Anthropic. Resta solo su questo telefono, non va nel backup e non è nel codice del sito.
+    ${(() => { try { return localStorage.getItem("palestra-api-key") ? "✅ Chiave salvata." : "Nessuna chiave."; } catch { return ""; } })()}</p>
+    <div style="padding:0 12px"><input id="chiave" class="campo" type="password" placeholder="sk-ant-..." autocomplete="off"></div>
+    <div class="scelte"><button data-a="salva-chiave">Salva chiave</button></div></section>
+    <section class="card"><div class="card-testa"><h2>Blocco app</h2></div>
+    <p class="nota">Un sito non può bloccare altre app: lo può fare solo l'app Swift vera, con le API Screen Time di Apple. Per ora puoi farlo con le funzioni dell'iPhone:</p>
+    <ol class="passi">
+      <li><b>Durante l'allenamento</b>: app <b>Comandi → Automazione → + → App</b> → scegli TikTok, Instagram… → <b>È aperta</b> → <b>Esegui subito</b> → azione <b>Apri app → Palestra</b>. Ogni volta che apri TikTok si riapre la Palestra. Disattiva l'automazione quando non ti serve.</li>
+      <li><b>Fasce orarie (studio, notte)</b>: <b>Impostazioni → Tempo di utilizzo → Tempo di inattività</b> → Programmato, con gli orari che vuoi. Fuori dalle app consentite tutto resta bloccato.</li>
+      <li><b>Limite giornaliero</b>: <b>Tempo di utilizzo → Limitazioni app</b> → Social → per esempio 30 min.</li>
+    </ol></section>
     <button class="secondario" data-a="reset">Cancella tutti i dati</button>`;
 }
 
 // ---------- Dialogo sostituzione ----------
 
-function apriSostituzione(i) {
-  const v = S.attiva.voci[i];
+let doveCambio = null; // { tipo: "attiva", i } oppure { tipo: "scheda", codice, i }
+function apriSostituzione(i, codice) {
+  doveCambio = codice ? { tipo: "scheda", codice, i } : { tipo: "attiva", i };
+  const v = codice ? S.schede[codice].righe[i] : S.attiva.voci[i];
   const g = gruppo(v.ex);
   const alt = tuttiEsercizi().filter(e => e.gruppo === g && e.nome !== v.ex);
   const d = $("#dialogo");
   d.innerHTML = `<h2>Sostituisci ${esc(v.ex)}</h2><p class="nota">${GRUPPI[g] || ""} · stesse serie e ripetizioni</p>
-    <label class="pulita"><input type="checkbox" id="sempre"> Cambia anche nella scheda (per sempre)</label>
+    ${codice ? "" : `<label class="pulita"><input type="checkbox" id="sempre"> Cambia anche nella scheda (per sempre)</label>`}
     <div class="lista">${alt.map(e => `<button data-a="scegli" data-i="${i}" data-v="${esc(e.nome)}">${esc(e.nome)}<small>${ATTREZZI[e.eq].nome}</small></button>`).join("")}</div>
     <h3>Crea esercizio</h3>
     <input id="nuovo-nome" placeholder="Nome esercizio">
@@ -378,6 +423,10 @@ function apriSostituzione(i) {
 }
 
 function sostituisci(i, nome) {
+  if (doveCambio?.tipo === "scheda") {
+    S.schede[doveCambio.codice].righe[i].ex = nome;
+    salva(); $("#dialogo").close(); return disegna();
+  }
   const a = S.attiva, v = a.voci[i];
   if ($("#sempre")?.checked) {
     const riga = S.schede[a.codice].righe.find(r => r.ex === v.ex);
@@ -397,7 +446,7 @@ document.addEventListener("click", e => {
   const a = b.dataset.a, v = b.dataset.v, i = +b.dataset.i, j = +b.dataset.j;
   switch (a) {
     case "inizia": sbloccaAudio(); return inizia(v);
-    case "riprendi": sbloccaAudio(); return vai("allenamento");
+    case "riprendi": sbloccaAudio(); tieniSchermoAcceso(); return vai("allenamento");
     case "vai": return vai(v);
     case "fine": return fine();
     case "annulla":
@@ -417,6 +466,7 @@ document.addEventListener("click", e => {
     case "timer-piu": S.timerFine += +v * 1000; salva(); return disegnaTimer();
     case "timer-chiudi": S.timerFine = null; salva(); return disegnaTimer();
     case "sostituisci": return apriSostituzione(+v);
+    case "sostituisci-scheda": return apriSostituzione(i, v);
     case "scegli": return sostituisci(i, v);
     case "crea": {
       const nome = $("#nuovo-nome").value.trim();
@@ -437,9 +487,13 @@ document.addEventListener("click", e => {
       else { const l = document.createElement("a"); l.href = URL.createObjectURL(blob); l.download = f.name; l.click(); }
       return;
     }
+    case "salva-chiave":
+      try { localStorage.setItem("palestra-api-key", $("#chiave").value.trim()); } catch {}
+      alert("Chiave salvata solo su questo telefono."); return disegna();
     case "reset":
       if (confirm("Cancellare TUTTI i dati? Non si può annullare.")) { S = statoIniziale(); salva(); vai("oggi"); }
       return;
+    default: window.azioneCibo?.(a, b);
   }
 });
 
@@ -457,6 +511,7 @@ document.addEventListener("change", e => {
   if (a === "pulita") { S.attiva.voci[+t.dataset.v].pulita = t.checked; salva(); }
   if (a === "inizio" && t.value) { S.inizio = isoData(lunedi(new Date(t.value + "T12:00"))); salva(); disegna(); }
   if (a === "storico-es") { param = t.value; disegna(); }
+  window.cambioCibo?.(t);
   if (a === "importa" && t.files[0]) {
     t.files[0].text().then(txt => {
       const d = JSON.parse(txt);
@@ -467,7 +522,10 @@ document.addEventListener("change", e => {
 });
 
 // Quando torni nell'app il timer si aggiorna (il tempo è calcolato dall'ora di fine).
-document.addEventListener("visibilitychange", () => { if (!document.hidden) disegnaTimer(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { disegnaTimer(); tieniSchermoAcceso(); } });
 
-vai(S.attiva ? "allenamento" : "oggi");
+function avvia() {
+  vai(S.attiva ? "allenamento" : "oggi");
+  if (S.attiva) tieniSchermoAcceso();
+}
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});

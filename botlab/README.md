@@ -64,6 +64,16 @@ ed eseguire comandi nel terminale. Tutto **gratis**: Oracle Cloud Free + Gemini 
 - Il pulsante **💬 Chat / ⌨️ Terminale** ti fa usare direttamente il terminale del bot.
 - 🧹 cancella la conversazione (i file restano), 🗑 elimina il bot e il suo computer.
 
+## Sicurezza: 5 tentativi
+Se qualcuno sbaglia la password **5 volte**, il suo dispositivo (la sua connessione internet) viene
+**bloccato per sempre**: non potrà più entrare, nemmeno con la password giusta.
+Se inserisci la password giusta prima del quinto errore, il contatore si azzera.
+
+Se ti blocchi da solo, collegati al server (come al passo 3) e scrivi:
+```
+bash ~/botlab/botlab/sblocca.sh
+```
+
 ## Aggiornare
 ```
 bash ~/botlab/botlab/aggiorna.sh

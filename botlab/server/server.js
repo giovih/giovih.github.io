@@ -313,6 +313,18 @@ async function readBody(req) {
   for await (const chunk of req) { s += chunk; if (s.length > 1e6) throw new Error("troppo grande"); }
   return s ? JSON.parse(s) : {};
 }
+// ---------- blocco tentativi ----------
+// Dopo MAX_TENTATIVI password sbagliate quel dispositivo (indirizzo IP) viene bloccato per sempre.
+// Per sbloccare: bash ~/botlab/botlab/sblocca.sh sul server.
+const MAX_TENTATIVI = Number(process.env.MAX_TENTATIVI || 5);
+const BLOCK_FILE = path.join(DATA_DIR, "bloccati.json");
+const bloccati = await readJson(BLOCK_FILE, {}); // ip -> { tentativi, bloccato, quando }
+
+function clientIp(req) {
+  // Caddy mette l'IP vero del visitatore in X-Forwarded-For
+  return String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || req.socket.remoteAddress || "?";
+}
+
 function authorized(req) {
   const h = req.headers.authorization || "";
   const given = Buffer.from(h.replace(/^Bearer /, ""));
@@ -341,7 +353,22 @@ const server = http.createServer(async (req, res) => {
 
   const url = new URL(req.url, "http://x");
   if (!url.pathname.startsWith("/api/")) return serveStatic(req, res);
-  if (!authorized(req)) return send(res, 401, { error: "Password sbagliata" });
+  const ip = clientIp(req);
+  if (bloccati[ip]?.bloccato) return send(res, 403, { error: "Dispositivo bloccato: troppe password sbagliate." });
+  if (!authorized(req)) {
+    const b = (bloccati[ip] ||= { tentativi: 0 });
+    b.tentativi++;
+    b.quando = new Date().toISOString();
+    if (b.tentativi >= MAX_TENTATIVI) {
+      b.bloccato = true;
+      console.warn(`Bloccato per sempre ${ip} dopo ${b.tentativi} password sbagliate`);
+    }
+    await writeJson(BLOCK_FILE, bloccati);
+    if (b.bloccato) return send(res, 403, { error: "Dispositivo bloccato: troppe password sbagliate." });
+    const restano = MAX_TENTATIVI - b.tentativi;
+    return send(res, 401, { error: `Password sbagliata. ${restano === 1 ? "Ultimo tentativo" : `Restano ${restano} tentativi`} prima del blocco.` });
+  }
+  if (bloccati[ip]) { delete bloccati[ip]; await writeJson(BLOCK_FILE, bloccati); } // password giusta: azzera i tentativi
 
   try {
     const parts = url.pathname.split("/").filter(Boolean); // api, bots, :id, action

@@ -195,8 +195,8 @@ function Alimentazione({ oggi, imp, vai }) {
       </div>
     </div>
     <div class="macro-row due mt-16">
-      <div class="macro"><div class="macro-top"><b>Carboidrati</b><span>${fmtInt(t.carb)}/${o.carboidrati} g</span></div><${Bar} value=${quota(t.carb, o.carboidrati)} color="var(--tono-ambra)" /></div>
-      <div class="macro"><div class="macro-top"><b>Grassi</b><span>${fmtInt(t.grassi)}/${o.grassi} g</span></div><${Bar} value=${quota(t.grassi, o.grassi)} color="var(--tono-lavanda)" /></div>
+      <div class="macro"><div class="macro-top"><b>Carboidrati</b><span>${fmtInt(t.carb)} di ${o.carboidrati} g</span></div><${Bar} value=${quota(t.carb, o.carboidrati)} color="var(--tono-ambra)" /></div>
+      <div class="macro"><div class="macro-top"><b>Grassi</b><span>${fmtInt(t.grassi)} di ${o.grassi} g</span></div><${Bar} value=${quota(t.grassi, o.grassi)} color="var(--tono-lavanda)" /></div>
     </div>
   <//>`;
 }

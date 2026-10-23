@@ -378,7 +378,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-2); }
   background: var(--seg-on); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
   transition: transform 0.45s var(--spring);
 }
-.segmented button { position: relative; z-index: 1; font-size: 0.765rem; font-weight: 500; color: var(--label); border-radius: 8px; }
+.segmented button { position: relative; z-index: 1; font-size: 0.765rem; font-weight: 500; color: var(--label); border-radius: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px; }
 .segmented button[aria-pressed="true"] { font-weight: 600; }
 
 .toggle { position: relative; width: 51px; height: 31px; flex: none; }
@@ -413,6 +413,9 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 .search .icon { width: 18px; height: 18px; color: var(--label-2); }
 .search input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; font-size: 1rem; }
 .search input::placeholder { color: var(--label-2); }
+.search input:focus-visible { outline: none; }
+.search:focus-within { box-shadow: 0 0 0 2px var(--accent-soft); }
+.search input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
 
 .time-input {
   height: 34px; padding: 0 10px; border-radius: 8px; border: 0;
@@ -448,7 +451,7 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 
 .macro-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .macro { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.macro .macro-top { display: flex; justify-content: space-between; align-items: baseline; gap: 4px; font-size: 0.765rem; }
+.macro .macro-top { display: flex; flex-direction: column; gap: 1px; font-size: 0.765rem; }
 .macro .macro-top b { font-weight: 600; color: var(--label); }
 .macro .macro-top span { color: var(--label-2); font-variant-numeric: tabular-nums; }
 
@@ -478,8 +481,8 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 .toast {
   position: fixed; left: 50%; top: calc(var(--safe-top) + 10px); z-index: 90;
   transform: translate(-50%, -140%); opacity: 0;
-  display: flex; align-items: center; gap: 8px; max-width: calc(100% - 32px);
-  padding: 11px 16px; border-radius: 22px;
+  display: flex; align-items: center; gap: 8px; max-width: calc(100% - 32px); white-space: nowrap;
+  padding: 11px 18px; border-radius: 22px;
   background: var(--material-strong); box-shadow: var(--shadow);
   -webkit-backdrop-filter: saturate(180%) blur(24px); backdrop-filter: saturate(180%) blur(24px);
   font-size: 0.882rem; font-weight: 600;
@@ -675,3 +678,6 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 @keyframes pop { 0% { transform: scale(0.85); } 100% { transform: scale(1); } }
 .pop { animation: pop 0.45s var(--spring-bouncy); }
 @keyframes typing { 0%, 80%, 100% { opacity: 0.25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-2px); } }
+
+/* Campi dentro i fogli: in chiaro bianchi su sfondo grigio (come le impostazioni di iOS) */
+.sheet .field { background: var(--card); }

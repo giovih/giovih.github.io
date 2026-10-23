@@ -83,20 +83,26 @@ function Foglio({ l }) {
   // trascina verso il basso per chiudere
   const giu = e => {
     if (l.opz.chiudibile === false) return;
-    drag.current = { y0: e.clientY, t0: performance.now(), dy: 0 };
-    ref.current.classList.add('dragging');
-    e.currentTarget.setPointerCapture?.(e.pointerId);
+    // i bottoni della testata (chiudi, salva…) devono ricevere il tocco normalmente
+    if (e.target.closest('button, a, input, textarea, select, label')) return;
+    drag.current = { y0: e.clientY, t0: performance.now(), dy: 0, id: e.pointerId, el: e.currentTarget, preso: false };
   };
   const muovi = e => {
     const d = drag.current;
     if (!d) return;
     d.dy = Math.max(0, e.clientY - d.y0);
-    ref.current.style.transform = `translateY(${d.dy}px)`;
+    if (!d.preso && d.dy > 6) {
+      d.preso = true;
+      ref.current.classList.add('dragging');
+      try { d.el.setPointerCapture(d.id); } catch { /* niente */ }
+    }
+    if (d.preso) ref.current.style.transform = `translateY(${d.dy}px)`;
   };
   const su = () => {
     const d = drag.current;
     if (!d) return;
     drag.current = null;
+    if (!d.preso) return;
     ref.current.classList.remove('dragging');
     ref.current.style.transform = '';
     const v = d.dy / Math.max(1, performance.now() - d.t0);

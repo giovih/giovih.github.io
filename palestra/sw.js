@@ -6,8 +6,8 @@ const CACHE = 'pal2-' + VERSIONE;
 
 const FILE = [
   './', 'index.html', 'manifest.webmanifest', 'app.js',
-  'lib/preact.js',
-  'ui/design.css', 'ui/screens.css', 'ui/icons.js', 'ui/kit.js', 'ui/overlay.js', 'ui/haptics.js', 'ui/charts.js', 'ui/keypad.js',
+  'lib/preact.js', 'lib/zxing.js',
+  'ui/design.css', 'ui/screens.css', 'ui/icons.js', 'ui/kit.js', 'ui/overlay.js', 'ui/haptics.js', 'ui/charts.js', 'ui/keypad.js', 'ui/scanner.js',
   'core/dates.js', 'core/format.js', 'core/scheda.js', 'core/cycle.js', 'core/progression.js', 'core/nutrition.js',
   'core/foods.js', 'core/settings.js', 'core/reminders.js', 'core/migrate.js', 'core/sync-merge.js', 'core/coach.js',
   'data/idb.js', 'data/store.js', 'data/actions.js', 'data/cloud.js', 'data/sync.js', 'data/push.js', 'data/off.js', 'data/ai.js', 'data/rest.js',

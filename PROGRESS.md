@@ -12,7 +12,10 @@ sto costruendo una **PWA installabile** con notifiche web push, stessa grafica e
       (numero, precedente, kg, ripetizioni, spunta), tastierino con Avanti, menu "..." per esercizio (sostituisci, nota, serie),
       tecnica pulita, superserie, drop set, timer di recupero sfocato con −15/+15/Salta, schermo acceso, riepilogo e "Prossima volta",
       ripresa automatica se l'app viene chiusa. Le notifiche push arrivano con il passo 6 (servono il server e l'account).
-- [ ] Passo 3 – Cibo
+- [x] **Passo 3 – Cibo** (stile Yazio): anello delle calorie con quanto manca, barre di proteine/carboidrati/grassi, acqua e creatina,
+      i 6 pasti con gli alimenti; aggiunta con ricerca (alimenti di base offline + Open Food Facts), **codice a barre** (fotocamera o
+      a mano), **recenti**, **preferiti** (stella), **pasti della scheda con un tocco** (18 pasti), **copia il pasto di ieri**,
+      **foto + descrizione con stima AI** (dopo il passo 6), inserimento a mano, modifica e spostamento tra i pasti.
 - [ ] Passo 4 – Progressi, agenda, peso
 - [ ] Passo 5 – Coach e Altro
 - [ ] Passo 6 – Salvataggio online (Supabase) e notifiche dal server

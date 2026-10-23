@@ -43,6 +43,7 @@ export function fmtDuration(sec) {
 /** 4500 s → "1 h 15 min", 1800 → "30 min". */
 export function fmtMinutes(sec) {
   const m = Math.round((sec || 0) / 60);
+  if (m < 1) return 'meno di 1 min';
   if (m < 60) return `${m} min`;
   return `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}`;
 }

@@ -7,7 +7,11 @@ sto costruendo una **PWA installabile** con notifiche web push, stessa grafica e
 - [x] **Passo 1 – Base**: design system (colori, tipografia, componenti: Card, PrimaryButton, StatTile, SetRow, ProgressRing,
       Segmented, Toggle, ListRow, EmptyState, Callout, Sheet, Menu, Toast, tastierino), icone in stile SF Symbols,
       struttura del progetto, dati della scheda, archivio locale (IndexedDB), importazione automatica dei dati del sito, test della logica.
-- [ ] Passo 2 – Oggi e allenamento (in corso: schermate fatte, mancano le notifiche push)
+- [x] **Passo 2 – Oggi e allenamento**: giorno in grande, settimana con le sedute fatte/previste/saltate, card della seduta
+      con anteprima, anelli di calorie e proteine, acqua e creatina in una riga; allenamento a tutto schermo con righe delle serie
+      (numero, precedente, kg, ripetizioni, spunta), tastierino con Avanti, menu "..." per esercizio (sostituisci, nota, serie),
+      tecnica pulita, superserie, drop set, timer di recupero sfocato con −15/+15/Salta, schermo acceso, riepilogo e "Prossima volta",
+      ripresa automatica se l'app viene chiusa. Le notifiche push arrivano con il passo 6 (servono il server e l'account).
 - [ ] Passo 3 – Cibo
 - [ ] Passo 4 – Progressi, agenda, peso
 - [ ] Passo 5 – Coach e Altro

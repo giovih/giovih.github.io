@@ -1,6 +1,6 @@
 // Struttura dell'app: le 5 schede, l'allenamento a tutto schermo e i livelli (fogli, menu, avvisi).
 
-import { html, useState, useEffect, useCallback } from '../lib/preact.js';
+import { html, useState, useEffect, useCallback, useRef } from '../lib/preact.js';
 import * as S from '../data/store.js';
 import { sessioneAttiva } from '../data/actions.js';
 import { Icon } from '../ui/icons.js';
@@ -42,7 +42,17 @@ export function AppShell() {
   useEffect(() => S.ascolta(setVer), []);
 
   const [scheda, setScheda] = useState(() => schedaDaHash() || 'oggi');
-  const [allenamento, setAllenamento] = useState(() => (location.hash.startsWith('#allenamento') && !!sessioneAttiva()));
+  const schedaCorrente = useRef(scheda);
+  schedaCorrente.current = scheda;
+  // se l'app viene riaperta durante un allenamento (iOS chiude spesso le app in background) torno lì
+  const [allenamento, setAllenamentoStato] = useState(() => {
+    const att = sessioneAttiva();
+    return !!att && (location.hash.startsWith('#allenamento') || Date.now() - new Date(att.data) < 3 * 3600 * 1000);
+  });
+  const setAllenamento = aperto => {
+    setAllenamentoStato(aperto);
+    history.replaceState(null, '', aperto ? '#allenamento' : '#' + schedaCorrente.current);
+  };
   // ogni scheda ricorda la sua posizione di scorrimento
   const [scroll] = useState(() => ({}));
 

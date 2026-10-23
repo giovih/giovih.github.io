@@ -48,3 +48,31 @@ Qui scrivo le scelte che ho fatto da solo durante il lavoro, con il motivo.
 ## 6. Pasti preimpostati
 Kcal e proteine sono quelli della tua scheda; carboidrati e grassi li ho stimati dagli ingredienti, controllando che
 4×proteine + 4×carboidrati + 9×grassi torni con le calorie (scarto massimo 20 kcal, verificato dai test).
+
+## 7. Progressi, agenda e grafici
+- **Fascia obiettivo del peso**: parte dalla prima pesata e sale di +0,25-0,5 kg a settimana. Quando applichi un cambio di calorie
+  (+250 o −200) la fascia **riparte dall'ultima pesata di quel giorno**: da lì, con le calorie nuove, si deve salire di nuovo
+  al ritmo giusto. Altrimenti dopo un calo iniziale (56,1 → 54,7) resteresti "sotto" per sempre, anche salendo bene.
+- **Grafico del peso**: con 0 pesate un invito a pesarsi (mai un errore), con 1 pesata il punto, con 2 o più la linea morbida
+  (interpolazione monotona: non inventa picchi che non ci sono) e la fascia obiettivo. Periodo 1M / 3M / 6M / Tutto.
+  Toccando o trascinando il dito sul grafico compare il valore di quel giorno con l'obiettivo; funziona anche con le frecce della
+  tastiera e VoiceOver legge i valori. L'elenco "Pesate" sotto è la tabella con tutti i numeri.
+- **Ritmo a settimana**: retta dei minimi quadrati sulle pesate delle ultime 4 settimane (più stabile di "ultima meno prima").
+- **Colori dei grafici controllati** con un validatore di contrasto e daltonismo: blu per calorie e peso, verde acqua
+  (#2AA897 scuro / #1D9886 chiaro) per le proteine, grigio neutro per la fascia obiettivo. Il verde acqua delle proteine
+  è un po' più scuro di quello della seduta B perché quello chiaro non passava il controllo sul fondo scuro.
+  I toni delle sedute restano tenui: non servono a distinguere i dati, c'è sempre la lettera (A, B, G, C, F) o il nome.
+  I testi non sono mai colorati con il colore dei dati.
+- **Forza stimata** (1RM, formula di Epley) per il grafico degli esercizi: unisce peso e ripetizioni in un solo numero
+  che sale sia quando aggiungi ripetizioni sia quando aggiungi peso. Si può vedere anche il carico o le ripetizioni.
+  Negli esercizi a corpo libero senza zavorra si vedono le ripetizioni. Le settimane di scarico sono punti vuoti.
+- **Serie per muscolo**: conta il muscolo principale di ogni esercizio, settimana per settimana (da lunedì), con una fascia
+  indicativa 10-20 serie. La scheda dà la priorità alla parte alta, quindi le gambe restano sotto: è scritto sotto il grafico.
+- **Agenda**: per ogni giorno due mini anelli (calorie fuori, proteine dentro, come l'app Fitness), la lettera della seduta fatta,
+  il peso se ti sei pesato e un puntino per le note. Da oggi in avanti si vede la seduta in programma (lettera vuota).
+  Tocco un giorno e sotto c'è il dettaglio: allenamento (apre la seduta), peso (si modifica), cibo (apre quel giorno in Cibo),
+  acqua e creatina, nota. Si cambia mese con le frecce o scorrendo.
+- **Diario** ogni 4 settimane (1, 4, 8, 12…): si compila da solo con l'ultimo peso e la serie migliore delle ultime 4 settimane
+  di panca, squat e rematore; si può correggere. Se il peso del diario è di oggi e non ti eri pesato, va anche tra le pesate.
+- **Foto di progresso**: miniature, "prima e dopo" affiancate e a schermo intero con una linea da trascinare.
+  Restano sul telefono e, con l'account, nello spazio privato di Supabase (passo 6).

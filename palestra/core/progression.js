@@ -148,12 +148,33 @@ export function recordBattuti(sessioni, s) {
   return out;
 }
 
-/** Punti per i grafici di un esercizio: peso migliore e ripetizioni totali per seduta (dalla più vecchia). */
+/**
+ * Forza stimata: il peso che si alzerebbe per 1 ripetizione (formula di Epley).
+ * Oltre le 12 ripetizioni la stima è meno precisa, ma resta utile per vedere se si migliora.
+ */
+export function forzaStimata(kg, reps) {
+  if (!(kg > 0) || !(reps > 0)) return 0;
+  return reps === 1 ? kg : kg * (1 + reps / 30);
+}
+
+/**
+ * Punti per i grafici di un esercizio, dalla seduta più vecchia:
+ * peso migliore, ripetizioni totali, volume, forza stimata e serie migliore.
+ */
 export function puntiEsercizio(sessioni, nome) {
   return sedutePassate(sessioni).reverse().flatMap(s => {
     const sets = serieFatte(s.voci.find(v => v.ex === nome));
     if (!sets.length) return [];
-    return [{ data: s.data, kg: Math.max(...sets.map(x => x.kg)), reps: sets.reduce((t, x) => t + x.reps, 0), scarico: !!s.scarico }];
+    return [{
+      data: s.data,
+      kg: Math.max(...sets.map(x => x.kg)),
+      reps: sets.reduce((t, x) => t + x.reps, 0),
+      volume: Math.round(sets.reduce((t, x) => t + x.kg * x.reps, 0)),
+      forza: Math.round(Math.max(...sets.map(x => forzaStimata(x.kg, x.reps))) * 2) / 2,
+      top: serieMigliore(sets),
+      sets,
+      scarico: !!s.scarico,
+    }];
   });
 }
 

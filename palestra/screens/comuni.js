@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from '../lib/preact.js';
 import { isoDay } from '../core/dates.js';
+import * as S from '../data/store.js';
 
 /** Ora corrente che si aggiorna ogni `ms` (per orologi e conti alla rovescia). */
 export function useOra(ms = 1000, attivo = true) {
@@ -67,4 +68,28 @@ export async function salvaFile(nome, testo, tipo = 'application/json') {
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   return true;
+}
+
+/**
+ * Indirizzo di una foto salvata sul telefono, o null se non c'è (ancora).
+ * Riprova quando l'archivio cambia: così una foto scaricata dal cloud compare da sola.
+ */
+export function useBlob(key) {
+  const [url, setUrl] = useState(null);
+  const ver = url ? 0 : S.getVersione();
+  useEffect(() => {
+    let vivo = true;
+    if (!key) { setUrl(null); return; }
+    S.urlDiBlob(key).then(u => { if (vivo) setUrl(u); }).catch(() => {});
+    return () => { vivo = false; };
+  }, [key, ver]);
+  return url;
+}
+
+/** Preferenze di visualizzazione di questo telefono (es. ultima sezione aperta). Mai dati importanti. */
+export function pref(chiave, def) {
+  try { const v = localStorage.getItem('palestra-pref-' + chiave); return v == null ? def : JSON.parse(v); } catch { return def; }
+}
+export function setPref(chiave, valore) {
+  try { localStorage.setItem('palestra-pref-' + chiave, JSON.stringify(valore)); } catch { /* niente */ }
 }

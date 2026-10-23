@@ -12,7 +12,7 @@ import { apriAggiungi, apriModificaCibo } from './aggiungi-cibo.js';
 import { PASTI, nomePasto } from '../core/foods.js';
 import { quota, totali } from '../core/nutrition.js';
 import { fmtInt, fmtNum } from '../core/format.js';
-import { addDaysIso, parseDay, weekdayIt, GIORNI, MESI, cap, daysBetween } from '../core/dates.js';
+import { addDaysIso, parseDay, weekdayIt, GIORNI, MESI, cap, daysBetween, isoDay } from '../core/dates.js';
 import { sedutaDelGiorno } from '../core/settings.js';
 import { toast } from '../ui/overlay.js';
 
@@ -44,7 +44,7 @@ function Riepilogo({ giorno }) {
       </div>
     </div>
     <div class="macro-row mt-16">
-      <div class="macro"><div class="macro-top"><b>Proteine</b><span>${fmtInt(t.prot)} di ${o.proteine} g</span></div><${Bar} value=${quota(t.prot, o.proteine)} color="var(--tono-teal)" label="Proteine" /></div>
+      <div class="macro"><div class="macro-top"><b>Proteine</b><span>${fmtInt(t.prot)} di ${o.proteine} g</span></div><${Bar} value=${quota(t.prot, o.proteine)} color="var(--dato-prot)" label="Proteine" /></div>
       <div class="macro"><div class="macro-top"><b>Carboidrati</b><span>${fmtInt(t.carb)} di ${o.carboidrati} g</span></div><${Bar} value=${quota(t.carb, o.carboidrati)} color="var(--tono-ambra)" label="Carboidrati" /></div>
       <div class="macro"><div class="macro-top"><b>Grassi</b><span>${fmtInt(t.grassi)} di ${o.grassi} g</span></div><${Bar} value=${quota(t.grassi, o.grassi)} color="var(--tono-lavanda)" label="Grassi" /></div>
     </div>
@@ -89,6 +89,15 @@ export function Cibo({ hidden, vai }) {
   const [giorno, setGiorno] = useState(oggi);
   // a mezzanotte, se stavi guardando "oggi", passo al giorno nuovo
   useEffect(() => { setGiorno(g => (daysBetween(g, oggi) === 1 ? oggi : g)); }, [oggi]);
+  // dall'agenda si apre il cibo di un giorno preciso
+  useEffect(() => {
+    const f = e => {
+      const { scheda, sotto } = e.detail || {};
+      if (scheda === 'cibo' && /^\d{4}-\d{2}-\d{2}$/.test(sotto || '')) setGiorno(sotto > isoDay() ? isoDay() : sotto);
+    };
+    addEventListener('vai-sotto', f);
+    return () => removeEventListener('vai-sotto', f);
+  }, []);
   const allenamento = !!sedutaDelGiorno(S.impostazioni(), weekdayIt(parseDay(giorno)));
   const cambia = n => { aptico(); setGiorno(g => (n > 0 && g >= oggi ? g : addDaysIso(g, n))); };
 

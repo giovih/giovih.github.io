@@ -101,7 +101,7 @@ function Dettaglio({ al, pasto, giorno, onIndietro, onFatto }) {
     <div class="det-valori">
       <div class="dv-kcal"><span class="rounded num">${fmtInt(v.kcal)}</span><small>kcal</small></div>
       <div class="dv-macro">
-        <div><span class="dot" style="--c:var(--tono-teal)"></span>Proteine<b class="num">${fmtNum(v.prot)} g</b></div>
+        <div><span class="dot" style="--c:var(--dato-prot)"></span>Proteine<b class="num">${fmtNum(v.prot)} g</b></div>
         <div><span class="dot" style="--c:var(--tono-ambra)"></span>Carboidrati<b class="num">${fmtNum(v.carb)} g</b></div>
         <div><span class="dot" style="--c:var(--tono-lavanda)"></span>Grassi<b class="num">${fmtNum(v.grassi)} g</b></div>
       </div>
@@ -415,7 +415,7 @@ function ModificaCibo({ cibo, chiudi }) {
           <div class="det-valori compatti">
             <div class="dv-kcal"><span class="rounded num">${fmtInt(calc.kcal)}</span><small>kcal</small></div>
             <div class="dv-macro">
-              <div><span class="dot" style="--c:var(--tono-teal)"></span>Proteine<b class="num">${fmtNum(calc.prot)} g</b></div>
+              <div><span class="dot" style="--c:var(--dato-prot)"></span>Proteine<b class="num">${fmtNum(calc.prot)} g</b></div>
               <div><span class="dot" style="--c:var(--tono-ambra)"></span>Carboidrati<b class="num">${fmtNum(calc.carb)} g</b></div>
               <div><span class="dot" style="--c:var(--tono-lavanda)"></span>Grassi<b class="num">${fmtNum(calc.grassi)} g</b></div>
             </div>

@@ -16,7 +16,14 @@ sto costruendo una **PWA installabile** con notifiche web push, stessa grafica e
       i 6 pasti con gli alimenti; aggiunta con ricerca (alimenti di base offline + Open Food Facts), **codice a barre** (fotocamera o
       a mano), **recenti**, **preferiti** (stella), **pasti della scheda con un tocco** (18 pasti), **copia il pasto di ieri**,
       **foto + descrizione con stima AI** (dopo il passo 6), inserimento a mano, modifica e spostamento tra i pasti.
-- [ ] Passo 4 – Progressi, agenda, peso
+- [x] **Passo 4 – Progressi**: quattro sezioni.
+      **Corpo**: peso grande con "dall'inizio", ritmo a settimana e obiettivo di oggi; grafico (mai errori: 1 valore = punto,
+      2 o più = linea + fascia obiettivo) con valore al tocco; consiglio sulle calorie con il tasto per applicarlo; elenco delle
+      pesate; foglio per registrare il peso (−/+ 0,1 kg, giorno); foto di progresso con prima/dopo affiancate e a scorrimento.
+      **Allenamenti**: sedute della settimana e del mese, durata media, serie per muscolo con fascia 10-20, grafico di ogni
+      esercizio (forza stimata, carico, ripetizioni), ultime volte, storico con il dettaglio di ogni seduta (e "elimina").
+      **Agenda**: calendario del mese con anelli di calorie e proteine, seduta, peso e note; dettaglio del giorno toccato.
+      **Diario**: ogni 4 settimane, compilato da solo dai dati.
 - [ ] Passo 5 – Coach e Altro
 - [ ] Passo 6 – Salvataggio online (Supabase) e notifiche dal server
 - [ ] Passo 7 – Rifinitura grafica di ogni schermata
@@ -27,10 +34,10 @@ sto costruendo una **PWA installabile** con notifiche web push, stessa grafica e
 palestra/            l'app (PWA)
   index.html app.js sw.js manifest.webmanifest
   lib/               Preact + htm (16 KB)
-  core/              logica pura, testata: date, formati, scheda, progressione, nutrizione, promemoria, importazione
+  core/              logica pura, testata: date, formati, scheda, progressione, nutrizione, statistiche, promemoria, importazione
   data/              archivio locale (IndexedDB), azioni, timer di recupero, sincronizzazione
-  ui/                design system: design.css, screens.css, icone, componenti, fogli, tastierino, aptica
-  screens/           le schermate: oggi, allenamento, cibo, progressi, coach, altro
+  ui/                design system: design.css, screens.css, icone, componenti, grafici, fogli, tastierino, aptica
+  screens/           le schermate: oggi, allenamento, cibo, progressi (corpo, allenamenti, agenda, diario), coach, altro
   test/              test (node --test test/*.test.js)
   v1/                la versione precedente, per sicurezza
 supabase/            database, funzioni e istruzioni per il salvataggio online (passo 6)

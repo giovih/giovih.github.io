@@ -48,6 +48,10 @@
   --tono-lavanda: #ab95f0;
   --tono-sabbia: #cfb983;
   --acqua: #5ac8fa;
+  /* Colori dei dati nei grafici (controllati per contrasto e daltonismo sulle card) */
+  --dato-prot: #2aa897;
+  --dato-fascia: rgba(235, 235, 245, 0.075);
+  --fumetto: #2d2d32;
 
   /* Forme */
   --r-card: 22px;
@@ -104,6 +108,9 @@
     --tono-lavanda: #7a5fd8;
     --tono-sabbia: #9e8443;
     --acqua: #1b9bd8;
+  --dato-prot: #1d9886;
+  --dato-fascia: rgba(60, 60, 67, 0.09);
+  --fumetto: #ffffff;
   }
 }
 :root[data-tema="chiaro"] {
@@ -139,6 +146,9 @@
   --tono-lavanda: #7a5fd8;
   --tono-sabbia: #9e8443;
   --acqua: #1b9bd8;
+  --dato-prot: #1d9886;
+  --dato-fascia: rgba(60, 60, 67, 0.09);
+  --fumetto: #ffffff;
 }
 
 /* Colore di una seduta: class="tono-ambra" imposta --tono */
@@ -339,6 +349,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-2); }
 .btn-tinted { background: var(--accent-soft); color: var(--accent); }
 .btn-plain { background: none; color: var(--accent); padding: 0 8px; height: 44px; font-weight: 400; }
 .btn-plain.strong { font-weight: 600; }
+.btn-plain.danger { color: var(--danger); }
 .btn-danger { background: var(--danger-soft); color: var(--danger); }
 .btn-block { display: flex; width: 100%; }
 .btn-small { height: 34px; padding: 0 14px; border-radius: 17px; font-size: 0.882rem; }
@@ -681,3 +692,65 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 
 /* Campi dentro i fogli: in chiaro bianchi su sfondo grigio (come le impostazioni di iOS) */
 .sheet .field { background: var(--card); }
+
+/* ---------------------------------------------------------------------
+   Grafici (ui/charts.js)
+   Linea 2 px, punti 8 px con anello del colore della card, griglia sottilissima, testi nei colori del testo.
+   --------------------------------------------------------------------- */
+
+.chart-wrap { position: relative; }
+.chart { position: relative; touch-action: pan-y; -webkit-tap-highlight-color: transparent; outline: none; border-radius: 10px; }
+.chart:focus-visible { box-shadow: 0 0 0 2px var(--accent-soft); }
+.chart svg { overflow: visible; }
+.chart.vuoto { display: grid; place-items: center; color: var(--label-2); font-size: 0.882rem; text-align: center; padding: 0 24px; }
+.ch-griglia { stroke: var(--separator); stroke-width: 1; shape-rendering: crispEdges; }
+.ch-asse { fill: var(--label-2); font-size: 11px; font-family: var(--font); }
+.ch-linea { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: ch-disegna 1.1s var(--ease-out) 0.05s forwards; }
+.ch-fascia { fill: var(--dato-fascia); animation: ch-appare 0.6s var(--ease-out) both; }
+.ch-area { animation: ch-appare 0.8s var(--ease-out) 0.35s both; }
+.ch-punto { animation: ch-appare 0.4s var(--ease-out) 0.5s both; }
+.ch-punto.scelto { animation: none; }
+.ch-mirino { stroke: var(--label-3); stroke-width: 1; shape-rendering: crispEdges; }
+.ch-ultimo { fill: var(--label); font-size: 12px; font-weight: 600; font-family: var(--font); paint-order: stroke; stroke-width: 4px; stroke-linejoin: round; animation: ch-appare 0.4s var(--ease-out) 0.7s both; }
+.ch-tocco { fill: transparent; cursor: crosshair; }
+.ch-fumetto {
+  position: absolute; z-index: 3; pointer-events: none;
+  display: flex; flex-direction: column; gap: 1px; padding: 7px 11px 8px; border-radius: 12px; white-space: nowrap;
+  background: var(--fumetto); border: 0.5px solid var(--separator);
+  box-shadow: var(--shadow); animation: ch-appare 0.16s var(--ease-out);
+}
+.ch-fumetto b { font-size: 1rem; font-weight: 600; letter-spacing: -0.02em; }
+.ch-fumetto span { font-size: 0.706rem; color: var(--label-2); }
+.ch-riga { display: flex; align-items: center; gap: 6px; }
+.ch-chiave { display: inline-block; flex: none; }
+.ch-chiave.linea { width: 14px; height: 2px; border-radius: 1px; background: var(--accent); }
+.ch-chiave.fascia { width: 14px; height: 10px; border-radius: 3px; background: var(--dato-fascia); box-shadow: inset 0 0 0 0.5px var(--separator); }
+.ch-legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 0.765rem; color: var(--label-2); }
+.ch-legenda span { display: inline-flex; align-items: center; gap: 6px; }
+@keyframes ch-disegna { to { stroke-dashoffset: 0; } }
+@keyframes ch-appare { from { opacity: 0; } to { opacity: 1; } }
+
+/* Barre orizzontali */
+.hbars { --lab: 7.2rem; --val: 2rem; --gap: 10px; position: relative; display: flex; flex-direction: column; gap: 9px; }
+.hb-row { position: relative; display: grid; grid-template-columns: minmax(0, var(--lab)) 1fr var(--val); align-items: center; gap: var(--gap); }
+.hb-lab { font-size: 0.882rem; color: var(--label); }
+.hb-track { position: relative; height: 10px; }
+.hb-track::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--separator); }
+.hb-fascia {
+  position: absolute; top: -6px; bottom: -6px; border-radius: 6px; background: var(--dato-fascia);
+  --pista: calc(100% - var(--lab) - var(--val) - 2 * var(--gap));
+  left: calc(var(--lab) + var(--gap) + var(--pista) * var(--fa));
+  width: calc(var(--pista) * (var(--fb) - var(--fa)));
+}
+.hb-track > i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 0 4px 4px 0; transform-origin: left; animation: hb-cresce 0.8s var(--spring) both; }
+.hb-val { font-size: 0.882rem; font-weight: 600; text-align: right; }
+.hb-val.zero { color: var(--label-3); font-weight: 500; }
+@keyframes hb-cresce { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Mini anelli dell'agenda */
+.anelli-giorno { position: relative; display: inline-grid; place-items: center; flex: none; }
+.anelli-giorno svg { position: absolute; inset: 0; overflow: visible; }
+.anelli-giorno .ag-traccia { stroke: var(--fill-2); }
+.anelli-giorno .ag-kcal { stroke: var(--accent); }
+.anelli-giorno .ag-prot { stroke: var(--dato-prot); }
+.anelli-giorno .ag-centro { position: relative; font-size: 0.706rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }

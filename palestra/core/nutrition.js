@@ -133,11 +133,26 @@ export function applicaConsiglio(obiettivi, consiglio, oggi) {
   };
 }
 
-/** Linea obiettivo per il grafico: dal primo peso, +0,25 e +0,5 kg a settimana. */
-export function lineaObiettivo(pesiIn, finoA) {
+/**
+ * Da quale pesata parte la fascia obiettivo del grafico.
+ * Senza cambi di calorie: dalla prima pesata. Dopo un cambio (ultimoAggiustamento) riparte
+ * dall'ultima pesata fatta fino a quel giorno: da lì, con le calorie nuove, si deve salire di 0,25-0,5 kg a settimana.
+ */
+export function ancoraObiettivo(pesiIn, ultimoAggiustamento = null) {
   const pesi = pesiOrdinati(pesiIn);
   if (!pesi.length) return null;
-  const p0 = pesi[0];
+  if (ultimoAggiustamento) {
+    let a = null;
+    for (const p of pesi) if (p.giorno <= ultimoAggiustamento) a = p;
+    return a || pesi.find(p => p.giorno > ultimoAggiustamento) || pesi[0];
+  }
+  return pesi[0];
+}
+
+/** Fascia obiettivo per il grafico: dalla pesata di partenza, +0,25 e +0,5 kg a settimana. */
+export function lineaObiettivo(pesiIn, finoA, ultimoAggiustamento = null) {
+  const p0 = ancoraObiettivo(pesiIn, ultimoAggiustamento);
+  if (!p0) return null;
   const sett = Math.max(0, daysBetween(p0.giorno, finoA)) / 7;
   return {
     da: { giorno: p0.giorno, kg: p0.kg },
@@ -145,10 +160,30 @@ export function lineaObiettivo(pesiIn, finoA) {
   };
 }
 
-/** Peso atteso oggi secondo il ritmo minimo consigliato. */
-export function pesoAtteso(pesiIn, giorno) {
-  const l = lineaObiettivo(pesiIn, giorno);
+/** Peso atteso in un giorno secondo la fascia obiettivo. */
+export function pesoAtteso(pesiIn, giorno, ultimoAggiustamento = null) {
+  const l = lineaObiettivo(pesiIn, giorno, ultimoAggiustamento);
   return l ? { min: l.a.min, max: l.a.max } : null;
+}
+
+/**
+ * Ritmo del peso in kg a settimana: retta dei minimi quadrati sulle pesate degli ultimi `giorni` giorni.
+ * Restituisce null se le pesate coprono meno di 6 giorni (troppo presto per dirlo).
+ */
+export function ritmoPeso(pesiIn, finoA, giorni = 28) {
+  const pesi = pesiOrdinati(pesiIn).filter(p => !finoA || p.giorno <= finoA);
+  if (pesi.length < 2) return null;
+  const da = addDaysIso(pesi[pesi.length - 1].giorno, -giorni);
+  let fin = pesi.filter(p => p.giorno >= da);
+  if (fin.length < 2) fin = pesi.slice(-2); // pesate rare: uso le ultime due
+  if (daysBetween(fin[0].giorno, fin[fin.length - 1].giorno) < 6) return null;
+  const xs = fin.map(p => daysBetween(fin[0].giorno, p.giorno));
+  const ys = fin.map(p => p.kg);
+  const mx = xs.reduce((t, x) => t + x, 0) / xs.length;
+  const my = ys.reduce((t, y) => t + y, 0) / ys.length;
+  let num = 0, den = 0;
+  for (let i = 0; i < xs.length; i++) { num += (xs[i] - mx) * (ys[i] - my); den += (xs[i] - mx) ** 2; }
+  return den ? (num / den) * 7 : null;
 }
 
 function fmtGiorno(iso) {

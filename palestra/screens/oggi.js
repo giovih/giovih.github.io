@@ -184,8 +184,8 @@ function Alimentazione({ oggi, imp, vai }) {
         </div>
       </div>
       <div class="alim-anello">
-        <${ProgressRing} value=${quota(t.prot, o.proteine)} size=${80} stroke=${9} color="var(--tono-teal)" label=${`Proteine: ${t.prot} di ${o.proteine} grammi`}>
-          <span class="t-sub w-bold" style="color:var(--tono-teal)">P</span>
+        <${ProgressRing} value=${quota(t.prot, o.proteine)} size=${80} stroke=${9} color="var(--dato-prot)" label=${`Proteine: ${t.prot} di ${o.proteine} grammi`}>
+          <span class="t-sub w-bold">P</span>
         <//>
         <div class="alim-val">
           <div class="t-foot secondary">Proteine</div>

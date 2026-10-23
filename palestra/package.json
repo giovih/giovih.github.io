@@ -1,0 +1,9 @@
+{
+  "name": "palestra",
+  "private": true,
+  "type": "module",
+  "description": "App palestra (PWA). Nessuna dipendenza da installare: i test usano solo Node.",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

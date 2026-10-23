@@ -1,23 +1,101 @@
-// Fa funzionare l'app anche senza internet (in palestra spesso non c'è campo).
-const CACHE = "palestra-v5";
-const FILE = ["./", "index.html", "style.css", "app.js", "dati.js", "cibo.js", "extra.js", "manifest.webmanifest",
-  "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
+// Service worker: l'app funziona senza internet e riceve le notifiche push.
+// Aggiorna VERSIONE a ogni pubblicazione: il telefono scarica la nuova versione da solo.
 
-self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILE)).then(() => self.skipWaiting()));
+const VERSIONE = '2.0.0';
+const CACHE = 'pal2-' + VERSIONE;
+
+const FILE = [
+  './', 'index.html', 'manifest.webmanifest', 'app.js',
+  'lib/preact.js',
+  'ui/design.css', 'ui/screens.css', 'ui/icons.js', 'ui/kit.js', 'ui/overlay.js', 'ui/haptics.js', 'ui/charts.js', 'ui/keypad.js',
+  'core/dates.js', 'core/format.js', 'core/scheda.js', 'core/cycle.js', 'core/progression.js', 'core/nutrition.js',
+  'core/foods.js', 'core/settings.js', 'core/reminders.js', 'core/migrate.js', 'core/sync-merge.js', 'core/coach.js',
+  'data/idb.js', 'data/store.js', 'data/actions.js', 'data/cloud.js', 'data/sync.js', 'data/push.js', 'data/off.js', 'data/ai.js', 'data/rest.js',
+  'screens/app-shell.js', 'screens/oggi.js', 'screens/allenamento.js', 'screens/cibo.js', 'screens/aggiungi-cibo.js',
+  'screens/progressi.js', 'screens/coach.js', 'screens/altro.js', 'screens/comuni.js',
+  'icons/icon-96.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
+];
+
+self.addEventListener('install', e => {
+  e.waitUntil((async () => {
+    const c = await caches.open(CACHE);
+    // "reload" evita la cache HTTP di GitHub Pages (10 minuti)
+    await Promise.all(FILE.map(async f => {
+      try { await c.put(f, await fetch(new Request(f, { cache: 'reload' }))); } catch { /* il file arriverà dalla rete */ }
+    }));
+    await self.skipWaiting();
+  })());
 });
-self.addEventListener("activate", e => {
-  e.waitUntil(caches.keys()
-    .then(k => Promise.all(k.filter(n => n.startsWith("palestra-") && n !== CACHE).map(n => caches.delete(n))))
-    .then(() => self.clients.claim()));
+
+self.addEventListener('activate', e => {
+  e.waitUntil((async () => {
+    const nomi = await caches.keys();
+    await Promise.all(nomi.filter(n => n.startsWith('pal2-') && n !== CACHE).map(n => caches.delete(n)));
+    await self.clients.claim();
+  })());
 });
-// Prima la rete (aggiornamenti subito), senza rete la copia salvata.
-self.addEventListener("fetch", e => {
-  const url = new URL(e.request.url);
-  if (e.request.method !== "GET" || url.origin !== location.origin) return;
-  e.respondWith(
-    fetch(e.request, { cache: "no-cache" })
-      .then(r => { const c = r.clone(); caches.open(CACHE).then(x => x.put(e.request, c)); return r; })
-      .catch(() => caches.match(e.request, { ignoreSearch: true }))
-  );
+
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;              // Supabase, Open Food Facts: sempre rete
+  if (!url.pathname.startsWith(new URL('./', location).pathname)) return;
+  if (url.pathname.includes('/v1/')) return;                 // versione precedente: ha il suo service worker
+
+  e.respondWith((async () => {
+    const c = await caches.open(CACHE);
+    // Pagine: sempre l'app (index.html), anche con #ancore o parametri
+    if (req.mode === 'navigate') {
+      const r = await c.match('index.html') || await c.match('./');
+      if (r) return r;
+    }
+    const hit = await c.match(req, { ignoreSearch: true });
+    if (hit) return hit;
+    try {
+      const r = await fetch(req);
+      if (r.ok && r.type === 'basic') c.put(req, r.clone());
+      return r;
+    } catch (err) {
+      if (req.mode === 'navigate') return (await c.match('index.html')) || Response.error();
+      throw err;
+    }
+  })());
+});
+
+/* ---------- notifiche push ---------- */
+
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { titolo: 'Palestra', testo: e.data ? e.data.text() : '' }; }
+  const titolo = d.titolo || 'Palestra';
+  e.waitUntil(self.registration.showNotification(titolo, {
+    body: d.testo || '',
+    tag: d.tag || undefined,
+    renotify: !!d.tag,
+    icon: 'icons/icon-192.png',
+    badge: 'icons/icon-96.png',
+    data: { url: d.url || './' },
+    timestamp: Date.now(),
+  }));
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const dest = new URL(e.notification.data?.url || './', self.registration.scope).href;
+  e.waitUntil((async () => {
+    const tutti = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of tutti) {
+      if (c.url.startsWith(self.registration.scope)) {
+        await c.focus();
+        c.postMessage({ tipo: 'apri', url: dest });
+        return;
+      }
+    }
+    await self.clients.openWindow(dest);
+  })());
+});
+
+self.addEventListener('message', e => {
+  if (e.data?.tipo === 'versione') e.source?.postMessage({ tipo: 'versione', versione: VERSIONE });
 });

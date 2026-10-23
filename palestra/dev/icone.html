@@ -1,0 +1,7 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../ui/design.css"><style>body{padding:16px}.g{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}.c{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10px;color:var(--label-2)}.c svg{color:var(--label)}</style></head>
+<body><div id="r"></div><script type="module">
+import { html, render } from '../lib/preact.js';
+import { Icon, ICON_NAMES } from '../ui/icons.js';
+render(html`<div class="g">${ICON_NAMES.map(n => html`<div class="c"><${Icon} name=${n} size=${32}/>${n}</div>`)}</div>`, document.getElementById('r'));
+</script></body></html>

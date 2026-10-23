@@ -1,0 +1,111 @@
+/* Stili delle singole schermate (costruiti sui token di design.css). */
+
+/* ---------- elementi comuni ---------- */
+
+.card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.card-head .chev { color: var(--label-3); }
+button.card { display: block; width: 100%; text-align: left; color: inherit; }
+.pallino { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: pulsa 1.6s ease-in-out infinite; }
+@keyframes pulsa { 50% { opacity: 0.35; } }
+.pallino-tono { width: 12px; height: 12px; border-radius: 50%; background: var(--tono); flex: none; margin: 0 4px; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.scelte { display: flex; flex-wrap: wrap; gap: 8px; }
+.scelta { height: 34px; padding: 0 14px; border-radius: 17px; background: var(--fill-2); font-size: 0.882rem; font-weight: 500; transition: background-color 0.2s, color 0.2s; }
+.scelta.on { background: var(--accent); color: var(--on-accent); }
+.regola { display: flex; gap: 12px; align-items: flex-start; padding: 14px; background: var(--card); border-radius: 18px; border: 0.5px solid var(--hairline); }
+.regola .co-icon, .riscaldamento .co-icon { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; flex: none; background: var(--accent-soft); color: var(--accent); }
+.regola .co-icon .icon, .riscaldamento .co-icon .icon { width: 18px; height: 18px; }
+.conferma { padding: 4px 4px 0; }
+
+/* ---------- Oggi: settimana ---------- */
+
+.settimana { padding: 16px 14px 14px; }
+.sett-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 0 2px 14px; }
+.sett-count { text-align: right; }
+.sett-count .rounded { font-size: 1.647rem; font-weight: 700; line-height: 1.1; }
+.sett-giorni { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.sg { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.sg .sg-lettera { font-size: 0.706rem; font-weight: 600; color: var(--label-3); }
+.sg.oggi .sg-lettera { color: var(--accent); }
+.sg .sg-cerchio {
+  width: 2.2rem; height: 2.2rem; max-width: 40px; max-height: 40px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 0.765rem; font-weight: 700; color: var(--tono, var(--label-3));
+  border: 2px solid transparent; transition: transform 0.4s var(--spring-bouncy);
+}
+.sg.previsto .sg-cerchio { border-color: color-mix(in srgb, var(--tono) 70%, transparent); background: color-mix(in srgb, var(--tono) 10%, transparent); }
+.sg.saltato .sg-cerchio { border-color: var(--label-4); border-style: dashed; color: var(--label-3); }
+.sg.fatto .sg-cerchio { background: var(--tono); color: #fff; }
+.sg.riposo .sg-cerchio i { width: 5px; height: 5px; border-radius: 50%; background: var(--label-4); }
+.sg.oggi .sg-cerchio { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--accent); }
+
+/* ---------- Oggi: seduta ---------- */
+
+.seduta { overflow: hidden; }
+.seduta::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--tono) 16%, transparent), transparent 60%);
+}
+.seduta > * { position: relative; }
+.seduta-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.seduta-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; }
+.seduta-meta span { display: inline-flex; align-items: center; gap: 5px; }
+.anteprima { margin: 16px 0 16px; border-top: 0.5px solid var(--separator); }
+.anteprima-riga { display: flex; align-items: center; gap: 8px; padding: 10px 2px; border-bottom: 0.5px solid var(--separator); font-size: 0.941rem; }
+.anteprima-riga .chip { height: 20px; padding: 0 7px; font-size: 0.647rem; }
+.anteprima-altri { padding: 10px 2px 0; }
+.seduta-stat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.seduta-stat small { font-family: var(--font); }
+
+.riposo-card { text-align: center; padding: 24px 20px 18px; }
+.riposo-card .riposo-icona { width: 60px; height: 60px; margin: 0 auto 12px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-softer); color: var(--accent); }
+.riposo-card p { margin: 6px auto 0; max-width: 300px; line-height: 1.38; }
+
+/* ---------- Oggi: alimentazione, acqua, creatina ---------- */
+
+.alim-anelli { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.alim-anello { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.alim-anello .ring { width: clamp(64px, 19vw, 80px) !important; height: clamp(64px, 19vw, 80px) !important; }
+.alim-anello .ring > svg { width: 100%; height: 100%; }
+.alim-val { min-width: 0; }
+.alim-val .t-foot { white-space: nowrap; }
+.macro-row.due { grid-template-columns: 1fr 1fr; }
+
+.card.mini { padding: 14px; display: flex; flex-direction: column; gap: 12px; position: relative; min-height: 122px; }
+.card.mini + .card.mini { margin-top: 0; }
+.mini-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mini-main { display: flex; flex-direction: column; gap: 2px; text-align: left; min-width: 0; }
+.mini-icona { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex: none; }
+.mini-val { font-family: var(--font-rounded); font-size: 1.294rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mini-val small { font-family: var(--font); font-size: 0.765rem; font-weight: 500; color: var(--label-2); }
+.mini-bar .bar { height: 4px; }
+.check-tondo { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: none; border: 2px solid var(--label-4); color: transparent; transition: all 0.35s var(--spring-bouncy); }
+.check-tondo.on { background: var(--tono-lavanda); border-color: var(--tono-lavanda); color: #fff; }
+
+.acqua-big { display: grid; place-items: center; padding: 8px 0 4px; }
+.acqua-tasti { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.acqua-tasto { display: flex !important; flex-direction: column; align-items: center; gap: 4px; padding: 14px 6px !important; color: var(--acqua); }
+.acqua-tasto .t-headline { color: var(--label); }
+.acqua-tasto + .acqua-tasto { margin-top: 0; }
+
+/* ---------- Allenamento ---------- */
+
+.wo-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 12px; }
+.riscaldamento {
+  width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 12px;
+  border-radius: 16px; background: var(--card); border: 0.5px solid var(--hairline); text-align: left; font-size: 0.882rem;
+}
+.riscaldamento .chev { color: var(--label-3); }
+.workout.con-tastierino .workout-body { padding-bottom: calc(var(--safe-bottom) + 330px); }
+.workout.con-tastierino .rest-bar { bottom: calc(var(--safe-bottom) + 300px); }
+.sr-drop-row { display: flex; gap: 8px; align-items: flex-start; margin: 2px 4px 6px 2.6rem; font-size: 0.706rem; line-height: 1.35; color: var(--tono-rosa); }
+.sr-drop-row .icon { flex: none; margin-top: 1px; }
+
+/* ---------- Riepilogo ---------- */
+
+.riepilogo { padding-bottom: 12px; }
+.rp-top { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 0 22px; }
+.rp-check { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); margin-bottom: 10px; box-shadow: 0 10px 30px color-mix(in srgb, var(--accent) 40%, transparent); }
+.rp-stat { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rp-stat .card + .card { margin-top: 0; }
+.prossima-val { text-align: right; font-weight: 600; font-size: 0.941rem; display: flex; flex-direction: column; align-items: flex-end; flex: none; }
+.prossima-val small { font-weight: 400; color: var(--label-2); font-size: 0.765rem; }

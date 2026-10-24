@@ -94,7 +94,7 @@ function suggerisci(riga, scarico) {
 
     if (tuttoMax) {
       kg = kgU + A.passo;
-      msg = `Massimo in tutte le serie 💪 Sali di peso (${A.consiglio}) e riparti da ${riga.min}.`;
+      msg = `Massimo in tutte le serie Sali di peso (${A.consiglio}) e riparti da ${riga.min}.`;
     } else if (fermo && kgU > 0) {
       kg = arrot(kgU * 0.9);
       msg = `Fermo da 3 sedute: scendi del 10% (${kgTxt(kg)} kg) e risali.`;
@@ -231,10 +231,10 @@ function disegna() {
 
 function avvisiSettimana(w) {
   const out = [];
-  if (w.ciclo === 8) out.push(`<div class="avviso giallo">⚠️ <b>Settimana 8: SCARICO.</b> Metà serie e -10% di peso. Dalla prossima riparti dai pesi di prima.</div>`);
+  if (w.ciclo === 8) out.push(`<div class="avviso giallo"><b>Settimana 8: SCARICO.</b> Metà serie e -10% di peso. Dalla prossima riparti dai pesi di prima.</div>`);
   else if (w.ciclo === 7) out.push(`<div class="avviso">La prossima settimana è di scarico.</div>`);
-  if (w.ciclo >= 5 && w.ciclo < 8) out.push(`<div class="avviso">🔥 Drop set attivi: ultima serie di alzate laterali, croci e curl inclinato.</div>`);
-  if (w.ciclo === 1 || w.ciclo === 4 || w.ciclo === 8) out.push(`<div class="avviso">📓 Settimana ${w.n}: è settimana di diario (peso, panca, squat, rematore).</div>`);
+  if (w.ciclo >= 5 && w.ciclo < 8) out.push(`<div class="avviso">Drop set attivi: ultima serie di alzate laterali, croci e curl inclinato.</div>`);
+  if (w.ciclo === 1 || w.ciclo === 4 || w.ciclo === 8) out.push(`<div class="avviso">Settimana ${w.n}: è settimana di diario (peso, panca, squat, rematore).</div>`);
   return out.join("");
 }
 
@@ -254,7 +254,7 @@ function oggi() {
   h += avvisiSettimana(w);
 
   const cr = S.cibo?.[isoData(new Date())]?.creatina;
-  if (!cr) h += `<button class="avviso promemoria" data-a="vai" data-v="cibo">💊 Ricordati la creatina (5 g, anche nei giorni di riposo)</button>`;
+  if (!cr) h += `<button class="avviso promemoria" data-a="vai" data-v="cibo">Ricordati la creatina (5 g, anche nei giorni di riposo)</button>`;
   if (S.attiva) {
     h += `<button class="grande" style="background:${S.attiva.colore}" data-a="riprendi">▶︎ Riprendi ${esc(S.attiva.nome)}</button>`;
     return h;
@@ -265,10 +265,10 @@ function oggi() {
       <h2>${sc.nome}</h2><span>${sc.sotto}</span></div>
       ${sc.righe.map(r => `<div class="riga"><span>${esc(r.ex)}${r.ss ? ' <i class="ss">SS</i>' : ""}</span>
         <b>${ripTxt(r)}</b><em>${recTxt(r.recMin, r.recMax)}</em></div>`).join("")}</section>`;
-    if (fattoOggi) h += `<div class="avviso verde">✅ Allenamento di oggi già fatto.</div>`;
+    if (fattoOggi) h += `<div class="avviso verde">Allenamento di oggi già fatto.</div>`;
     h += `<button class="grande" style="background:${sc.colore}" data-a="inizia" data-v="${cod}">Inizia allenamento</button>`;
   } else {
-    h += `<section class="card riposo"><h2>😴 Oggi riposo</h2>
+    h += `<section class="card riposo"><h2>Oggi riposo</h2>
       <p>Mangia bene, dormi e prendi la creatina.</p></section>`;
   }
   h += `<details class="altro"><summary>Fai un altro allenamento</summary>
@@ -285,12 +285,12 @@ function allenamento() {
   const fatte = a.voci.reduce((t, v) => t + v.sets.filter(x => x.fatto).length, 0);
   const pct = tot ? Math.round(fatte / tot * 100) : 0;
   let h = `<div class="barra-all">
-      <div class="ba-riga"><b>${esc(a.nome)}</b><span>⏱ <span id="durata">0:00</span></span></div>
+      <div class="ba-riga"><b>${esc(a.nome)}</b><span><span id="durata">0:00</span></span></div>
       <div class="ba-riga piccola"><span>${fatte}/${tot} serie</span><span>${pct}%</span></div>
       <div class="progresso"><div style="width:${pct}%;background:${a.colore}"></div></div>
     </div>
     <div class="sotto" style="margin:8px 4px">Settimana ${a.settimana} · ciclo ${a.ciclo}/8${a.scarico ? " · SCARICO" : ""}</div>
-    <details class="regole"><summary>📌 Regole di esecuzione</summary><ul>${REGOLE.map(x => `<li>${x}</li>`).join("")}</ul></details>`;
+    <details class="regole"><summary>Regole di esecuzione</summary><ul>${REGOLE.map(x => `<li>${x}</li>`).join("")}</ul></details>`;
 
   a.voci.forEach((v, i) => {
     const eq = attrezzo(v.ex), A = ATTREZZI[eq];
@@ -305,7 +305,7 @@ function allenamento() {
       <div class="es-info"><b>${ripTxt({ serie: v.sets.length, min: v.min, max: v.max })}</b> · rec ${recTxt(v.recMin, v.recMax)}${conSucc ? " (a fine coppia)" : ""}
         · <span class="${eq === "man" ? "evid" : ""}">${A.nome}: ${A.peso}</span></div>
       <div class="ultima">Ultima volta: ${ultima}</div>
-      <div class="sug">💡 ${esc(v.msg)}</div>
+      <div class="sug">${esc(v.msg)}</div>
       <div class="serie-testa"><span>#</span><span>${eq === "man" ? "kg / manubrio" : eq === "cl" ? "zavorra kg" : "kg"}</span><span>rip</span><span></span></div>
       ${v.sets.map((x, j) => `
         <div class="serie ${x.fatto ? "fatta" : ""}">
@@ -314,7 +314,7 @@ function allenamento() {
           <input inputmode="numeric" data-i="${i}" data-j="${j}" data-k="reps" value="${x.reps}" placeholder="${v.min}">
           <button class="spunta" data-a="spunta" data-i="${i}" data-j="${j}">✓</button>
         </div>
-        ${dropOn && j === v.sets.length - 1 ? `<div class="drop">🔥 DROP SET: cedimento → -25% (${kgTxt(arrot((num(x.kg) || 0) * 0.75))} kg) → di nuovo cedimento. Nel diario segna solo la serie normale.</div>` : ""}`).join("")}
+        ${dropOn && j === v.sets.length - 1 ? `<div class="drop">DROP SET: cedimento → -25% (${kgTxt(arrot((num(x.kg) || 0) * 0.75))} kg) → di nuovo cedimento. Nel diario segna solo la serie normale.</div>` : ""}`).join("")}
       <label class="pulita"><input type="checkbox" data-a="pulita" data-v="${i}" ${v.pulita ? "checked" : ""}> Tecnica pulita in tutte le serie</label>
       <button class="cambia" data-a="sostituisci" data-v="${i}">⇄ Macchina occupata? Cambia esercizio</button>
     </section>`;
@@ -330,7 +330,7 @@ function riepilogo() {
   const min = s.fine ? Math.round((new Date(s.fine) - new Date(s.data)) / 60000) : null;
   const sc = S.schede[s.codice];
   const prossimo = sc ? sc.righe.map(r => ({ r, sug: suggerisci(r, false) })) : [];
-  return `<header class="testa"><h1>Fatto! 🎉</h1><div class="sotto">${esc(s.nome)}${min ? ` · ${min} min` : ""}</div></header>
+  return `<header class="testa"><h1>Fatto! </h1><div class="sotto">${esc(s.nome)}${min ? ` · ${min} min` : ""}</div></header>
     <section class="card"><div class="card-testa" style="background:${s.colore}"><h2>Prossima volta</h2></div>
     ${prossimo.map(({ r, sug }) => `<div class="riga col"><b>${esc(r.ex)}</b>
       <span>${sug.kg != null ? kgTxt(sug.kg) + " kg × " : ""}${sug.reps.join(" / ")}</span><em>${esc(sug.msg)}</em></div>`).join("")}
@@ -384,7 +384,7 @@ function storico() {
 
 function impostazioni() {
   return `<header class="testa"><h1>Altro</h1></header>
-    <button class="grande" data-a="vai" data-v="scheda">📋 Scheda e calendario</button>
+    <button class="grande" data-a="vai" data-v="scheda">Scheda e calendario</button>
     ${window.sezioneSync?.() ?? ""}
     <section class="card"><div class="card-testa"><h2>Programma</h2></div>
     <label class="riga"><span>Inizio settimana 1</span><input type="date" data-a="inizio" value="${S.inizio}"></label>
@@ -393,11 +393,8 @@ function impostazioni() {
     <p class="nota">I dati sono solo in questo telefono. Fai un backup ogni tanto: servirà anche per passarli all'app iPhone.</p>
     <div class="scelte"><button data-a="esporta">Salva backup</button>
     <label class="bottone">Carica backup<input type="file" accept=".json,application/json" data-a="importa" hidden></label></div></section>
-    <section class="card"><div class="card-testa"><h2>Chiave AI (cibo e coach)</h2></div>
-    <p class="nota">Incolla la chiave API di Anthropic. Resta solo su questo telefono, non va nel backup e non è nel codice del sito.
-    ${(() => { try { return localStorage.getItem("palestra-api-key") ? "✅ Chiave salvata." : "Nessuna chiave."; } catch { return ""; } })()}</p>
-    <div style="padding:0 12px"><input id="chiave" class="campo" type="password" placeholder="sk-ant-..." autocomplete="off"></div>
-    <div class="scelte"><button data-a="salva-chiave">Salva chiave</button></div></section>
+    <section class="card"><div class="card-testa"><h2>AI (cibo e coach)</h2></div>
+    <p class="nota">Stima con AI e Coach ora sono nella nuova app. La chiave dell'AI sta sul server, mai sul telefono.</p></section>
     <section class="card"><div class="card-testa"><h2>Blocco app</h2></div>
     <p class="nota">Un sito non può bloccare altre app: lo può fare solo l'app Swift vera, con le API Screen Time di Apple. Per ora puoi farlo con le funzioni dell'iPhone:</p>
     <ol class="passi">
@@ -494,9 +491,6 @@ document.addEventListener("click", e => {
       else { const l = document.createElement("a"); l.href = URL.createObjectURL(blob); l.download = f.name; l.click(); }
       return;
     }
-    case "salva-chiave":
-      try { localStorage.setItem("palestra-api-key", $("#chiave").value.trim()); } catch {}
-      alert("Chiave salvata solo su questo telefono."); return disegna();
     case "reset":
       if (confirm("Cancellare TUTTI i dati? Non si può annullare.")) { S = statoIniziale(); salva(); vai("oggi"); }
       return;

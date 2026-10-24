@@ -2,12 +2,12 @@
 "use strict";
 
 const PASTI = [
-  ["colazione", "Colazione", "🥣"],
-  ["spuntino", "Spuntino a scuola", "🍎"],
-  ["pranzo", "Pranzo · pre-allenamento (1-1,5 h prima)", "🍝"],
-  ["merenda", "Merenda · post-allenamento", "🥛"],
-  ["cena", "Cena", "🍽️"],
-  ["notte", "Prima di dormire", "🌙"]
+  ["colazione", "Colazione", ""],
+  ["spuntino", "Spuntino a scuola", ""],
+  ["pranzo", "Pranzo · pre-allenamento (1-1,5 h prima)", ""],
+  ["merenda", "Merenda · post-allenamento", ""],
+  ["cena", "Cena", ""],
+  ["notte", "Prima di dormire", ""]
 ];
 
 // Crea i campi del cibo se mancano (anche dopo "cancella dati" o un backup vecchio).
@@ -43,9 +43,9 @@ function consiglioPeso() {
   const p = [...S.peso].sort((a, b) => a.data.localeCompare(b.data));
   if (p.length < 3) return "Pesati una volta a settimana, al mattino a digiuno. Obiettivo: +0,25-0,5 kg a settimana.";
   const [a, b, c] = p.slice(-3);
-  if (c.kg - a.kg <= 0) return "⚠️ Da 2 settimane non sali di peso: aggiungi <b>+250 kcal al giorno</b>.";
-  if (b.kg - a.kg > 0.7 && c.kg - b.kg > 0.7) return "⚠️ Sali più di 0,7 kg a settimana da più settimane: togli <b>200 kcal al giorno</b>.";
-  return "✅ Stai salendo bene. Continua così.";
+  if (c.kg - a.kg <= 0) return "Da 2 settimane non sali di peso: aggiungi <b>+250 kcal al giorno</b>.";
+  if (b.kg - a.kg > 0.7 && c.kg - b.kg > 0.7) return "Sali più di 0,7 kg a settimana da più settimane: togli <b>200 kcal al giorno</b>.";
+  return "Stai salendo bene. Continua così.";
 }
 
 function graficoPeso() {
@@ -68,9 +68,9 @@ function cibo() {
       ${barra("Grassi", t.grassi, o.grassi, "g", "#A78BFA")}
     </section>
     <section class="card pad">
-      ${barra("💧 Acqua", g.acqua / 1000, 3, "L", "#38BDF8", "2-3")}
+      ${barra("Acqua", g.acqua / 1000, 3, "L", "#38BDF8", "2-3")}
       <div class="scelte"><button data-a="acqua" data-v="-250">−</button><button data-a="acqua" data-v="250">+ 250 ml</button><button data-a="acqua" data-v="500">+ 500 ml</button></div>
-      <button class="creatina ${g.creatina ? "presa" : ""}" data-a="creatina">${g.creatina ? "✅ Creatina 5 g presa" : "💊 Creatina 5 g — tocca quando la prendi"}</button>
+      <button class="creatina ${g.creatina ? "presa" : ""}" data-a="creatina">${g.creatina ? "Creatina 5 g presa" : "Creatina 5 g — tocca quando la prendi"}</button>
     </section>`;
 
   for (const [k, nome, icona] of PASTI) {
@@ -78,12 +78,12 @@ function cibo() {
     const kcal = lista.reduce((s, x) => s + (x.kcal || 0), 0);
     h += `<section class="card"><div class="card-testa"><h2 class="pasto">${icona} ${nome}</h2><span>${kcal ? kcal + " kcal" : ""}</span></div>
       ${lista.map((x, i) => `<div class="cibo-riga" data-a="togli-cibo" data-v="${k}" data-i="${i}">
-        ${x.foto ? `<img src="${x.foto}" alt="">` : `<div class="noimg">🍴</div>`}
+        ${x.foto ? `<img src="${x.foto}" alt="">` : `<div class="noimg"></div>`}
         <div><div>${esc(x.desc || "Pasto")}</div><small>${x.kcal} kcal · P ${x.prot} · C ${x.carb} · G ${x.grassi}</small></div></div>`).join("")}
       <button class="aggiungi" data-a="nuovo-cibo" data-v="${k}">+ Aggiungi</button></section>`;
   }
 
-  h += `<button class="secondario" style="color:var(--grigio)" data-a="vai" data-v="progressi">⚖️ Peso corporeo e foto → Progressi</button>`;
+  h += `<button class="secondario" style="color:var(--grigio)" data-a="vai" data-v="progressi">Peso corporeo e foto → Progressi</button>`;
   return h;
 }
 
@@ -95,12 +95,12 @@ function apriNuovoCibo(pasto) {
   const d = $("#dialogo");
   d.innerHTML = `<h2>${nome}</h2>
     <div class="scelte" style="padding:10px 0">
-      <label class="bottone">📷 Scatta<input type="file" accept="image/*" capture="environment" data-a="foto-cibo" hidden></label>
-      <label class="bottone">🖼️ Libreria<input type="file" accept="image/*" data-a="foto-cibo" hidden></label>
+      <label class="bottone">Scatta<input type="file" accept="image/*" capture="environment" data-a="foto-cibo" hidden></label>
+      <label class="bottone">Libreria<input type="file" accept="image/*" data-a="foto-cibo" hidden></label>
     </div>
     <img id="anteprima" class="anteprima nascosto" alt="">
     <textarea id="desc-cibo" class="campo" rows="3" placeholder="Es. 110 g di pasta con 80 g di pollo, 1 cucchiaio d'olio"></textarea>
-    <button class="grande" data-a="stima">✨ Stima con AI</button>
+    <button class="grande" data-a="stima">Stima con AI</button>
     <div id="esito" class="nota"></div>
     <div class="macro-campi">
       <label>kcal<input id="m-kcal" inputmode="numeric"></label>
@@ -145,55 +145,9 @@ const SCHEMA_CIBO = {
   }
 };
 
-/** Manda foto + descrizione a Claude e riempie i campi con la stima. */
+/** La stima con AI ora è solo nella nuova app: la chiave dell'AI sta sul server, non sul telefono. */
 async function stima() {
-  let chiave = null;
-  try { chiave = localStorage.getItem("palestra-api-key"); } catch {}
-  const esito = $("#esito");
-  if (!chiave) { esito.innerHTML = "Prima salva la chiave API in <b>Altro</b>."; return; }
-  const desc = $("#desc-cibo").value.trim();
-  if (!bozza.fotoAI && !desc) { esito.textContent = "Aggiungi una foto o una descrizione."; return; }
-
-  const contenuto = [];
-  if (bozza.fotoAI) contenuto.push({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: bozza.fotoAI.split(",")[1] } });
-  contenuto.push({ type: "text", text:
-    `Stima i valori nutrizionali di questo pasto. Descrizione dell'utente: "${desc || "nessuna"}". ` +
-    "Se la descrizione indica grammi o quantità, usali: valgono più della foto. Rispondi in italiano. " +
-    "kcal_min e kcal_max sono l'intervallo di incertezza. 'descrizione' è un nome breve del piatto; " +
-    "'note' spiega in una frase le ipotesi fatte (porzioni, condimenti)." });
-
-  esito.textContent = "⏳ Sto stimando…";
-  try {
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": chiave,
-        "anthropic-version": "2023-06-01",
-        "anthropic-beta": "server-side-fallback-2026-07-01",
-        "anthropic-dangerous-direct-browser-access": "true"
-      },
-      body: JSON.stringify({
-        model: "claude-opus-5-5",
-        max_tokens: 4000,
-        fallbacks: "default",
-        output_config: { effort: "low", format: { type: "json_schema", schema: SCHEMA_CIBO } },
-        system: "Sei un nutrizionista che stima calorie e macronutrienti dei pasti con valori realistici per l'Italia.",
-        messages: [{ role: "user", content: contenuto }]
-      })
-    });
-    const dati = await r.json();
-    if (!r.ok) throw new Error(dati.error?.message || `Errore ${r.status}`);
-    if (dati.stop_reason === "refusal") throw new Error("La richiesta è stata rifiutata, inserisci i valori a mano.");
-    const testo = dati.content.find(b => b.type === "text")?.text;
-    const v = JSON.parse(testo);
-    $("#m-kcal").value = v.kcal; $("#m-prot").value = v.proteine;
-    $("#m-carb").value = v.carboidrati; $("#m-grassi").value = v.grassi;
-    if (!desc) $("#desc-cibo").value = v.descrizione;
-    esito.innerHTML = `<b>${esc(v.descrizione)}</b>: circa ${v.kcal} kcal (tra ${v.kcal_min} e ${v.kcal_max}).<br>${esc(v.note)}<br>Puoi correggere i numeri prima di salvare.`;
-  } catch (e) {
-    esito.textContent = "❌ " + (e.message || "Errore di rete. Sei connesso?");
-  }
+  $("#esito").innerHTML = "La stima con AI ora è nella nuova app: torna alla nuova versione e usa <b>Cibo, Foto AI</b>.";
 }
 
 // ---------- Eventi (chiamati da app.js) ----------

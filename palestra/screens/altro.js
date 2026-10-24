@@ -13,6 +13,7 @@ import { scegliFile, salvaFile } from './comuni.js';
 import { PaginaSchede, PaginaScheda, PaginaOrari } from './al-programma.js';
 import { PaginaNotifiche, riassuntoNotifiche } from './al-notifiche.js';
 import { PaginaAccount, statoSync } from './al-account.js';
+import { PaginaPrepara } from './al-prepara.js';
 import { PaginaObiettivi, PaginaBlocco, PaginaPrivacy, PaginaCrediti } from './al-varie.js';
 import { fmtInt } from '../core/format.js';
 import { parseDay, formatDayShort, isoDay, mondayOf } from '../core/dates.js';
@@ -22,6 +23,7 @@ export const VERSIONE_APP = '2.0.0';
 /** Le sotto-pagine: titolo e componente. */
 const PAGINE = {
   account: { titolo: 'Salvataggio online', C: PaginaAccount },
+  prepara: { titolo: 'Prepara il server', C: PaginaPrepara },
   schede: { titolo: 'Scheda e calendario', C: PaginaSchede },
   scheda: { titolo: v => S.impostazioni().schede[v.cod]?.nome || 'Scheda', C: PaginaScheda },
   orari: { titolo: 'Orari della palestra', C: PaginaOrari },

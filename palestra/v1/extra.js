@@ -35,12 +35,12 @@ function vistaCorpo() {
       <div class="peso-riga"><input id="peso" class="campo" inputmode="decimal" placeholder="Peso di oggi, a digiuno"><button data-a="salva-peso">Salva</button></div>
       <p class="nota">${consiglioPeso()}</p>
     </section>
-    <section class="card"><div class="card-testa"><h2>📸 Foto di progresso</h2><span>1 al mese</span></div>
+    <section class="card"><div class="card-testa"><h2>Foto di progresso</h2><span>1 al mese</span></div>
       <p class="nota">Restano <b>solo su questo telefono</b>: non vanno nel backup né online.</p>
       ${vistaFoto()}
       <div class="scelte">
-        <label class="bottone">📷 Scatta<input type="file" accept="image/*" capture="user" data-a="nuova-foto" hidden></label>
-        <label class="bottone">🖼️ Libreria<input type="file" accept="image/*" data-a="nuova-foto" hidden></label>
+        <label class="bottone">Scatta<input type="file" accept="image/*" capture="user" data-a="nuova-foto" hidden></label>
+        <label class="bottone">Libreria<input type="file" accept="image/*" data-a="nuova-foto" hidden></label>
       </div>
     </section>`;
 }
@@ -121,15 +121,15 @@ function vistaDiario() {
   S.diario ||= [];
   const w = settimana();
   return `${w.n === 1 || w.n % 4 === 0
-      ? `<div class="avviso giallo">📓 Settimana ${w.n}: è settimana di diario!</div>`
+      ? `<div class="avviso giallo">Settimana ${w.n}: è settimana di diario!</div>`
       : `<p class="nota">Il diario si compila nelle settimane 1, 4, 8, 12… (ora sei alla ${w.n}).</p>`}
     <button class="grande" data-a="nuovo-diario">+ Compila il diario</button>
     ${[...S.diario].reverse().map((e, i) => `<section class="card pad diario">
       <b>Settimana ${e.settimana} · ${dataTxt(e.data + "T12:00")}</b>
-      <div>⚖️ Peso: ${kgTxt(e.peso)} kg</div>
-      <div>🏋️ Panca: ${esc(e.panca || "–")}</div>
-      <div>🦵 Squat: ${esc(e.squat || "–")}</div>
-      <div>🚣 Rematore: ${esc(e.rematore || "–")}</div>
+      <div>Peso: ${kgTxt(e.peso)} kg</div>
+      <div>Panca: ${esc(e.panca || "–")}</div>
+      <div>Squat: ${esc(e.squat || "–")}</div>
+      <div>Rematore: ${esc(e.rematore || "–")}</div>
       ${e.note ? `<div class="nota">${esc(e.note)}</div>` : ""}
       <button class="secondario" data-a="elimina-diario" data-v="${S.diario.length - 1 - i}">Elimina</button>
     </section>`).join("")}`;
@@ -166,10 +166,10 @@ function coach() {
     ${chat.length ? "" : `<p class="nota">Chiedimi qualsiasi cosa sui tuoi allenamenti, sul cibo o sul peso: guardo i dati dell'app.</p>
       <div class="esempi">${esempi.map(q => `<button data-a="chat-esempio" data-v="${esc(q)}">${q}</button>`).join("")}</div>`}
     <div class="chat">${chat.map(m => `<div class="bolla ${m.io ? "io" : ""}">${esc(m.testo).replace(/\n/g, "<br>")}</div>`).join("")}
-      ${chatInCorso ? `<div class="bolla">⏳ Sto pensando…</div>` : ""}
-      ${chatErrore ? `<div class="avviso giallo">❌ ${esc(chatErrore)}</div>` : ""}</div>
+      ${chatInCorso ? `<div class="bolla">Sto pensando…</div>` : ""}
+      ${chatErrore ? `<div class="avviso giallo">${esc(chatErrore)}</div>` : ""}</div>
     <div class="chat-input"><textarea id="chat-testo" class="campo" rows="1" placeholder="Scrivi al coach…"></textarea>
-      <button data-a="chat-invia" ${chatInCorso ? "disabled" : ""}>➤</button></div>`;
+      <button data-a="chat-invia" ${chatInCorso ? "disabled" : ""}>Invia</button></div>`;
 }
 
 /** Riassunto dei dati dell'app da dare al coach. */
@@ -201,44 +201,10 @@ function riassuntoDati() {
 }
 
 async function inviaChat(testo) {
-  testo = testo.trim();
-  if (!testo || chatInCorso) return;
-  let chiave = null;
-  try { chiave = localStorage.getItem("palestra-api-key"); } catch {}
-  chatErrore = "";
-  if (!chiave) { chatErrore = "Prima salva la chiave API in Altro."; return disegna(); }
-  chat.push({ io: true, testo });
-  chatInCorso = true; disegna(); scrollaChat();
-  const system = `Sei "Coach", l'assistente dentro l'app palestra di un ragazzo di 15 anni (172 cm) che si allena per l'ipertrofia con priorità alla parte alta e vuole salire di peso di 0,25-0,5 kg a settimana.
-Rispondi in italiano, breve e concreto, come un amico esperto. Usa i dati qui sotto. Niente markdown complicato.
-Regole: niente integratori a parte la creatina (5 g al giorno); niente diete estreme; niente massimali.
-Se parla di dolore acuto o articolare, digli di fermarsi e di parlarne con un genitore o un medico.
-
-DATI DELL'APP:
-${riassuntoDati()}`;
-  try {
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json", "x-api-key": chiave, "anthropic-version": "2023-06-01",
-        "anthropic-beta": "server-side-fallback-2026-07-01", "anthropic-dangerous-direct-browser-access": "true"
-      },
-      body: JSON.stringify({
-        model: "claude-opus-5-5", max_tokens: 4000, fallbacks: "default",
-        output_config: { effort: "low" }, system,
-        messages: chat.map(m => ({ role: m.io ? "user" : "assistant", content: m.testo }))
-      })
-    });
-    const dati = await r.json();
-    if (!r.ok) throw new Error(dati.error?.message || `Errore ${r.status}`);
-    if (dati.stop_reason === "refusal") throw new Error("Domanda rifiutata, prova a riformularla.");
-    chat.push({ io: false, testo: dati.content.filter(b => b.type === "text").map(b => b.text).join("\n") });
-  } catch (e) {
-    chat.pop();
-    chatErrore = e.message || "Errore di rete.";
-  }
-  chatInCorso = false;
-  if (vista === "coach") { disegna(); scrollaChat(); }
+  // il Coach ora è solo nella nuova app (la chiave dell'AI sta sul server, non sul telefono)
+  if (!testo.trim()) return;
+  chatErrore = "Il Coach ora è nella nuova app: torna alla nuova versione.";
+  disegna();
 }
 const scrollaChat = () => window.scrollTo(0, document.body.scrollHeight);
 
@@ -294,14 +260,14 @@ async function accedi(registrati) {
   try {
     if (registrati) {
       const d = await supa("/auth/v1/signup", { method: "POST", body: JSON.stringify({ email, password }) }, false);
-      if (!d.access_token) { syncStato = "📧 Controlla la tua email e conferma l'account, poi premi Accedi."; return disegna(); }
+      if (!d.access_token) { syncStato = "Controlla la tua email e conferma l'account, poi premi Accedi."; return disegna(); }
       salvaSessione(d);
     } else {
       salvaSessione(await supa("/auth/v1/token?grant_type=password", { method: "POST", body: JSON.stringify({ email, password }) }, false));
     }
     await scarica(true);
-    syncStato = "✅ Collegato.";
-  } catch (e) { syncStato = "❌ " + e.message; }
+    syncStato = "Collegato.";
+  } catch (e) { syncStato = "" + e.message; }
   disegna();
 }
 
@@ -323,7 +289,7 @@ async function carica() {
       body: JSON.stringify({ user_id: sync.utente, dati: datiDaInviare(), aggiornato: new Date(S.aggiornato || Date.now()).toISOString() })
     });
     sync.ultimo = Date.now(); salvaSync();
-  } catch (e) { syncStato = "⚠️ Salvataggio online non riuscito: " + e.message; }
+  } catch (e) { syncStato = "Salvataggio online non riuscito: " + e.message; }
 }
 
 /** Scarica i dati online: se sono più recenti di quelli del telefono, li usa. */
@@ -350,7 +316,7 @@ async function scarica(primaVolta = false) {
     } else if (primaVolta || (S.aggiornato || 0) > tRemoto) {
       await carica();
     }
-  } catch (e) { syncStato = "⚠️ " + e.message; }
+  } catch (e) { syncStato = "" + e.message; }
 }
 
 /** Chiamata da salva(): manda online dopo 3 secondi di pausa. */
@@ -378,13 +344,13 @@ create policy "solo i miei dati" on stato for all
 
 function sezioneSync() {
   if (syncAttivo()) {
-    return `<section class="card"><div class="card-testa"><h2>☁️ Salvataggio online</h2><span>attivo</span></div>
+    return `<section class="card"><div class="card-testa"><h2>Salvataggio online</h2><span>attivo</span></div>
       <p class="nota">Collegato come <b>${esc(sync.email || "")}</b>. I dati si salvano da soli
       ${sync.ultimo ? `(ultimo: ${new Date(sync.ultimo).toLocaleString("it-IT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })})` : ""}.
       Le foto restano solo sul telefono. ${esc(syncStato)}</p>
       <div class="scelte"><button data-a="sync-ora">Sincronizza ora</button><button data-a="sync-esci">Scollega</button></div></section>`;
   }
-  return `<section class="card"><details><summary>☁️ Salvataggio online (facoltativo)</summary>
+  return `<section class="card"><details><summary>Salvataggio online (facoltativo)</summary>
     <p class="nota">Così non perdi i dati se cambi telefono o cancelli Safari. Gratis con <b>Supabase</b>:</p>
     <ol class="passi">
       <li>Vai su <b>supabase.com</b> → Start your project → accedi con GitHub → <b>New project</b> (piano Free, regione Europa).</li>
@@ -441,7 +407,7 @@ function azioneExtra(a, b) {
     case "chat-nuova": chat = []; chatErrore = ""; return disegna();
     case "sync-registra": return accedi(true);
     case "sync-accedi": return accedi(false);
-    case "sync-ora": syncStato = "⏳"; disegna(); return scarica(true).then(() => { syncStato = "✅ Fatto."; disegna(); });
+    case "sync-ora": syncStato = ""; disegna(); return scarica(true).then(() => { syncStato = "Fatto."; disegna(); });
     case "sync-esci":
       if (confirm("Scollegare il salvataggio online? I dati restano sul telefono.")) { sync = { url: sync.url, anon: sync.anon }; salvaSync(); syncStato = ""; disegna(); }
       return;

@@ -37,13 +37,13 @@ export function PaginaAccount({ apri }) {
         : 'Con un account gratuito su Supabase i dati (anche le foto) restano al sicuro: se cambi telefono o reinstalli l\'app accedi e torna tutto. Serve anche per le notifiche ad app chiusa e per l\'AI.'}</p>
     </div>
     ${cloud.collegato ? html`<${Collegato} cloud=${cloud} sync=${sync} apri=${apri} />`
-      : !cloud.configurato || modifica ? html`<${Progetto} onFatto=${() => setModifica(false)} />`
+      : !cloud.configurato || modifica ? html`<${Progetto} apri=${apri} onFatto=${() => setModifica(false)} />`
       : html`<${Accesso} cloud=${cloud} onCambiaProgetto=${() => setModifica(true)} />`}`;
 }
 
 /* ---------- 1. progetto ---------- */
 
-function Progetto({ onFatto }) {
+function Progetto({ apri, onFatto }) {
   const cfg = C.configurazione();
   const [url, setUrl] = useState(cfg.url);
   const [chiave, setChiave] = useState(cfg.chiave);
@@ -55,6 +55,9 @@ function Progetto({ onFatto }) {
     onFatto();
   };
   return html`
+    <${List}>
+      <${ListRow} icon="sliders" tile="#5856d6" title="Prepara il server" sub="Passo passo, con il codice da copiare" chevron onClick=${() => apri('prepara')} />
+    <//>
     <${SectionLabel}>Il tuo progetto Supabase<//>
     <div class="card modulo">
       <label class="campo-diario">
@@ -70,7 +73,7 @@ function Progetto({ onFatto }) {
       <div class="mt-16"><${Button} block disabled=${!valido} onClick=${salva}>Salva<//></div>
     </div>
     <${SectionFoot}>Le trovi su supabase.com, nel tuo progetto: Project Settings, API. La chiave pubblica si può usare nell'app;
-      la chiave dell'AI invece resta solo sul server. I passaggi per creare il progetto sono in PROGRESS.md.<//>`;
+      la chiave dell'AI invece resta solo sul server.<//>`;
 }
 
 /* ---------- 2. accesso ---------- */

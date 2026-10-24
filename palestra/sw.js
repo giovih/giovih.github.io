@@ -13,7 +13,7 @@ const FILE = [
   'data/idb.js', 'data/store.js', 'data/actions.js', 'data/cloud.js', 'data/sync.js', 'data/push.js', 'data/off.js', 'data/ai.js', 'data/rest.js',
   'screens/app-shell.js', 'screens/oggi.js', 'screens/allenamento.js', 'screens/cibo.js', 'screens/aggiungi-cibo.js',
   'screens/progressi.js', 'screens/pr-corpo.js', 'screens/pr-allenamenti.js', 'screens/pr-agenda.js', 'screens/pr-diario.js',
-  'screens/coach.js', 'screens/altro.js', 'screens/al-programma.js', 'screens/al-notifiche.js', 'screens/al-account.js', 'screens/al-varie.js',
+  'screens/coach.js', 'screens/altro.js', 'screens/al-programma.js', 'screens/al-notifiche.js', 'screens/al-account.js', 'screens/al-prepara.js', 'screens/al-varie.js',
   'screens/comuni.js',
   'icons/icon-96.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
 ];
@@ -32,7 +32,10 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
     const nomi = await caches.keys();
-    await Promise.all(nomi.filter(n => n.startsWith('pal2-') && n !== CACHE).map(n => caches.delete(n)));
+    // tolgo le versioni vecchie di questa app e la cache della prima versione ("palestra-v5"…);
+    // "palestra1-…" è della copia in /v1/ e resta
+    const vecchia = n => (n.startsWith('pal2-') && n !== CACHE) || /^palestra-v\d+$/.test(n);
+    await Promise.all(nomi.filter(vecchia).map(n => caches.delete(n)));
     await self.clients.claim();
   })());
 });

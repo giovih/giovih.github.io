@@ -35,6 +35,7 @@
   /* Accento (uno solo) */
   --accent: #3d8bff;
   --accent-strong: #2f7bf0;
+  --accent-fill: #2170e6;   /* sfondo dei pulsanti pieni: testo bianco leggibile (contrasto 4,6:1) */
   --on-accent: #ffffff;
   --accent-soft: rgba(61, 139, 255, 0.16);
   --accent-softer: rgba(61, 139, 255, 0.09);
@@ -96,16 +97,17 @@
     --label-2: rgba(60, 60, 67, 0.68);
     --label-3: rgba(60, 60, 67, 0.4);
     --label-4: rgba(60, 60, 67, 0.2);
-    --accent: #1f6fe5;
+    --accent: #1a68dc;
     --accent-strong: #1862d0;
+    --accent-fill: #1a68dc;
     --accent-soft: rgba(31, 111, 229, 0.12);
     --accent-softer: rgba(31, 111, 229, 0.07);
-    --danger: #e5413a;
+    --danger: #d70015;
     --danger-soft: rgba(229, 65, 58, 0.1);
     --tono-ambra: #c47b2d;
     --tono-teal: #1d9886;
     --tono-rosa: #d15565;
-    --tono-lavanda: #7a5fd8;
+    --tono-lavanda: #6e52cf;
     --tono-sabbia: #9e8443;
     --acqua: #1b9bd8;
   --dato-prot: #1d9886;
@@ -134,16 +136,17 @@
   --label-2: rgba(60, 60, 67, 0.68);
   --label-3: rgba(60, 60, 67, 0.4);
   --label-4: rgba(60, 60, 67, 0.2);
-  --accent: #1f6fe5;
+  --accent: #1a68dc;
   --accent-strong: #1862d0;
+  --accent-fill: #1a68dc;
   --accent-soft: rgba(31, 111, 229, 0.12);
   --accent-softer: rgba(31, 111, 229, 0.07);
-  --danger: #e5413a;
+  --danger: #d70015;
   --danger-soft: rgba(229, 65, 58, 0.1);
   --tono-ambra: #c47b2d;
   --tono-teal: #1d9886;
   --tono-rosa: #d15565;
-  --tono-lavanda: #7a5fd8;
+  --tono-lavanda: #6e52cf;
   --tono-sabbia: #9e8443;
   --acqua: #1b9bd8;
   --dato-prot: #1d9886;
@@ -284,7 +287,7 @@ h1, h2, h3, p { margin: 0; }
 
 .section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 28px 4px 10px; }
 .section-title h2 { font-size: 1.294rem; line-height: 1.27; font-weight: 700; letter-spacing: -0.008em; }
-.section-title .st-action { color: var(--accent); font-size: 0.941rem; font-weight: 400; }
+.section-title .st-action { color: var(--accent); font-size: 0.941rem; font-weight: 400; padding: 10px 0 10px 12px; margin: -10px 0; } /* area di tocco più grande, stesso aspetto */
 .section-label { margin: 24px 16px 7px; font-size: 0.765rem; color: var(--label-2); text-transform: uppercase; letter-spacing: 0.02em; }
 .section-foot { margin: 7px 16px 0; font-size: 0.765rem; line-height: 1.38; color: var(--label-2); }
 
@@ -344,7 +347,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-2); }
 .btn:active { transform: scale(0.97); opacity: 0.86; }
 .btn:disabled { opacity: 0.38; pointer-events: none; }
 .btn .icon { width: 20px; height: 20px; }
-.btn-primary { background: var(--accent); color: var(--on-accent); }
+.btn-primary { background: var(--accent-fill); color: var(--on-accent); }
 .btn-secondary { background: var(--card-2); color: var(--label); }
 .btn-tinted { background: var(--accent-soft); color: var(--accent); }
 .btn-plain { background: none; color: var(--accent); padding: 0 8px; height: 44px; font-weight: 400; }
@@ -393,7 +396,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-2); }
 .segmented button[aria-pressed="true"] { font-weight: 600; }
 
 .toggle { position: relative; width: 51px; height: 31px; flex: none; }
-.toggle input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+.toggle input { position: absolute; inset: -7px; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
 .toggle .tg-track {
   position: absolute; inset: 0; border-radius: 16px; background: var(--fill);
   transition: background-color 0.25s var(--ease-out);
@@ -625,7 +628,7 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
   transition: transform 0.45s var(--spring-bouncy), background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .set-row .sr-check .icon { width: 20px; height: 20px; }
-.set-row.done .sr-check { background: var(--accent); border-color: var(--accent); color: var(--on-accent); transform: scale(1.04); }
+.set-row.done .sr-check { background: var(--accent-fill); border-color: var(--accent-fill); color: var(--on-accent); transform: scale(1.04); }
 .set-row .sr-check:active { transform: scale(0.88); }
 .set-row .sr-drop { grid-column: 2 / -1; font-size: 0.706rem; color: var(--tono-rosa); display: flex; gap: 6px; align-items: center; }
 
@@ -646,7 +649,7 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 .rest-bar .rb-label { font-size: 0.706rem; color: var(--label-2); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rest-bar .rb-label b { text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
 .rest-bar .rb-btn { height: 38px; min-width: 50px; padding: 0 10px; border-radius: 19px; background: var(--fill-2); font-size: 0.882rem; font-weight: 600; font-variant-numeric: tabular-nums; }
-.rest-bar .rb-btn.skip { background: var(--accent); color: var(--on-accent); }
+.rest-bar .rb-btn.skip { background: var(--accent-fill); color: var(--on-accent); }
 .rest-bar .rb-btn:active { opacity: 0.6; }
 .rest-bar .rb-line { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--accent); transition: width 0.25s linear; }
 
@@ -672,7 +675,7 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 }
 .keypad .kp-key:active { transform: scale(0.94); background: var(--card-3); }
 .keypad .kp-key.fn { font-family: var(--font); font-size: 0.941rem; font-weight: 600; }
-.keypad .kp-key.next { background: var(--accent); color: var(--on-accent); grid-row: span 2; height: auto; }
+.keypad .kp-key.next { background: var(--accent-fill); color: var(--on-accent); grid-row: span 2; height: auto; }
 .keypad .kp-key .icon { width: 22px; height: 22px; }
 
 /* ---------------------------------------------------------------------

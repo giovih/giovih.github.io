@@ -11,7 +11,7 @@ button.card { display: block; width: 100%; text-align: left; color: inherit; }
 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .scelte { display: flex; flex-wrap: wrap; gap: 8px; }
 .scelta { height: 34px; padding: 0 14px; border-radius: 17px; background: var(--fill-2); font-size: 0.882rem; font-weight: 500; transition: background-color 0.2s, color 0.2s; }
-.scelta.on { background: var(--accent); color: var(--on-accent); }
+.scelta.on { background: var(--accent-fill); color: var(--on-accent); }
 .regola { display: flex; gap: 12px; align-items: flex-start; padding: 14px; background: var(--card); border-radius: 18px; border: 0.5px solid var(--hairline); }
 .regola .co-icon, .riscaldamento .co-icon { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; flex: none; background: var(--accent-soft); color: var(--accent); }
 .regola .co-icon .icon, .riscaldamento .co-icon .icon { width: 18px; height: 18px; }
@@ -52,6 +52,8 @@ button.card { display: block; width: 100%; text-align: left; color: inherit; }
 .anteprima { margin: 16px 0 16px; border-top: 0.5px solid var(--separator); }
 .anteprima-riga { display: flex; align-items: center; gap: 8px; padding: 10px 2px; border-bottom: 0.5px solid var(--separator); font-size: 0.941rem; }
 .anteprima-riga .chip { height: 20px; padding: 0 7px; font-size: 0.647rem; }
+.anteprima-riga > .num { white-space: nowrap; flex: none; }
+.anteprima-riga > .ellipsis { min-width: 0; }
 .anteprima-altri { padding: 10px 2px 0; }
 .seduta-stat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .seduta-stat small { font-family: var(--font); }
@@ -104,7 +106,7 @@ button.card { display: block; width: 100%; text-align: left; color: inherit; }
 
 .riepilogo { padding-bottom: 12px; }
 .rp-top { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 0 22px; }
-.rp-check { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); margin-bottom: 10px; box-shadow: 0 10px 30px color-mix(in srgb, var(--accent) 40%, transparent); }
+.rp-check { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-fill); color: var(--on-accent); margin-bottom: 10px; box-shadow: 0 10px 30px color-mix(in srgb, var(--accent) 40%, transparent); }
 .rp-stat { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .rp-stat .card + .card { margin-top: 0; }
 .prossima-val { text-align: right; font-weight: 600; font-size: 0.941rem; display: flex; flex-direction: column; align-items: flex-end; flex: none; }
@@ -196,7 +198,7 @@ button.card { display: block; width: 100%; text-align: left; color: inherit; }
 .pr-nota { margin: 0 4px; }
 .riga-filtro { align-items: center; }
 .filtro-periodo { width: 11.5rem; flex: none; }
-.filtro-periodo .segmented { height: 28px; }
+.filtro-periodo .segmented { height: 32px; }
 .row-icon.tinta { background: color-mix(in srgb, var(--tile) 16%, transparent); color: var(--tile); }
 .row .row-sub { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
@@ -238,7 +240,7 @@ button.card { display: block; width: 100%; text-align: left; color: inherit; }
 .foto-mini img { width: 100%; height: 100%; object-fit: cover; }
 .fm-vuota { width: 100%; height: 100%; display: grid; place-items: center; color: var(--label-3); background: var(--card-2); }
 .foto-mini .fm-data { position: absolute; left: 6px; bottom: 6px; font-size: 0.647rem; font-weight: 600; color: #fff; padding: 2px 7px; border-radius: 8px; background: rgba(0, 0, 0, 0.45); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
-.foto-mini .fm-segno { position: absolute; right: 6px; top: 6px; font-size: 0.647rem; font-weight: 600; color: var(--on-accent); padding: 2px 7px; border-radius: 8px; background: var(--accent); }
+.foto-mini .fm-segno { position: absolute; right: 6px; top: 6px; font-size: 0.647rem; font-weight: 600; color: var(--on-accent); padding: 2px 7px; border-radius: 8px; background: var(--accent-fill); }
 .confronto { cursor: pointer; }
 .confronto .cf-coppia { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
 .confronto figure { margin: 0; position: relative; aspect-ratio: 3 / 4; background: var(--card-2); }
@@ -330,7 +332,7 @@ button.card { display: block; width: 100%; text-align: left; color: inherit; }
 .domanda:disabled { color: var(--label-3); }
 .bolla { max-width: 86%; padding: 9px 14px; border-radius: 20px; font-size: 1rem; line-height: 1.38; letter-spacing: -0.02em;
   overflow-wrap: anywhere; animation: fade-up 0.35s var(--spring) both; }
-.bolla.io { align-self: flex-end; background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 6px; white-space: pre-wrap; }
+.bolla.io { align-self: flex-end; background: var(--accent-fill); color: var(--on-accent); border-bottom-right-radius: 6px; white-space: pre-wrap; }
 .bolla.coach { align-self: flex-start; background: var(--card); border: 0.5px solid var(--hairline); border-bottom-left-radius: 6px; }
 .bolla.io + .bolla.coach, .bolla.coach + .bolla.io { margin-top: 6px; }
 .bolla p + p, .bolla p + ul, .bolla p + ol, .bolla ul + p, .bolla ol + p { margin-top: 8px; }
@@ -357,7 +359,7 @@ button.card { display: block; width: 100%; text-align: left; color: inherit; }
   border: 0.5px solid var(--separator); background: var(--card); font-size: 1rem; line-height: 1.35; color: var(--label); }
 .scrivi textarea:focus { outline: none; border-color: var(--accent); }
 .scrivi .invia { width: 34px; height: 34px; margin-bottom: 1px; border-radius: 50%; flex: none; display: grid; place-items: center;
-  background: var(--accent); color: var(--on-accent); transition: transform 0.3s var(--spring), background-color 0.2s; }
+  background: var(--accent-fill); color: var(--on-accent); transition: transform 0.3s var(--spring), background-color 0.2s; }
 .scrivi .invia:disabled { background: var(--fill); color: var(--label-3); }
 .scrivi .invia:active { transform: scale(0.88); }
 .tastiera-aperta .tabbar { transform: translateY(110%); transition: transform 0.2s; }

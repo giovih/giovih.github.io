@@ -190,4 +190,4 @@ dialog .scelte > * { color: var(--testo); }
 .bolla.io { background: var(--arancio); color: #111; align-self: flex-end; }
 .chat-input { position: fixed; left: 12px; right: 12px; bottom: calc(70px + env(safe-area-inset-bottom)); display: flex; gap: 8px; max-width: 616px; margin: 0 auto; z-index: 4; }
 .chat-input textarea { flex: 1; resize: none; font: inherit; color: inherit; }
-.chat-input button { flex: none; width: 54px; font-size: 22px; background: var(--arancio); color: #111; }
+.chat-input button { flex: none; padding: 0 16px; font-size: 16px; font-weight: 700; background: var(--arancio); color: #111; }

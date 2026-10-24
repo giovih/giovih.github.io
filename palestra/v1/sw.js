@@ -1,5 +1,5 @@
 // Fa funzionare l'app anche senza internet (in palestra spesso non c'è campo).
-const CACHE = "palestra1-v6";
+const CACHE = "palestra1-v7";
 const FILE = ["./", "index.html", "style.css", "app.js", "dati.js", "cibo.js", "extra.js", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 

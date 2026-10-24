@@ -149,3 +149,9 @@ Kcal e proteine sono quelli della tua scheda; carboidrati e grassi li ho stimati
 - In app c'è la guida con gli strumenti di iOS (Tempo di utilizzo, Comandi, Full immersion), che funzionano davvero e sono gratis.
 - Il blocco vero resta nel codice Swift (`PalestraApp/`), che richiede l'account sviluppatore a pagamento per Family Controls.
 
+
+## 12. Niente Coach e niente stima AI (richiesta)
+- L'AI di Anthropic si paga a consumo e non serve: ho tolto la scheda Coach (ora le sezioni sono 4: Oggi, Cibo, Progressi, Altro)
+  e la scheda "Foto AI" nell'aggiunta del cibo. Ho eliminato anche la funzione `ai` dal progetto Supabase.
+- Il codice resta nel repository (`screens/coach.js`, `data/ai.js`, `supabase/functions/ai/`): se un giorno servisse si rimette in pochi minuti.
+- I consigli importanti (calorie, scarico, pesata, diario) restano in Oggi, sezione "Per te".

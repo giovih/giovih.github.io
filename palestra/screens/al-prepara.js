@@ -1,5 +1,5 @@
 // Altro → Salvataggio online → Prepara il server: i passaggi per creare il progetto Supabase dal telefono,
-// con i pulsanti per copiare il codice del database e delle due funzioni (niente file da cercare su GitHub).
+// con i pulsanti per copiare il codice del database e della funzione delle notifiche (niente file da cercare su GitHub).
 
 import { html, useState, useEffect } from '../lib/preact.js';
 import { List, ListRow, SectionLabel, SectionFoot } from '../ui/kit.js';
@@ -10,7 +10,6 @@ import { aptico } from '../ui/haptics.js';
 const GITHUB = 'https://github.com/giovih/giovih.github.io/blob/main/';
 const FILE = {
   sql: 'supabase/setup.sql',
-  ai: 'supabase/functions/ai/index.ts',
   push: 'supabase/functions/push/index.ts',
 };
 
@@ -54,14 +53,13 @@ const Passi = ({ passi }) => html`<ol class="passi">${passi.map(p => html`<li>${
 
 export function PaginaPrepara() {
   const sql = useFile(FILE.sql);
-  const ai = useFile(FILE.ai);
   const push = useFile(FILE.push);
   const sito = new URL('./', location.href).href;
 
   return html`
     <div class="card info-testa">
       <span class="at-icona"><${Icon} name="cloud" size=${28} /></span>
-      <p class="t-sub secondary center">Si fa una volta sola, in circa 20 minuti. Serve per il salvataggio online, le notifiche ad app chiusa e l'AI.
+      <p class="t-sub secondary center">Si fa una volta sola, in circa 20 minuti. Serve per il salvataggio online e le notifiche ad app chiusa.
         Va benissimo farlo insieme a un genitore.</p>
     </div>
 
@@ -79,33 +77,24 @@ export function PaginaPrepara() {
       'Incolla tutto e premi Run. Deve finire senza errori rossi. Si può rifare quando vuoi: non cancella niente.',
     ]} /><//>
 
-    <${SectionLabel}>3. Crea le due funzioni del server<//>
+    <${SectionLabel}>3. Crea la funzione delle notifiche<//>
     <${List}>
-      <${RigaCopia} titolo="Copia la funzione ai" testo=${ai} file=${FILE.ai} cosa="Funzione ai" />
       <${RigaCopia} titolo="Copia la funzione push" testo=${push} file=${FILE.push} cosa="Funzione push" />
     <//>
     <div class="card mt-12"><${Passi} passi=${[
       'Apri Edge Functions, poi Deploy a new function, poi Via Editor.',
-      'Nome ai: cancella il codice di esempio, incolla la funzione ai e premi Deploy function.',
-      'Rifai lo stesso con il nome push e la funzione push.',
-      'Per tutte e due: apri la funzione, Details, spegni Enforce JWT verification e salva. Le funzioni controllano già da sole chi le chiama.',
+      'Nome push: cancella il codice di esempio, incolla la funzione push e premi Deploy function.',
+      'Apri la funzione, Details, spegni Enforce JWT verification e salva. La funzione controlla già da sola chi la chiama.',
     ]} /><//>
 
-    <${SectionLabel}>4. La chiave dell'AI, solo sul server<//>
-    <div class="card"><${Passi} passi=${[
-      'Serve un account su console.anthropic.com: le regole chiedono un adulto, quindi lo crea un genitore. Lì: API Keys, Create Key, e un po\' di credito in Billing.',
-      'Su Supabase: Edge Functions, Secrets, Add new secret. Nome ANTHROPIC_API_KEY, valore la chiave (inizia con sk-ant-).',
-    ]} /><//>
-    <${SectionFoot}>La chiave non va mai scritta nell'app né su GitHub: la usa solo la funzione ai. Al massimo 80 richieste al giorno.<//>
-
-    <${SectionLabel}>5. Indirizzo dell'app<//>
+    <${SectionLabel}>4. Indirizzo dell'app<//>
     <${List}>
       <${RigaCopia} titolo="Site URL" testo=${sito} cosa="Indirizzo" />
       <${RigaCopia} titolo="Redirect URL" testo=${sito + '**'} cosa="Indirizzo" />
     <//>
     <${SectionFoot}>Su Supabase apri Authentication, URL Configuration: incolla il primo in Site URL e salva, poi aggiungi il secondo con Add URL.<//>
 
-    <${SectionLabel}>6. Collega l'app<//>
+    <${SectionLabel}>5. Collega l'app<//>
     <div class="card"><${Passi} passi=${[
       'Su Supabase apri Project Settings, API Keys: copia Project URL e la chiave Publishable (nei progetti vecchi si chiama anon public).',
       'Torna indietro, incolla indirizzo e chiave e premi Salva. Poi Crea account con email e password.',

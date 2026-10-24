@@ -101,8 +101,6 @@ export function PaginaPrivacy() {
       <${ListRow} icon="lock" tile="#34c759" title="Sul telefono" sub="Tutto è salvato nell'app e funziona anche senza internet e senza account." />
       <${ListRow} icon="cloud" tile="#007aff" title="Online, solo se colleghi l'account"
         sub="Nel tuo progetto Supabase. Ogni dato è legato al tuo account: senza la tua password nessuno lo legge. Le foto sono in uno spazio privato." />
-      <${ListRow} icon="sparkles" tile="#af52de" title="Coach e stima del cibo"
-        sub="La domanda e un riassunto dei dati (o la foto del piatto) passano dalla funzione del tuo progetto e vanno ad Anthropic solo per la risposta. La chiave dell'AI è sul server, mai nell'app." />
       <${ListRow} icon="search" tile="#ff9500" title="Ricerca degli alimenti"
         sub="A Open Food Facts va solo il testo che cerchi o il codice a barre." />
       <${ListRow} icon="nosign" tile="#8e8e93" title="Niente pubblicità" sub="Nessun tracciamento e nessun dato venduto." />
@@ -119,7 +117,6 @@ export function PaginaCrediti() {
       <${ListRow} title="Preact e htm" sub="Interfaccia, licenze MIT e Apache 2.0" />
       <${ListRow} title="ZXing" sub="Lettura dei codici a barre, licenza Apache 2.0" />
       <${ListRow} title="Supabase" sub="Salvataggio online e notifiche" />
-      <${ListRow} title="Claude di Anthropic" sub="Coach e stima del cibo dalla foto" />
     <//>
     <${SectionFoot}>Icone disegnate per l'app nello stile di iOS. Font di sistema dell'iPhone.<//>`;
 }

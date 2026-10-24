@@ -34,7 +34,7 @@ export function PaginaAccount({ apri }) {
       <div class="t-title3 center">${cloud.collegato ? 'Dati al sicuro' : 'Salvataggio online'}</div>
       <p class="t-sub secondary center">${cloud.collegato
         ? 'Allenamenti, cibo, peso e foto sono anche nel tuo spazio online. Se cambi telefono accedi e torna tutto.'
-        : 'Con un account gratuito su Supabase i dati (anche le foto) restano al sicuro: se cambi telefono o reinstalli l\'app accedi e torna tutto. Serve anche per le notifiche ad app chiusa e per l\'AI.'}</p>
+        : 'Con un account gratuito su Supabase i dati (anche le foto) restano al sicuro: se cambi telefono o reinstalli l\'app accedi e torna tutto. Serve anche per le notifiche ad app chiusa.'}</p>
     </div>
     ${cloud.collegato ? html`<${Collegato} cloud=${cloud} sync=${sync} apri=${apri} />`
       : !cloud.configurato || modifica ? html`<${Progetto} apri=${apri} onFatto=${() => setModifica(false)} />`
@@ -72,8 +72,7 @@ function Progetto({ apri, onFatto }) {
       </label>
       <div class="mt-16"><${Button} block disabled=${!valido} onClick=${salva}>Salva<//></div>
     </div>
-    <${SectionFoot}>Le trovi su supabase.com, nel tuo progetto: Project Settings, API. La chiave pubblica si può usare nell'app;
-      la chiave dell'AI invece resta solo sul server.<//>`;
+    <${SectionFoot}>Le trovi su supabase.com, nel tuo progetto: Project Settings, API. La chiave pubblica si può usare nell'app.<//>`;
 }
 
 /* ---------- 2. accesso ---------- */

@@ -363,7 +363,7 @@ function Aggiungi({ giorno, pasto: pastoIniziale, chiudi, vai }) {
     ${q
       ? html`<div class="mt-8">${ricerca()}</div>`
       : html`<div class="mt-16"><${Segmented} value=${tab} onChange=${setTab} label="Tipo di aggiunta" options=${[
-          { value: 'pasti', label: 'Pasti' }, { value: 'recenti', label: 'Recenti' }, { value: 'preferiti', label: 'Preferiti' }, { value: 'foto', label: 'Foto AI' }]} /></div>
+          { value: 'pasti', label: 'Pasti' }, { value: 'recenti', label: 'Recenti' }, { value: 'preferiti', label: 'Preferiti' }]} /></div>
         <div class="mt-16">${schede[tab]()}</div>`}
   </div>`;
 }

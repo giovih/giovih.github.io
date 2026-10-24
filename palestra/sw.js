@@ -1,7 +1,7 @@
 // Service worker: l'app funziona senza internet e riceve le notifiche push.
 // Aggiorna VERSIONE a ogni pubblicazione: il telefono scarica la nuova versione da solo.
 
-const VERSIONE = '2.0.1';
+const VERSIONE = '2.1.0';
 const CACHE = 'pal2-' + VERSIONE;
 
 const FILE = [

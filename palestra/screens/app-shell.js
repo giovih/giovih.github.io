@@ -1,4 +1,4 @@
-// Struttura dell'app: le 5 schede, l'allenamento a tutto schermo e i livelli (fogli, menu, avvisi).
+// Struttura dell'app: le 4 schede, l'allenamento a tutto schermo e i livelli (fogli, menu, avvisi).
 
 import { html, useState, useEffect, useCallback, useRef } from '../lib/preact.js';
 import * as S from '../data/store.js';
@@ -10,7 +10,6 @@ import { applicaTema } from './comuni.js';
 import { Oggi } from './oggi.js';
 import { Cibo } from './cibo.js';
 import { Progressi } from './progressi.js';
-import { Coach } from './coach.js';
 import { Altro } from './altro.js';
 import { Allenamento } from './allenamento.js';
 
@@ -18,7 +17,6 @@ const SCHEDE = [
   { id: 'oggi', nome: 'Oggi', icona: 'house', iconaOn: 'houseFill' },
   { id: 'cibo', nome: 'Cibo', icona: 'forkKnife', iconaOn: 'forkKnifeFill' },
   { id: 'progressi', nome: 'Progressi', icona: 'chart', iconaOn: 'chartFill' },
-  { id: 'coach', nome: 'Coach', icona: 'sparkles', iconaOn: 'sparklesFill' },
   { id: 'altro', nome: 'Altro', icona: 'gear', iconaOn: 'gearFill' },
 ];
 
@@ -120,7 +118,6 @@ export function AppShell() {
     <${Oggi} hidden=${scheda !== 'oggi'} vai=${vai} />
     <${Cibo} hidden=${scheda !== 'cibo'} vai=${vai} />
     <${Progressi} hidden=${scheda !== 'progressi'} vai=${vai} />
-    <${Coach} hidden=${scheda !== 'coach'} vai=${vai} />
     <${Altro} hidden=${scheda !== 'altro'} vai=${vai} />
     <${TabBar} attiva=${scheda} onScegli=${scegli} />
     <${Allenamento} aperto=${allenamento} sessione=${att} onChiudi=${() => setAllenamento(false)} vai=${vai} />

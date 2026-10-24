@@ -1,7 +1,8 @@
 # Avanzamento: app Palestra definitiva
 
 **Xcode non c'è** su questo computer (`xcodebuild -version` → `command not found`, è Linux): come da istruzioni
-sto costruendo una **PWA installabile** con notifiche web push, stessa grafica e stessi dati. Dettagli in `DECISIONI.md`.
+ho costruito una **PWA installabile** con notifiche web push, stessa grafica e stessi dati. Dettagli in `DECISIONI.md`.
+Tutti gli 8 passi sono fatti. Restano solo le cose che richiedono un account (sotto, "Da fare domattina").
 
 ## Fatto
 - [x] **Passo 1 – Base**: design system (colori, tipografia, componenti: Card, PrimaryButton, StatTile, SetRow, ProgressRing,
@@ -39,13 +40,30 @@ sto costruendo una **PWA installabile** con notifiche web push, stessa grafica e
       AI (stima del cibo e Coach) attraverso la funzione `ai`: la chiave di Anthropic sta solo su Supabase.
       **Provato davvero** con un Supabase completo sul computer: 7 prove delle API, 19 prove con due telefoni simulati,
       notifiche controllate con firma e cifratura verificate da una libreria indipendente. Da fare domattina: i passi qui sotto.
-- [ ] Passo 7 – Rifinitura grafica di ogni schermata
-- [ ] Passo 8 – Blocco app (facoltativo)
+- [x] **Passo 7 – Rifinitura**: giro di tutte le schermate in tema scuro e chiaro, con dati veri e con l'app vuota
+      (mai errori, sempre uno stato vuoto con un'azione); contrasto del testo controllato schermata per schermata
+      (pulsanti pieni con un blu più profondo, tema chiaro più leggibile), aree di tocco più grandi, nessuna emoji,
+      schermate di avvio per iPhone (niente lampo bianco), guida **Prepara il server** dentro l'app con i pulsanti per copiare il codice.
+      La versione precedente in `/v1/` ora non ha più emoji né il campo per la chiave dell'AI.
+- [x] **Passo 8 – Blocco app**: un'app web non può bloccare le altre app (Apple lo permette solo alle app native con il permesso
+      Family Controls). In **Altro → Blocca le distrazioni** c'è la guida con Tempo di utilizzo, Comandi e Full immersion.
+      Il codice Swift per il blocco vero è in `PalestraApp/` (vedi sotto).
 
-## Da fare domattina: attivare il salvataggio online, le notifiche e l'AI (circa 20 minuti)
+## Prova subito (gratis, 1 minuto)
+1. Sull'iPhone apri **Safari** e vai su `https://giovih.github.io/palestra/`.
+2. Tocca **Condividi** (il quadrato con la freccia) e poi **Aggiungi alla schermata Home**. Se c'era già l'icona della vecchia app,
+   va bene quella: si aggiorna da sola e i tuoi dati vengono importati al primo avvio.
+3. Apri Palestra **dall'icona**. Funziona subito, anche senza internet: allenamenti, timer, cibo, peso, progressi, agenda, spunti del Coach.
+4. Se vedi ancora la vecchia versione: chiudi l'app (scorri verso l'alto dal basso e toglila) e riaprila. Al massimo serve farlo due volte.
 
-L'app funziona già senza account (dati sul telefono). Questi passi servono per: salvataggio online, notifiche ad app chiusa,
-Coach e stima del cibo dalla foto. Se ti blocchi, va bene farli con un genitore.
+Senza i passi qui sotto mancano solo: salvataggio online, notifiche con l'app chiusa, chat del Coach e stima del cibo dalla foto.
+Il timer di recupero suona comunque finché l'app è aperta (durante l'allenamento lo schermo resta acceso).
+
+## Da fare domattina: salvataggio online, notifiche e AI (circa 20 minuti)
+
+**Il modo più semplice è dal telefono:** apri l'app, **Altro → Salvataggio online → Prepara il server**. Ci sono gli stessi passi
+scritti qui sotto e i pulsanti **Copia** per il codice del database e delle due funzioni (niente file da cercare su GitHub).
+Se ti blocchi, va bene farli con un genitore. Servono per: salvataggio online, notifiche ad app chiusa, Coach e stima del cibo dalla foto.
 
 **1. Crea il progetto Supabase (gratis)**
 1. Vai su **supabase.com**, premi **Start your project** e accedi con GitHub.
@@ -54,13 +72,14 @@ Coach e stima del cibo dalla foto. Se ti blocchi, va bene farli con un genitore.
 
 **2. Prepara il database**
 1. Nel menu a sinistra apri **SQL Editor**, poi **New query**.
-2. Apri il file `supabase/setup.sql` di questo progetto (su GitHub: cartella `supabase`, file `setup.sql`, tasto *Copy raw file*),
+2. Nell'app premi **Copia il codice del database** (oppure su GitHub: cartella `supabase`, file `setup.sql`, tasto *Copy raw file*),
    incolla tutto e premi **Run**. Deve finire senza errori rossi. Si può rieseguire quando vuoi: non cancella niente.
 
 **3. Crea le due funzioni del server**
 1. Nel menu a sinistra apri **Edge Functions**, poi **Deploy a new function** e scegli **Via Editor**.
-2. Nome: `ai`. Cancella il codice di esempio e incolla tutto il file `supabase/functions/ai/index.ts`. Premi **Deploy function**.
-3. Rifai lo stesso con nome `push` e il file `supabase/functions/push/index.ts`.
+2. Nome: `ai`. Cancella il codice di esempio e incolla la funzione ai (nell'app: **Copia la funzione ai**; su GitHub:
+   `supabase/functions/ai/index.ts`). Premi **Deploy function**.
+3. Rifai lo stesso con nome `push` e la funzione push (`supabase/functions/push/index.ts`).
 4. Per **tutte e due** le funzioni: apri la funzione, scheda **Details** (o *Settings*), spegni **Enforce JWT verification**
    (a volte si chiama *Verify JWT with legacy secret*) e salva. Le funzioni controllano già da sole chi le chiama.
 
@@ -86,11 +105,11 @@ Coach e stima del cibo dalla foto. Se ti blocchi, va bene farli con un genitore.
 5. Consigliato, dopo aver creato il tuo account: **Authentication → Sign In / Providers**, spegni
    **Allow new users to sign up** e salva. Così nessun altro può creare account nel tuo progetto.
 
-**7. Installa l'app e attiva le notifiche**
-1. Apri `https://giovih.github.io/palestra/` in **Safari** sull'iPhone, tocca **Condividi** e poi **Aggiungi alla schermata Home**.
-2. Apri Palestra **dall'icona sulla schermata Home** (le notifiche funzionano solo così, con iOS 16.4 o più recente).
-3. **Altro → Notifiche → Attiva le notifiche**, poi **Consenti**. Premi **Manda una notifica di prova**: arriva in pochi secondi.
-4. Se avevi i dati nella vecchia app sul sito, la prima apertura li importa da sola (anche le foto).
+**7. Attiva le notifiche**
+1. Apri Palestra **dall'icona sulla schermata Home** (le notifiche funzionano solo così, con iOS 16.4 o più recente).
+2. **Altro → Notifiche → Attiva le notifiche**, poi **Consenti**. Premi **Manda una notifica di prova**: arriva in pochi secondi.
+3. Ogni promemoria (allenamento 1 ora prima, pranzo pre-allenamento, merenda, cena, prima di dormire, creatina, acqua, pesata)
+   si accende, si spegne e si sposta di orario lì.
 
 **Limiti da sapere**
 - Il piano gratuito di Supabase mette in pausa il progetto dopo circa una settimana senza utilizzo. Se succede: entra su
@@ -99,6 +118,16 @@ Coach e stima del cibo dalla foto. Se ti blocchi, va bene farli con un genitore.
   comunque nell'app, che tiene lo schermo acceso durante l'allenamento.
 - Le **Live Activity** (il timer sulla schermata di blocco come nelle app native) non esistono per le app web:
   al loro posto arriva la notifica "Recupero finito".
+
+## Blocco delle app (passo 8)
+- **Nell'app web non si può**: Safari non dà a nessun sito il permesso di bloccare altre app (Screen Time è solo per le app native).
+- **Cosa usare adesso** (gratis, già spiegato in **Altro → Blocca le distrazioni**): *Tempo di utilizzo → Limitazioni app*
+  per i social, *Tempo di inattività* per la sera, un'automazione di **Comandi** che apre Palestra quando apri TikTok o Instagram,
+  e una **Full immersion "Palestra"** che si attiva all'orario della palestra.
+- **Blocco vero dentro l'app**: il codice Swift è pronto in `PalestraApp/` (servizio `AppBlocker.swift` ed estensione `EstensioneBlocco/`).
+  Serve un Mac con Xcode, un iPhone collegato con il cavo e un **account sviluppatore Apple a pagamento (99 euro l'anno)**:
+  con l'account gratuito la funzione Family Controls non si può attivare. Le istruzioni sono in `PalestraApp/LEGGIMI.md`.
+  Nota: l'app Swift è il primo prototipo e non ha tutte le novità della versione web.
 
 ## Struttura
 ```
@@ -109,6 +138,7 @@ palestra/            l'app (PWA)
   data/              archivio locale (IndexedDB), azioni, timer di recupero, sincronizzazione
   ui/                design system: design.css, screens.css, icone, componenti, grafici, fogli, tastierino, aptica
   screens/           le schermate: oggi, allenamento, cibo, progressi (corpo, allenamenti, agenda, diario), coach, altro
+  icons/             icona dell'app e schermate di avvio per iPhone
   test/              test (node --test test/*.test.js)
   v1/                la versione precedente, per sicurezza
 supabase/            setup.sql (database), functions/ai e functions/push (funzioni del server), prove/ (prove automatiche)
@@ -116,5 +146,7 @@ supabase/            setup.sql (database), functions/ai e functions/push (funzio
 
 ## Test
 ```
-cd palestra && node --test test/*.test.js
+cd palestra && npm test                 # 51 prove della logica (progressione, calorie, statistiche, coach, sincronizzazione)
 ```
+Le prove del server (Supabase completo in locale con Docker: sincronizzazione, foto, notifiche cifrate, AI) sono spiegate
+in `supabase/prove/README.md`.

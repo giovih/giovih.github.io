@@ -22,7 +22,7 @@ Qui scrivo le scelte che ho fatto da solo durante il lavoro, con il motivo.
   (griglia 24×24, tratto arrotondato, varianti piene per la barra delle schede). Nessuna emoji in tutta l'app.
 - Font: quello di sistema (**SF Pro** su iPhone), **SF Pro Rounded** per i numeri grandi (come l'app Fitness), cifre tabulari.
 - Il testo segue la **dimensione del testo di iOS** (Dynamic Type) grazie a `font: -apple-system-body`.
-- **Un solo colore di accento: blu** (#3D8BFF scuro / #1F6FE5 chiaro). I toni delle sedute sono tenui: A ambra, B verde acqua, Gambe rosa, C lavanda, Avambracci sabbia.
+- **Un solo colore di accento: blu** (#3D8BFF scuro / #1A68DC chiaro; i pulsanti pieni usano un blu un po' più profondo, #2170E6, perché il testo bianco si legga bene). I toni delle sedute sono tenui: A ambra, B verde acqua, Gambe rosa, C lavanda, Avambracci sabbia.
 - Tema scuro predefinito (sfondo quasi nero, card a livelli di grigio, bordi da 0,5 px); tema chiaro automatico o forzabile in Altro.
 - Animazioni con **molle** (curva `linear()` calcolata da una molla reale), feedback aptico: su iPhone il web non può vibrare,
   ma un interruttore nativo nascosto (`<input switch>`, iOS 18+) fa "tic" con il Taptic Engine a ogni serie completata.
@@ -128,3 +128,24 @@ Kcal e proteine sono quelli della tua scheda; carboidrati e grassi li ho stimati
   la chiave di Anthropic e il segreto delle notifiche stanno solo sul server. Le funzioni verificano da sole l'utente.
 - **Provato** con un Supabase locale completo (Postgres con pg_cron e pg_net, GoTrue, PostgREST, Storage, Edge Runtime):
   prove in `supabase/prove/`.
+
+## 10. Rifinitura e pubblicazione
+- Ho fatto un giro automatico di tutte le schermate (Oggi, allenamento con tastierino e recupero, Cibo e aggiunta, le quattro
+  sezioni di Progressi, Coach, Altro) in tema scuro e chiaro, con dati realistici e con l'app vuota, e ho guardato ogni immagine.
+- Contrasto controllato con un programma su ogni schermata: i pulsanti pieni usano un blu un po' più profondo (#2170E6) perché
+  il testo bianco arrivi a 4,6:1; nel tema chiaro accento, rosso e lavanda sono leggermente più scuri. Il blu resta quello di prima a colpo d'occhio.
+- Aree di tocco più grandi senza cambiare l'aspetto (interruttori, periodi del grafico, "Aggiungi" nei titoli delle sezioni).
+- **Schermate di avvio** per tutti gli iPhone recenti, in scuro e chiaro: con una PWA, senza queste, iOS mostra un lampo bianco all'apertura.
+- Il service worker nuovo cancella la cache della prima versione del sito (`palestra-v5`) e lascia quella della copia in `/v1/`.
+- **Prepara il server** (Altro → Salvataggio online): dal telefono è scomodo copiare file da GitHub, quindi l'app scarica dal sito
+  il codice del database e delle funzioni e lo copia con un tocco. Il codice è pubblico (nessun segreto dentro): le chiavi stanno solo su Supabase.
+- La versione precedente in `/v1/` aveva emoji e un campo per incollare la chiave dell'AI nel telefono: li ho tolti, così anche lì
+  la chiave non sta mai nell'app. Stima e Coach rimandano alla versione nuova.
+- Pubblicazione: ho unito il ramo `palestra-app` con `main` (che nel frattempo aveva la chat in `chat/`, rimasta com'era) e l'ho pubblicato
+  su GitHub Pages. Le cartelle `supabase/` e `PalestraApp/` sono finite anche sul sito: servono alla guida "Prepara il server".
+
+## 11. Blocco delle app
+- Una PWA non può usare Screen Time: nessuna API web lo permette. Non ho inventato soluzioni finte.
+- In app c'è la guida con gli strumenti di iOS (Tempo di utilizzo, Comandi, Full immersion), che funzionano davvero e sono gratis.
+- Il blocco vero resta nel codice Swift (`PalestraApp/`), che richiede l'account sviluppatore a pagamento per Family Controls.
+

@@ -168,6 +168,7 @@
 *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html {
+  touch-action: manipulation; /* niente zoom con il doppio tocco: si comporta come un'app */
   font-size: 17px;
   font: -apple-system-body; /* segue la dimensione del testo di iOS (Dynamic Type) */
   font-family: var(--font);

@@ -18,6 +18,8 @@ async function avvia() {
   render(html`<${AppShell} />`, document.getElementById('app'));
   requestAnimationFrame(() => document.getElementById('avvio')?.remove());
   registraServiceWorker();
+  // niente zoom con due dita (Safari a volte ignora user-scalable=no)
+  document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
   // per i test automatici: ?debug espone archivio, azioni e cloud
   if (location.search.includes('debug')) {
     Promise.all([import('./data/actions.js'), import('./data/sync.js'), import('./data/push.js')])

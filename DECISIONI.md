@@ -76,3 +76,25 @@ Kcal e proteine sono quelli della tua scheda; carboidrati e grassi li ho stimati
   di panca, squat e rematore; si può correggere. Se il peso del diario è di oggi e non ti eri pesato, va anche tra le pesate.
 - **Foto di progresso**: miniature, "prima e dopo" affiancate e a schermo intero con una linea da trascinare.
   Restano sul telefono e, con l'account, nello spazio privato di Supabase (passo 6).
+
+## 8. Coach e Altro
+- **Coach senza account**: in cima ci sono gli **spunti della settimana**, calcolati dall'app senza AI (peso, allenamenti
+  fatti, record, esercizi fermi o pronti a salire, calorie e proteine medie, creatina). Funzionano sempre, anche offline.
+  Possono dire di mangiare di più, mai di mangiare meno (c'è un test che lo controlla).
+- **Chat con l'AI**: la domanda e un riassunto dei dati (allenamenti delle ultime 6 settimane, cibo di 7 giorni, peso,
+  diario, note, consigli della progressione) vanno alla funzione `ai` di Supabase, che chiama Anthropic. La chiave
+  resta sul server. Nel menu "..." c'è **"Cosa sa il Coach"**: mostra esattamente il testo che viene mandato.
+  Le regole per il Coach (età, niente integratori a parte la creatina, niente diete, niente massimali, dolore = fermati)
+  stanno nel server, non nell'app. La chat resta salvata (ultimi 60 messaggi). Se la risposta non arriva c'è "Riprova".
+- **Altro** è fatto come le Impostazioni di iOS: righe con icone colorate, sotto-pagine che entrano da destra,
+  si torna indietro con la freccia o **scorrendo dal bordo sinistro**. Toccare di nuovo "Altro" torna all'inizio.
+- **Scheda e calendario**: per ogni giorno si sceglie la seduta; due calendari pronti (lun-mer-ven-sab, lun-mer-ven-dom);
+  avviso se manca una seduta o se è doppia. Ogni seduta si modifica: cambiare esercizio, serie, ripetizioni, recuperi,
+  superserie, drop set, spostare su/giù, aggiungere o togliere esercizi, ripristinare l'originale.
+- **Notifiche**: ogni promemoria ha il suo interruttore e il suo orario; pranzo e merenda nei giorni di palestra si
+  spostano da soli (prima/dopo l'allenamento), negli altri giorni usano l'orario scritto. In fondo si vedono i prossimi
+  promemoria. Su iPhone le notifiche web funzionano solo con l'app aggiunta alla schermata Home (iOS 16.4+): la pagina lo spiega.
+- **Obiettivi**: modificabili con − e +; se metti meno calorie di quelle di partenza della scheda compare un avviso
+  (non un blocco: la scelta è tua). Si vedono le kcal che fanno i macro.
+- **Backup**: esporta tutto in un file (con o senza foto) e importa sia i backup nuovi sia quelli della versione
+  precedente. "Cancella tutti i dati" chiede di scrivere CANCELLA.

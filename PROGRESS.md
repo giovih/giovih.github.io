@@ -24,7 +24,13 @@ sto costruendo una **PWA installabile** con notifiche web push, stessa grafica e
       esercizio (forza stimata, carico, ripetizioni), ultime volte, storico con il dettaglio di ogni seduta (e "elimina").
       **Agenda**: calendario del mese con anelli di calorie e proteine, seduta, peso e note; dettaglio del giorno toccato.
       **Diario**: ogni 4 settimane, compilato da solo dai dati.
-- [ ] Passo 5 – Coach e Altro
+- [x] **Passo 5 – Coach e Altro**.
+      **Coach**: spunti automatici della settimana (anche senza account e senza internet), chat con l'AI (bolle, elenchi,
+      grassetto, "Riprova"), domande di esempio, "Cosa sa il Coach". La chat si attiva collegando l'account (passo 6).
+      **Altro**: salvataggio online (progetto, accesso, stato), scheda e calendario con editor completo delle sedute,
+      orari della palestra, avambracci, inizio programma, obiettivi, notifiche (ogni tipo con orario e interruttore),
+      tema, backup (esporta/importa, anche il vecchio formato), versione precedente, guida al blocco delle app,
+      privacy, crediti, cancella tutto.
 - [ ] Passo 6 – Salvataggio online (Supabase) e notifiche dal server
 - [ ] Passo 7 – Rifinitura grafica di ogni schermata
 - [ ] Passo 8 – Blocco app (facoltativo)

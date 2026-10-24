@@ -93,3 +93,29 @@ export function pref(chiave, def) {
 export function setPref(chiave, valore) {
   try { localStorage.setItem('palestra-pref-' + chiave, JSON.stringify(valore)); } catch { /* niente */ }
 }
+
+/**
+ * Altezza della tastiera di iOS (0 se chiusa). Su iPhone la tastiera copre la pagina invece di accorciarla:
+ * con visualViewport so quanto spazio resta e sposto in su la barra per scrivere.
+ */
+export function useTastiera() {
+  const [kb, setKb] = useState(0);
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const f = () => {
+      const h = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      const v = h > 80 ? Math.round(h) : 0;
+      setKb(v);
+      document.documentElement.classList.toggle('tastiera-aperta', v > 0);
+    };
+    vv.addEventListener('resize', f);
+    vv.addEventListener('scroll', f);
+    return () => {
+      vv.removeEventListener('resize', f);
+      vv.removeEventListener('scroll', f);
+      document.documentElement.classList.remove('tastiera-aperta');
+    };
+  }, []);
+  return kb;
+}

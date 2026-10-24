@@ -278,8 +278,8 @@ h1, h2, h3, p { margin: 0; }
   -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 0.5px solid var(--separator);
 }
-.nav-bar .nb-title { position: absolute; left: 70px; right: 70px; text-align: center; font-weight: 600; font-size: 1rem; letter-spacing: -0.024em; }
-.back-btn { display: inline-flex; align-items: center; gap: 2px; height: 44px; padding: 0 8px 0 2px; color: var(--accent); font-size: 1rem; }
+.nav-bar .nb-title { position: absolute; left: 104px; right: 104px; text-align: center; font-weight: 600; font-size: 1rem; letter-spacing: -0.024em; pointer-events: none; }
+.back-btn { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 2px; height: 44px; max-width: 100px; padding: 0 8px 0 2px; color: var(--accent); font-size: 1rem; }
 .back-btn .icon { width: 24px; height: 24px; }
 
 .section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 28px 4px 10px; }
@@ -754,3 +754,9 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 .anelli-giorno .ag-kcal { stroke: var(--accent); }
 .anelli-giorno .ag-prot { stroke: var(--dato-prot); }
 .anelli-giorno .ag-centro { position: relative; font-size: 0.706rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+
+/* Righe delle impostazioni */
+.row.disattiva { opacity: 0.45; pointer-events: none; }
+.row .riga-numero { font-weight: 500; color: var(--label); min-width: 3.4rem; margin-right: 4px; }
+.row .riga-numero small { font-size: 0.765rem; color: var(--label-2); font-weight: 400; }
+.row .time-input { flex: none; }

@@ -13,7 +13,8 @@ const FILE = [
   'data/idb.js', 'data/store.js', 'data/actions.js', 'data/cloud.js', 'data/sync.js', 'data/push.js', 'data/off.js', 'data/ai.js', 'data/rest.js',
   'screens/app-shell.js', 'screens/oggi.js', 'screens/allenamento.js', 'screens/cibo.js', 'screens/aggiungi-cibo.js',
   'screens/progressi.js', 'screens/pr-corpo.js', 'screens/pr-allenamenti.js', 'screens/pr-agenda.js', 'screens/pr-diario.js',
-  'screens/coach.js', 'screens/altro.js', 'screens/comuni.js',
+  'screens/coach.js', 'screens/altro.js', 'screens/al-programma.js', 'screens/al-notifiche.js', 'screens/al-account.js', 'screens/al-varie.js',
+  'screens/comuni.js',
   'icons/icon-96.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
 ];
 

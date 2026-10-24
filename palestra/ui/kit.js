@@ -3,6 +3,7 @@
 import { html, useState, useEffect, useRef, useLayoutEffect } from '../lib/preact.js';
 import { Icon } from './icons.js';
 import { aptico } from './haptics.js';
+import { apriMenu } from './overlay.js';
 
 const cx = (...c) => c.filter(Boolean).join(' ');
 
@@ -43,8 +44,10 @@ export function Page({ id, hidden, title, caption, actions, compactRight, childr
 
 /** Barra con "indietro" per le pagine interne. */
 export function NavBar({ title, back = 'Indietro', onBack, right }) {
+  // come su iOS: se il nome della pagina precedente è lungo, il tasto dice solo "Indietro"
+  const etichetta = back && back.length <= 11 ? back : 'Indietro';
   return html`<div class="nav-bar">
-    <button class="back-btn" onClick=${onBack} aria-label=${'Torna a ' + back}><${Icon} name="chevronLeft" />${back}</button>
+    <button class="back-btn" onClick=${onBack} aria-label=${'Torna a ' + back}><${Icon} name="chevronLeft" /><span class="ellipsis">${etichetta}</span></button>
     <div class="nb-title ellipsis">${title}</div>
     <span class="spacer"></span>
     ${right}
@@ -205,4 +208,52 @@ export function AnimatedNumber({ value, format = v => v }) {
   const prev = useRef(value);
   useLayoutEffect(() => { if (prev.current !== value) { prev.current = value; setK(x => x + 1); } }, [value]);
   return html`<span key=${k} class=${k ? 'pop' : ''} style="display:inline-block">${format(value)}</span>`;
+}
+
+/* ---------- righe delle impostazioni ---------- */
+
+const iconaRiga = (icon, tile) => icon && html`<span class="row-icon" style=${tile ? `--tile:${tile}` : null}><${Icon} name=${icon} /></span>`;
+const testoRiga = (title, sub) => html`<span class="row-main"><span class="row-title">${title}</span>${sub && html`<span class="row-sub">${sub}</span>`}</span>`;
+
+/** Riga con interruttore (tutta la riga è toccabile). */
+export function RigaInterruttore({ icon, tile, title, sub, checked, onChange, disabled }) {
+  return html`<label class=${cx('row', icon && 'has-icon', disabled && 'disattiva')}>
+    ${iconaRiga(icon, tile)}${testoRiga(title, sub)}
+    <${Toggle} checked=${checked} onChange=${onChange} label=${title} />
+  </label>`;
+}
+
+/** Riga con un orario a destra. */
+export function RigaOra({ icon, tile, title, sub, value, onChange, disabled }) {
+  return html`<div class=${cx('row', icon && 'has-icon', disabled && 'disattiva')}>
+    ${iconaRiga(icon, tile)}${testoRiga(title, sub)}
+    <${TimeInput} value=${value} onChange=${onChange} label=${title} />
+  </div>`;
+}
+
+/** Riga che apre un menu per scegliere un valore. */
+export function RigaScelta({ icon, tile, title, sub, value, options, onChange, disabled }) {
+  const sel = options.find(o => o.value === value);
+  const apri = e => {
+    aptico();
+    apriMenu(e.currentTarget.querySelector('.row-detail') || e.currentTarget, options.map(o => ({
+      label: o.label, icona: o.value === value ? 'check' : null, azione: () => o.value !== value && onChange(o.value),
+    })));
+  };
+  return html`<button type="button" class=${cx('row', icon && 'has-icon', disabled && 'disattiva')} onClick=${apri}
+    aria-label=${`${title}: ${sel?.label || ''}`}>
+    ${iconaRiga(icon, tile)}${testoRiga(title, sub)}
+    <span class="row-detail">${sel?.label}</span>
+    <${Icon} name="chevronUpDown" class="chev" size=${14} />
+  </button>`;
+}
+
+/** Riga con un numero e i tasti − e +. */
+export function RigaNumero({ icon, tile, title, sub, value, unit, step = 1, min = -Infinity, max = Infinity, onChange, format = v => v }) {
+  const cambia = d => onChange(Math.max(min, Math.min(max, Math.round((value + d) * 100) / 100)));
+  return html`<div class=${cx('row', icon && 'has-icon')}>
+    ${iconaRiga(icon, tile)}${testoRiga(title, sub)}
+    <span class="row-detail num riga-numero">${format(value)}${unit && html`<small> ${unit}</small>`}</span>
+    <${Stepper} onMinus=${() => cambia(-step)} onPlus=${() => cambia(step)} label=${title} />
+  </div>`;
 }

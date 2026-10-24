@@ -1,6 +1,8 @@
 // Alimenti di base (valori medi per 100 g o 100 ml, da tabelle CREA/USDA ed etichette comuni)
 // e pasti preimpostati della scheda. Servono anche senza internet.
 
+import { ALIMENTI_EXTRA } from './alimenti-extra.js';
+
 /** I pasti della giornata. */
 export const PASTI = [
   { key: 'colazione', nome: 'Colazione', icona: 'sunrise' },
@@ -24,7 +26,16 @@ export function pastoPerOra(ora = new Date().getHours()) {
 }
 
 const a = (id, nome, kcal, prot, carb, grassi, porzioni = [], unita = 'g') =>
-  ({ id: 'db-' + id, nome, kcal, prot, carb, grassi, unita, porzioni, fonte: 'db' });
+  ({ id: 'db-' + id, nome, kcal, prot, carb, grassi, unita, porzioni, alias: ALIAS[id] || '', fonte: 'db' });
+
+// parole simili per trovare gli alimenti di base anche con altri nomi
+const ALIAS = {
+  manzo: 'bistecca carne rossa fettina', macinato: 'carne trita ragu', pollo: 'carne bianca', tacchino: 'carne bianca',
+  uova: 'uovo', pasta: 'spaghetti penne fusilli rigatoni maccheroni', riso: 'risotto', pane: 'panino rosetta baguette',
+  cornetto: 'brioche croissant', pizza: 'margherita', latte: 'cappuccino', 'yogurt-greco': 'fage', barretta: 'protein bar',
+  'crema-nocciole': 'nutella', olio: 'evo condimento', patate: 'patata', verdure: 'contorno', 'frutti-bosco': 'mirtilli lamponi',
+  ceci: 'legumi', fagioli: 'legumi', lenticchie: 'legumi', 'tonno-olio': 'tonno', 'tonno-naturale': 'tonno', wurstel: 'wurstel',
+};
 const P = (nome, g) => ({ nome, g });
 
 export const ALIMENTI = [
@@ -111,6 +122,8 @@ export const ALIMENTI = [
   a('hummus', 'Hummus', 177, 7.9, 14, 9.6, [P('Porzione', 50)]),
 ];
 
+ALIMENTI.push(...ALIMENTI_EXTRA.filter(x => !ALIMENTI.some(y => y.id === x.id)));
+
 /** Pasti preimpostati della scheda (kcal e proteine dalla scheda, carboidrati e grassi stimati). */
 const m = (pasto, n, nome, descrizione, kcal, prot, carb, grassi) =>
   ({ id: `preset-${pasto}-${n}`, pasto, nome, descrizione, kcal, prot, carb, grassi, fonte: 'preset' });
@@ -139,7 +152,13 @@ export const PRESET = [
 /** Toglie accenti e maiuscole per la ricerca. */
 export const normalizza = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 
-/** Ricerca negli alimenti di base: tutte le parole devono comparire. */
+// radice della parola: "bistecche" e "bistecca" → "bistecc", "polli" e "pollo" → "poll"
+const radice = w => (w.length > 3 ? w.replace(/(he|hi|e|i|a|o)$/, '') : w);
+
+/**
+ * Ricerca negli alimenti di base: ogni parola cercata deve trovarsi nel nome o nelle parole simili
+ * (anche al plurale o scritta a metà). Prima i nomi che iniziano con quello che cerchi.
+ */
 export function cercaLocale(testo, lista = ALIMENTI, max = 20) {
   const q = normalizza(testo);
   if (!q) return [];
@@ -147,8 +166,18 @@ export function cercaLocale(testo, lista = ALIMENTI, max = 20) {
   return lista
     .map(x => {
       const n = normalizza(x.nome);
-      if (!parole.every(p => n.includes(p))) return null;
-      return { x, score: (n.startsWith(q) ? 0 : 1) + n.length / 100 };
+      const al = normalizza(x.alias);
+      const pn = n.split(' '), pa = al ? al.split(' ') : [];
+      const trova = (p, ws) => ws.some(w => w.startsWith(p) || (p.length > 3 && radice(w).startsWith(radice(p))));
+      let score = 0;
+      for (const p of parole) {
+        if (trova(p, pn) || n.includes(p)) continue;
+        if (trova(p, pa)) { score += 2; continue; }
+        return null;
+      }
+      if (n.startsWith(q)) score -= 1;
+      else if (!pn[0].startsWith(parole[0]) && !radice(pn[0]).startsWith(radice(parole[0]))) score += 0.5;
+      return { x, score: score + n.length / 100 };
     })
     .filter(Boolean)
     .sort((a, b) => a.score - b.score)

@@ -1,7 +1,7 @@
 // Service worker: l'app funziona senza internet e riceve le notifiche push.
 // Aggiorna VERSIONE a ogni pubblicazione: il telefono scarica la nuova versione da solo.
 
-const VERSIONE = '2.1.0';
+const VERSIONE = '2.2.0';
 const CACHE = 'pal2-' + VERSIONE;
 
 const FILE = [
@@ -9,7 +9,7 @@ const FILE = [
   'lib/preact.js', 'lib/zxing.js',
   'ui/design.css', 'ui/screens.css', 'ui/icons.js', 'ui/kit.js', 'ui/overlay.js', 'ui/haptics.js', 'ui/charts.js', 'ui/keypad.js', 'ui/scanner.js',
   'core/dates.js', 'core/format.js', 'core/scheda.js', 'core/cycle.js', 'core/progression.js', 'core/nutrition.js',
-  'core/foods.js', 'core/settings.js', 'core/reminders.js', 'core/migrate.js', 'core/sync-merge.js', 'core/coach.js', 'core/stats.js',
+  'core/foods.js', 'core/alimenti-extra.js', 'core/settings.js', 'core/reminders.js', 'core/migrate.js', 'core/sync-merge.js', 'core/coach.js', 'core/stats.js',
   'data/idb.js', 'data/store.js', 'data/actions.js', 'data/cloud.js', 'data/sync.js', 'data/push.js', 'data/off.js', 'data/ai.js', 'data/rest.js',
   'screens/app-shell.js', 'screens/oggi.js', 'screens/allenamento.js', 'screens/cibo.js', 'screens/aggiungi-cibo.js',
   'screens/progressi.js', 'screens/pr-corpo.js', 'screens/pr-allenamenti.js', 'screens/pr-agenda.js', 'screens/pr-diario.js',

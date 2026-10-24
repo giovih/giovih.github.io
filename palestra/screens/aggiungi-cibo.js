@@ -294,7 +294,7 @@ function Aggiungi({ giorno, pasto: pastoIniziale, chiudi, vai }) {
 
   const ricerca = () => {
     const miei = [...preferiti, ...recenti].filter((x, i, arr) => normalizza(x.nome).includes(qn) && arr.findIndex(y => y.nome === x.nome) === i).slice(0, 6);
-    const base = cercaLocale(q, ALIMENTI, 12);
+    const base = cercaLocale(q, ALIMENTI, 15);
     const preset = PRESET.filter(p => normalizza(p.nome + ' ' + p.descrizione).includes(qn)).slice(0, 4);
     return html`
       ${miei.length > 0 && html`<div class="section-label">I tuoi alimenti</div><div class="list">${miei.map(c => html`<${RigaAlimento}
@@ -303,7 +303,7 @@ function Aggiungi({ giorno, pasto: pastoIniziale, chiudi, vai }) {
       ${preset.length > 0 && html`<div class="section-label">Pasti della scheda</div><div class="list">${preset.map(p => html`<${RigaAlimento}
         titolo=${p.nome} sotto=${p.descrizione} kcal=${p.kcal} icona=${PASTI.find(x => x.key === p.pasto)?.icona}
         onApri=${() => aggiungiDiretto(p)} onAggiungi=${() => aggiungiDiretto(p)} />`)}</div>`}
-      ${base.length > 0 && html`<div class="section-label">Alimenti di base · per 100 g</div><div class="list">${base.map(al => html`<${RigaAlimento}
+      ${base.length > 0 && html`<div class="section-label">Alimenti · valori per 100 g</div><div class="list">${base.map(al => html`<${RigaAlimento}
         titolo=${al.nome} sotto=${`P ${fmtNum(al.prot)} · C ${fmtNum(al.carb)} · G ${fmtNum(al.grassi)}`} kcal=${al.kcal}
         onApri=${() => apriDettaglio(al)} />`)}</div>`}
       <div class="section-label">Open Food Facts</div>

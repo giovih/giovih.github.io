@@ -223,6 +223,17 @@ test('ricerca alimenti senza accenti', () => {
   assert.equal(cercaLocale('YOGURT greco')[0].id, 'db-yogurt-greco');
   assert.ok(cercaLocale('burro arachidi').some(x => x.id === 'db-burro-arachidi'));
   assert.deepEqual(cercaLocale(''), []);
+  // cibi "di casa" e nomi diversi
+  assert.match(cercaLocale('bistecca')[0].nome, /^Bistecca/);
+  assert.match(cercaLocale('bistecche')[0].nome, /^Bistecca/);
+  assert.ok(cercaLocale('bistec').length > 0);
+  assert.ok(cercaLocale('carne rossa').some(x => x.id === 'db-manzo'));
+  assert.ok(cercaLocale('nutella').some(x => x.id === 'db-crema-nocciole'));
+  assert.match(cercaLocale('cotoletta')[0].nome, /Cotoletta/);
+  assert.match(cercaLocale('pollo')[0].nome, /pollo/i);
+  assert.ok(cercaLocale('lasagne').length && cercaLocale('carbonara').length && cercaLocale('kebab').length);
+  assert.ok(ALIMENTI.length > 400);
+  assert.equal(new Set(ALIMENTI.map(x => x.id)).size, ALIMENTI.length);
   assert.equal(pastoPerOra(7), 'colazione');
   assert.equal(pastoPerOra(23), 'notte');
 });

@@ -161,6 +161,9 @@ export function leggiTokenDaIndirizzo() {
 
 export const rpc = (nome, argomenti = {}) => richiesta('/rest/v1/rpc/' + nome, { metodo: 'POST', corpo: argomenti });
 
+/** Lettura semplice dal database (con l'utente collegato). */
+export const rest = percorso => richiesta(percorso);
+
 export const funzione = (nome, corpo = {}) => richiesta('/functions/v1/' + nome, { metodo: 'POST', corpo });
 
 export async function caricaFile(bucket, percorso, blob) {

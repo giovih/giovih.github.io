@@ -1,0 +1,13 @@
+{
+  "name": "palestra-prove-supabase",
+  "private": true,
+  "type": "module",
+  "description": "Prove del backend Supabase dell'app Palestra su un Supabase locale (Docker).",
+  "scripts": {
+    "avvia": "./avvia.sh && node gateway.mjs & node finti.mjs",
+    "api": "node --test api.test.mjs",
+    "telefoni": "node e2e.mjs",
+    "notifiche": "node push-client.mjs"
+  },
+  "dependencies": { "http_ece": "1.2.0", "playwright": "1.56.1" }
+}

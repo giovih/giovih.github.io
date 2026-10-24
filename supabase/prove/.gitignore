@@ -1,0 +1,4 @@
+chiavi.env
+storage/
+node_modules/
+*.png

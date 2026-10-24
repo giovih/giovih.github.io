@@ -376,3 +376,29 @@ test('pesi iniziali: 56,1 e 54,7 senza doppioni', () => {
   assert.deepEqual(pesiIniziali([{ giorno: '2026-10-16', kg: 56.1 }], '2026-10-12'), [{ giorno: '2026-10-23', kg: 54.7 }]);
   assert.deepEqual(pesiIniziali([{ giorno: '2026-10-16', kg: 56.1 }, { giorno: '2026-10-23', kg: 55 }], '2026-10-12'), []);
 });
+
+// ---------- unione dei dati sincronizzati ----------
+
+import { applicaRemoti, uguali, vinceRemoto } from '../core/sync-merge.js';
+
+test('sincronizzazione: vince il più recente, i doppioni identici non contano', () => {
+  const m = new Map();
+  m.set('peso/1', { kind: 'peso', id: '1', data: { giorno: '1', kg: 55 }, updated: 10, deleted: false, dirty: false });
+  // identico (con chiavi in altro ordine, come le restituisce il database): non cambia niente
+  assert.equal(applicaRemoti(m, [{ kind: 'peso', id: '1', data: { kg: 55, giorno: '1' }, updated: 10, deleted: false }]).length, 0);
+  // più vecchio: non vince
+  assert.equal(applicaRemoti(m, [{ kind: 'peso', id: '1', data: { kg: 50 }, updated: 9 }]).length, 0);
+  // più nuovo: vince
+  assert.equal(applicaRemoti(m, [{ kind: 'peso', id: '1', data: { kg: 56 }, updated: 11 }]).length, 1);
+  assert.equal(m.get('peso/1').data.kg, 56);
+  // stesso istante ma contenuto diverso e locale già inviato (record "deboli" di due telefoni): vince il server
+  m.set('impostazioni/impostazioni', { kind: 'impostazioni', id: 'impostazioni', data: { tema: 'auto' }, updated: 1, deleted: false, dirty: false });
+  assert.equal(applicaRemoti(m, [{ kind: 'impostazioni', id: 'impostazioni', data: { tema: 'scuro' }, updated: 1 }]).length, 1);
+  // stesso istante con modifiche locali non inviate: tengo le mie
+  assert.equal(vinceRemoto({ updated: 5, dirty: true }, { updated: 5 }), false);
+  // lapide
+  applicaRemoti(m, [{ kind: 'peso', id: '1', data: null, updated: 20, deleted: true }]);
+  assert.equal(m.get('peso/1').deleted, true);
+  assert.ok(uguali({ a: [1, { b: 2 }] }, { a: [1, { b: 2 }] }));
+  assert.ok(!uguali({ a: [1, 2] }, { a: [2, 1] }));
+});

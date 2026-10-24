@@ -98,3 +98,33 @@ Kcal e proteine sono quelli della tua scheda; carboidrati e grassi li ho stimati
   (non un blocco: la scelta è tua). Si vedono le kcal che fanno i macro.
 - **Backup**: esporta tutto in un file (con o senza foto) e importa sia i backup nuovi sia quelli della versione
   precedente. "Cancella tutti i dati" chiede di scrivere CANCELLA.
+
+## 9. Salvataggio online, notifiche e AI (Supabase)
+- **Supabase** (piano gratuito): database Postgres, account, spazio per le foto, funzioni del server, lavori programmati.
+  Tutto con semplici richieste HTTP dall'app (nessuna libreria in più sul telefono).
+- **Sincronizzazione record per record**: ogni allenamento, pasto, peso, giorno, impostazioni ecc. è un record con
+  `updated` (ora della modifica). Vince sempre il più recente; gli id sono unici (uuid o il giorno), quindi niente doppioni;
+  le cancellazioni viaggiano come "lapidi". Il server rimanda indietro i record che aveva già più nuovi, così tutti i
+  telefoni finiscono uguali. Le novità si scaricano a pagine con un segnalibro, ripartendo 10 secondi prima per non perdere
+  scritture arrivate in ritardo.
+- **Un telefono nuovo non cancella mai i dati veri**: impostazioni iniziali, pesi di partenza e dati importati dalla vecchia
+  app sono "deboli" (valgono meno di qualunque modifica vera); a ogni giro prima si riceve e poi si manda; al primo
+  collegamento valgono le impostazioni salvate online.
+- **Vecchia app**: se nel progetto c'è la tabella `stato` della versione precedente, al primo collegamento l'app la importa
+  (una volta sola, senza doppioni).
+- **Foto**: spazio privato `foto`, ogni utente solo nella sua cartella; le miniature si scaricano per prime; una foto
+  cancellata su un telefono sparisce anche online e sugli altri telefoni.
+- **Notifiche push**: il telefono calcola i promemoria dei prossimi 14 giorni e li manda al server (si aggiornano da soli
+  quando cambi orari o segni creatina e acqua). Ogni 5 secondi il database (pg_cron) controlla se ce n'è una pronta e chiama
+  la funzione `push` (pg_net), che la invia con lo standard Web Push. Cifratura (RFC 8291) e firma VAPID (RFC 8292) scritte con
+  le funzioni crittografiche di Deno, senza librerie esterne; le chiavi VAPID si creano da sole e restano nel database.
+  Il recupero ha priorità alta e sostituisce quello precedente (stesso "argomento").
+- **AI**: funzione `ai` con l'SDK ufficiale di Anthropic (TypeScript, versione bloccata 1.3.0), modello `claude-opus-5-5`
+  con i *fallback* del server attivi (se un controllo di sicurezza rifiuta, la richiesta passa al modello consigliato).
+  Stima del cibo con uscita JSON a schema fisso e sforzo `low`; Coach con sforzo `medium`. Le regole del Coach (mai mangiare
+  meno, solo creatina, niente massimali, dolore = fermati e parlane con un adulto) stanno nel server. Le emoji vengono tolte
+  anche dalle risposte. Limite di 80 richieste al giorno.
+- **Sicurezza**: nel codice ci sono solo l'indirizzo del progetto e la chiave pubblica (fatta per stare nelle app);
+  la chiave di Anthropic e il segreto delle notifiche stanno solo sul server. Le funzioni verificano da sole l'utente.
+- **Provato** con un Supabase locale completo (Postgres con pg_cron e pg_net, GoTrue, PostgREST, Storage, Edge Runtime):
+  prove in `supabase/prove/`.

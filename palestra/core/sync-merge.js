@@ -13,8 +13,19 @@ export function vinceRemoto(locale, remoto) {
   return !locale.dirty; // stesso istante: se ho modifiche non inviate tengo le mie
 }
 
+/** Uguaglianza profonda indipendente dall'ordine delle chiavi (il database le riordina). */
+export function uguali(a, b) {
+  if (a === b) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  const ka = Object.keys(a), kb = Object.keys(b);
+  if (ka.length !== kb.length) return false;
+  return ka.every(k => Object.prototype.hasOwnProperty.call(b, k) && uguali(a[k], b[k]));
+}
+
 /**
  * Applica una lista di record remoti alla mappa locale (Map "kind/id" → record).
+ * Un record identico a quello che ho già non conta come cambiato (niente aggiornamenti inutili dello schermo).
  * @returns {object[]} record locali cambiati
  */
 export function applicaRemoti(mappa, remoti) {
@@ -24,6 +35,7 @@ export function applicaRemoti(mappa, remoti) {
     const k = `${r.kind}/${r.id}`;
     const loc = mappa.get(k);
     const rem = { kind: r.kind, id: String(r.id), data: r.deleted ? null : r.data, updated: +r.updated || 0, deleted: !!r.deleted, dirty: false };
+    if (loc && !loc.dirty && loc.updated === rem.updated && loc.deleted === rem.deleted && uguali(loc.data, rem.data)) continue;
     if (vinceRemoto(loc, rem)) {
       mappa.set(k, rem);
       cambiati.push(rem);

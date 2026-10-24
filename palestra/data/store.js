@@ -171,13 +171,26 @@ export function daInviare(max = 500) {
   return out;
 }
 export const quantiDaInviare = () => { let n = 0; for (const r of recs.values()) if (r.dirty) n++; return n; };
+/** Id dei record cancellati di un tipo (le "lapidi" che viaggiano verso gli altri telefoni). */
+export const lapidi = kind => { const out = []; for (const r of recs.values()) if (r.kind === kind && r.deleted) out.push(r.id); return out; };
 
 export function segnaComeInviati(inviati) {
   const puliti = segnaInviati(recs, inviati);
   for (const r of puliti) accoda(r);
 }
 
-export function applicaDalServer(righe) {
+/**
+ * Applica i record arrivati dal server (vince il più recente).
+ * forza: tipi per cui vince comunque il server (al primo collegamento le impostazioni salvate online).
+ */
+export function applicaDalServer(righe, { forza = [] } = {}) {
+  if (forza.length) {
+    for (const r of righe) {
+      if (!forza.includes(r.kind)) continue;
+      const loc = recs.get(chiave(r.kind, r.id));
+      if (loc && loc.updated >= (+r.updated || 0)) recs.set(chiave(r.kind, r.id), { ...loc, updated: (+r.updated || 0) - 1, dirty: false });
+    }
+  }
   const cambiati = applicaRemoti(recs, righe);
   if (!cambiati.length) return 0;
   for (const r of cambiati) { cache.delete(r.kind); accoda(r); }
@@ -192,11 +205,17 @@ export function segnaTuttoDaInviare() {
 
 /* ---------- avvio e importazioni ---------- */
 
-function scriviMolti(lista, sporchi = true) {
+/**
+ * Scrive più record insieme. "deboli": dati creati dall'app (impostazioni iniziali, pesi di partenza, importazione
+ * della versione precedente) con updated = 1, così perdono sempre contro una modifica vera fatta su un altro telefono:
+ * un telefono nuovo non sovrascrive mai i dati salvati online.
+ */
+function scriviMolti(lista, sporchi = true, deboli = false) {
   for (const { kind, id, data } of lista) {
     const k = chiave(kind, id);
     const prec = recs.get(k);
-    const rec = { kind, id: String(id), data, updated: prossimoUpdated(prec?.updated), deleted: false, dirty: sporchi };
+    const updated = deboli && !prec ? 1 : prossimoUpdated(prec?.updated);
+    const rec = { kind, id: String(id), data, updated, deleted: false, dirty: sporchi };
     recs.set(k, rec);
     cache.delete(kind);
     accoda(rec);
@@ -218,7 +237,7 @@ export async function importaVecchio(S, fotoVecchie = []) {
   // le impostazioni importate valgono solo se non le ho già cambiate qui
   if (!leggi('impostazioni', 'impostazioni') || !getMeta('impostazioniToccate')) records.push({ kind: 'impostazioni', id: 'impostazioni', data: imp });
   // non sovrascrivo record più recenti già presenti (es. importo due volte)
-  scriviMolti(records.filter(r => !recs.has(chiave(r.kind, r.id)) || r.kind === 'impostazioni'));
+  scriviMolti(records.filter(r => !recs.has(chiave(r.kind, r.id)) || r.kind === 'impostazioni'), true, true);
   for (const b of blob) { try { await idb.scrivi('blobs', [{ key: b.key, blob: dataUrlInBlob(b.dataUrl), caricato: false }]); } catch (e) { console.error(e); } }
   aggiungiPesiIniziali();
   await scriviOra();
@@ -272,8 +291,11 @@ export async function creaBackup(conFoto = true) {
 function aggiungiPesiIniziali() {
   const pesi = lista('peso').map(p => ({ giorno: p.giorno || p.id, kg: p.kg }));
   const nuovi = pesiIniziali(pesi, impostazioni().inizioProgramma);
-  scriviMolti(nuovi.map(p => ({ kind: 'peso', id: p.giorno, data: { giorno: p.giorno, kg: p.kg } })));
+  scriviMolti(nuovi.map(p => ({ kind: 'peso', id: p.giorno, data: { giorno: p.giorno, kg: p.kg } })), true, true);
 }
+
+/** Impostazioni iniziali "deboli": se online ci sono già le tue, vincono quelle. */
+const impostazioniDeboli = () => scriviMolti([{ kind: 'impostazioni', id: 'impostazioni', data: impostazioniIniziali() }], true, true);
 
 /** Avvio: carica tutto, migra i dati del sito al primo avvio, aggiunge i pesi iniziali. */
 export async function avvia() {
@@ -295,7 +317,7 @@ export async function avvia() {
         }
       } catch { /* niente */ }
     }
-    if (!leggi('impostazioni', 'impostazioni')) salva('impostazioni', 'impostazioni', impostazioniIniziali());
+    if (!leggi('impostazioni', 'impostazioni')) impostazioniDeboli();
     aggiungiPesiIniziali();
     // La chiave dell'AI non deve stare sul telefono: ora passa da Supabase.
     try { localStorage.removeItem('palestra-api-key'); } catch { /* niente */ }
@@ -315,7 +337,7 @@ export async function cancellaTutto() {
   recs.clear(); cache.clear(); daScrivere = new Map();
   for (const k of Object.keys(meta)) delete meta[k];
   await Promise.all([idb.svuota('records'), idb.svuota('blobs'), idb.svuota('meta')]);
-  salva('impostazioni', 'impostazioni', impostazioniIniziali());
+  impostazioniDeboli();
   aggiungiPesiIniziali();
   await scriviOra();
   await setMeta('migrato', { quando: new Date().toISOString(), daVecchio: false });

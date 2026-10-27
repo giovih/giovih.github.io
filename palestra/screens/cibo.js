@@ -69,7 +69,7 @@ function Pasto({ p, giorno, vai, allenamento }) {
       ${c.foto ? html`<img class="cr-img" src=${c.foto} alt="" />` : html`<span class="cr-img vuota"><${Icon} name=${c.fonte === 'preset' ? 'list' : c.fonte === 'off' ? 'barcode' : 'forkKnife'} size=${16} /></span>`}
       <span class="row-main">
         <span class="row-title ellipsis">${c.nome}</span>
-        <span class="row-sub ellipsis">${[c.quantita ? `${fmtNum(c.quantita)} ${c.unita || 'g'}` : null, `${fmtNum(c.prot)} g proteine`].filter(Boolean).join(' · ')}</span>
+        <span class="row-sub ellipsis">${[c.quantita ? `${fmtNum(c.quantita)} ${c.unita || 'g'}` : c.porzioni && c.porzioni !== 1 ? `${fmtNum(c.porzioni)} porzioni` : null, `${fmtNum(c.prot)} g proteine`].filter(Boolean).join(' · ')}</span>
       </span>
       <span class="cr-kcal num">${fmtInt(c.kcal)}</span>
     </button>`)}

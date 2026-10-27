@@ -113,6 +113,81 @@ function Dettaglio({ al, pasto, giorno, onIndietro, onFatto }) {
 }
 
 /* =====================================================================
+   Porzioni: per i cibi senza grammi (pasti della scheda, inseriti a mano)
+   ===================================================================== */
+
+const SCELTE_PORZIONI = [0.5, 1, 1.5, 2, 3];
+const fmtPorzioni = n => `${fmtNum(n)} ${n === 1 ? 'porzione' : 'porzioni'}`;
+
+/** Valori di una porzione (per un cibo già aggiunto tiene conto delle porzioni scelte allora). */
+export const perPorzione = c => c.base || (() => {
+  const n = +c.porzioni > 0 ? +c.porzioni : 1;
+  const r = v => Math.round((+v || 0) / n * 10) / 10;
+  return { kcal: Math.round((+c.kcal || 0) / n), prot: r(c.prot), carb: r(c.carb), grassi: r(c.grassi) };
+})();
+const perPorzioni = (base, n) => {
+  const r = v => Math.round((+v || 0) * n * 10) / 10;
+  return { kcal: Math.round((+base.kcal || 0) * n), prot: r(base.prot), carb: r(base.carb), grassi: r(base.grassi) };
+};
+
+/** Scelta del numero di porzioni: tasti rapidi, meno/più e campo libero. */
+function ScegliPorzioni({ valore, onCambia }) {
+  const n = parseNum(valore) ?? 0;
+  const passo = d => { aptico(); onCambia(fmtNum(Math.max(0.5, Math.round((n + d) * 2) / 2))); };
+  return html`<div class="card det-quantita">
+    <label class="field-label" for="det-porz">Quante porzioni</label>
+    <div class="row-flex">
+      <${IconButton} icon="minus" label="Mezza porzione in meno" onClick=${() => passo(-0.5)} />
+      <input id="det-porz" class="field num-grande center" inputmode="decimal" value=${valore} onInput=${e => onCambia(e.currentTarget.value)}
+        onFocus=${e => e.currentTarget.select()} aria-label="Numero di porzioni" />
+      <${IconButton} icon="plus" label="Mezza porzione in più" onClick=${() => passo(0.5)} />
+    </div>
+    <div class="scelte mt-12">
+      ${SCELTE_PORZIONI.map(x => html`<button type="button" class=${'scelta' + (n === x ? ' on' : '')} onClick=${() => { aptico(); onCambia(fmtNum(x)); }}>${x === 0.5 ? 'Mezza' : fmtPorzioni(x)}</button>`)}
+    </div>
+  </div>`;
+}
+
+const Valori = ({ v, compatti }) => html`<div class=${'det-valori' + (compatti ? ' compatti' : '')}>
+  <div class="dv-kcal"><span class="rounded num">${fmtInt(v.kcal)}</span><small>kcal</small></div>
+  <div class="dv-macro">
+    <div><span class="dot" style="--c:var(--dato-prot)"></span>Proteine<b class="num">${fmtNum(v.prot)} g</b></div>
+    <div><span class="dot" style="--c:var(--tono-ambra)"></span>Carboidrati<b class="num">${fmtNum(v.carb)} g</b></div>
+    <div><span class="dot" style="--c:var(--tono-lavanda)"></span>Grassi<b class="num">${fmtNum(v.grassi)} g</b></div>
+  </div>
+</div>`;
+
+/** Prima di aggiungere un pasto senza grammi: quante porzioni? */
+function DettaglioPorzioni({ item, pasto, giorno, onIndietro, onFatto }) {
+  const base = perPorzione(item);
+  const [q, setQ] = useState(fmtNum(item.porzioni || 1));
+  const n = parseNum(q) ?? 0;
+  const v = perPorzioni(base, n);
+  const aggiungi = () => {
+    if (n <= 0) return;
+    aptico('successo');
+    const { id, giorno: _g, ora: _o, pasto: _p, per100: _x, quantita: _q, unita: _u, ...dati } = item;
+    A.aggiungiCibo(giorno, pasto, { ...dati, ...v, porzioni: n, base, rif: dati.rif || id });
+    toast(`Aggiunto a ${nomePasto(pasto)}`);
+    onFatto();
+  };
+  return html`<div class="dettaglio">
+    ${onIndietro && html`<button type="button" class="back-btn" onClick=${onIndietro}><${Icon} name="chevronLeft" />Indietro</button>`}
+    <div class="det-testa">
+      ${item.foto ? html`<img class="det-img" src=${item.foto} alt="" />` : html`<span class="det-img vuota"><${Icon} name=${item.fonte === 'preset' ? 'list' : 'forkKnife'} size=${24} /></span>`}
+      <div class="grow">
+        <div class="t-title3">${item.nome}</div>
+        ${item.descrizione && html`<div class="t-foot secondary">${item.descrizione}</div>`}
+      </div>
+    </div>
+    <${ScegliPorzioni} valore=${q} onCambia=${setQ} />
+    <${Valori} v=${v} />
+    <p class="t-foot secondary center mt-8">Una porzione: ${fmtInt(base.kcal)} kcal · P ${fmtNum(base.prot)} · C ${fmtNum(base.carb)} · G ${fmtNum(base.grassi)}</p>
+    <div class="mt-16"><${Button} block icon="plus" disabled=${n <= 0} onClick=${aggiungi}>Aggiungi a ${nomePasto(pasto)}<//></div>
+  </div>`;
+}
+
+/* =====================================================================
    Inserimento a mano
    ===================================================================== */
 
@@ -245,13 +320,14 @@ function Aggiungi({ giorno, pasto: pastoIniziale, chiudi, vai }) {
   }, [q]);
 
   const fatto = () => chiudi();
-  const aggiungiDiretto = (item, etichetta) => {
-    const { id, giorno: _g, ora: _o, pasto: _p, ...dati } = item;
-    A.aggiungiCibo(giorno, pasto, { ...dati, rif: dati.rif || id });
-    toast(etichetta || `Aggiunto a ${nomePasto(pasto)}`);
-  };
   const apriDettaglio = al => setVista({ tipo: 'dettaglio', dati: al });
   const daVoce = c => (c.per100 ? { ...c.per100, id: c.rif || c.id, nome: c.nome, unita: c.unita, fonte: c.fonte, barcode: c.barcode, porzioni: c.quantita ? [{ nome: 'Come l\'ultima volta', g: c.quantita }] : [], quantitaIniziale: c.quantita } : null);
+  // prima di aggiungere chiedo sempre quanto: grammi se ci sono i valori per 100, altrimenti porzioni
+  const aggiungiDiretto = item => {
+    if (daVoce(item)) return apriDettaglio(daVoce(item));
+    if ((item.fonte === 'off' || item.fonte === 'db') && item.kcal != null && !item.giorno) return apriDettaglio({ ...item, id: item.rif || item.id });
+    setVista({ tipo: 'porzioni', dati: item });
+  };
 
   const codiceLetto = async codice => {
     setVista({ tipo: 'cerco', dati: codice });
@@ -279,6 +355,9 @@ function Aggiungi({ giorno, pasto: pastoIniziale, chiudi, vai }) {
       <${Button} kind="secondary" block onClick=${() => setVista({ tipo: 'scanner' })}>Scansiona di nuovo<//>
     </div>`;
   }
+  if (vista?.tipo === 'porzioni') {
+    return html`<${DettaglioPorzioni} item=${vista.dati} pasto=${pasto} giorno=${giorno} onIndietro=${() => setVista(null)} onFatto=${fatto} />`;
+  }
   if (vista?.tipo === 'dettaglio') {
     return html`<${Dettaglio} al=${vista.dati} pasto=${pasto} giorno=${giorno} onIndietro=${() => setVista(null)} onFatto=${fatto} />`;
   }
@@ -299,7 +378,7 @@ function Aggiungi({ giorno, pasto: pastoIniziale, chiudi, vai }) {
     return html`
       ${miei.length > 0 && html`<div class="section-label">I tuoi alimenti</div><div class="list">${miei.map(c => html`<${RigaAlimento}
         titolo=${c.nome} sotto=${[etichettaQuantita(c), c.prot ? `${fmtNum(c.prot)} g proteine` : null].filter(Boolean).join(' · ')} kcal=${c.kcal}
-        immagine=${c.foto} onApri=${() => (daVoce(c) ? apriDettaglio(daVoce(c)) : aggiungiDiretto(c))} onAggiungi=${() => aggiungiDiretto(c)} />`)}</div>`}
+        immagine=${c.foto} onApri=${() => aggiungiDiretto(c)} onAggiungi=${() => aggiungiDiretto(c)} />`)}</div>`}
       ${preset.length > 0 && html`<div class="section-label">Pasti della scheda</div><div class="list">${preset.map(p => html`<${RigaAlimento}
         titolo=${p.nome} sotto=${p.descrizione} kcal=${p.kcal} icona=${PASTI.find(x => x.key === p.pasto)?.icona}
         onApri=${() => aggiungiDiretto(p)} onAggiungi=${() => aggiungiDiretto(p)} />`)}</div>`}
@@ -325,7 +404,7 @@ function Aggiungi({ giorno, pasto: pastoIniziale, chiudi, vai }) {
       return html`
         <div class="list">${miei.map(p => html`<${RigaAlimento} titolo=${p.nome} sotto=${`${p.descrizione} · ${p.prot} g proteine`} kcal=${p.kcal}
           icona=${PASTI.find(x => x.key === p.pasto)?.icona} onApri=${() => aggiungiDiretto(p)} onAggiungi=${() => aggiungiDiretto(p)} />`)}</div>
-        <p class="section-foot">Un tocco e il pasto è aggiunto. Puoi correggerlo dopo dal diario.</p>
+        <p class="section-foot">Tocca un pasto, scegli quante porzioni e aggiungilo. Puoi sempre correggerlo dopo.</p>
         <details class="altri-pasti">
           <summary>Pasti degli altri momenti</summary>
           <div class="list">${altri.map(p => html`<${RigaAlimento} titolo=${p.nome} sotto=${`${nomePasto(p.pasto)} · ${p.descrizione}`} kcal=${p.kcal}
@@ -335,13 +414,12 @@ function Aggiungi({ giorno, pasto: pastoIniziale, chiudi, vai }) {
     recenti: () => recenti.length
       ? html`<div class="list">${recenti.map(c => html`<${RigaAlimento} titolo=${c.nome}
           sotto=${[etichettaQuantita(c), c.prot ? `${fmtNum(c.prot)} g proteine` : null].filter(Boolean).join(' · ')} kcal=${c.kcal} immagine=${c.foto}
-          onApri=${() => (daVoce(c) ? apriDettaglio(daVoce(c)) : aggiungiDiretto(c))} onAggiungi=${() => aggiungiDiretto(c)} />`)}</div>`
+          onApri=${() => aggiungiDiretto(c)} onAggiungi=${() => aggiungiDiretto(c)} />`)}</div>`
       : html`<${EmptyState} icon="clockBack" title="Ancora niente" text="Qui trovi gli alimenti che aggiungi più spesso, pronti con un tocco." />`,
     preferiti: () => preferiti.length
       ? html`<div class="list">${preferiti.map(c => html`<${RigaAlimento} titolo=${c.nome}
           sotto=${c.per100 || c.fonte === 'off' || c.fonte === 'db' ? 'Tocca per scegliere la quantità' : `${fmtNum(c.prot || 0)} g proteine`} kcal=${c.kcal}
-          onApri=${() => (c.fonte === 'off' || c.fonte === 'db' ? apriDettaglio({ ...c, id: c.rif || c.id }) : aggiungiDiretto(c))}
-          onAggiungi=${c.fonte === 'off' || c.fonte === 'db' ? null : () => aggiungiDiretto(c)} />`)}</div>`
+          onApri=${() => aggiungiDiretto(c)} onAggiungi=${() => aggiungiDiretto(c)} />`)}</div>`
       : html`<${EmptyState} icon="star" title="Nessun preferito" text="Apri un alimento e tocca la stella per averlo sempre qui." />`,
     foto: () => html`<${FotoAI} pasto=${pasto} giorno=${giorno} onFatto=${fatto} vai=${vai} />`,
   };
@@ -381,21 +459,40 @@ export function apriModificaCibo(cibo) {
   apriFoglio(chiudi => html`<${ModificaCibo} cibo=${cibo} chiudi=${chiudi} />`, { titolo: 'Modifica' });
 }
 
-function ModificaCibo({ cibo, chiudi }) {
+/** Valori per 100 g di un cibo già aggiunto (anche per quelli salvati prima che li tenessi). */
+function per100Di(c) {
+  if (c.per100) return c.per100;
+  const q = +c.quantita;
+  if (!(q > 0) || !c.unita) return null;
+  const f = 100 / q, r = v => Math.round((+v || 0) * f * 10) / 10;
+  return { kcal: Math.round((+c.kcal || 0) * f), prot: r(c.prot), carb: r(c.carb), grassi: r(c.grassi) };
+}
+
+function ModificaCibo({ cibo: originale, chiudi }) {
+  const cibo = { ...originale, per100: per100Di(originale) };
   const [q, setQ] = useState(cibo.quantita != null ? String(cibo.quantita) : '');
   const [v, setV] = useState({ nome: cibo.nome, kcal: cibo.kcal, prot: cibo.prot, carb: cibo.carb, grassi: cibo.grassi });
   const [pasto, setPasto] = useState(cibo.pasto);
   const [pref, setPref] = useState(A.ePreferito(cibo));
   const conQuantita = !!cibo.per100;
+  const [modificaValori, setModificaValori] = useState(false);
+  const base = conQuantita ? null : perPorzione(cibo);
+  const [porz, setPorz] = useState(fmtNum(cibo.porzioni || 1));
   const qn = parseNum(q) ?? 0;
-  const calc = conQuantita ? perQuantita(cibo.per100, qn) : null;
+  const pn = parseNum(porz) ?? 0;
+  const calc = conQuantita ? perQuantita(cibo.per100, qn) : perPorzioni(base, pn);
+  // grammi pronti: quelli dell'alimento, se lo conosco, più qualche valore comune
+  const al = conQuantita ? ALIMENTI.find(x => x.id === cibo.rif) : null;
+  const pronte = conQuantita ? [...new Set([...(al?.porzioni || []).map(p => p.g), 100, ...(cibo.quantita ? [cibo.quantita] : [])])].sort((a, b) => a - b) : [];
   const n = k => parseNum(String(v[k])) ?? 0;
 
   const salva = () => {
     aptico('successo');
     const patch = conQuantita
-      ? { quantita: qn, kcal: calc.kcal, prot: calc.prot, carb: calc.carb, grassi: calc.grassi, nome: v.nome, pasto }
-      : { nome: v.nome, kcal: Math.round(n('kcal')), prot: n('prot'), carb: n('carb'), grassi: n('grassi'), pasto };
+      ? { quantita: qn, per100: cibo.per100, kcal: calc.kcal, prot: calc.prot, carb: calc.carb, grassi: calc.grassi, nome: v.nome, pasto }
+      : modificaValori
+        ? { nome: v.nome, kcal: Math.round(n('kcal')), prot: n('prot'), carb: n('carb'), grassi: n('grassi'), porzioni: 1, base: null, pasto }
+        : { nome: v.nome, ...calc, porzioni: pn, base, pasto };
     A.modificaCibo(cibo.id, patch);
     chiudi();
   };
@@ -410,20 +507,24 @@ function ModificaCibo({ cibo, chiudi }) {
         onClick=${() => { aptico(); A.preferito(cibo, !pref); setPref(!pref); }}><${Icon} name=${pref ? 'starFill' : 'star'} size=${24} /></button>
     </div>
     ${conQuantita
-      ? html`<label class="field-label" for="mod-q">Quantità (${cibo.unita || 'g'})</label>
-          <input id="mod-q" class="field num-grande" inputmode="decimal" value=${q} onInput=${e => setQ(e.currentTarget.value)} />
-          <div class="det-valori compatti">
-            <div class="dv-kcal"><span class="rounded num">${fmtInt(calc.kcal)}</span><small>kcal</small></div>
-            <div class="dv-macro">
-              <div><span class="dot" style="--c:var(--dato-prot)"></span>Proteine<b class="num">${fmtNum(calc.prot)} g</b></div>
-              <div><span class="dot" style="--c:var(--tono-ambra)"></span>Carboidrati<b class="num">${fmtNum(calc.carb)} g</b></div>
-              <div><span class="dot" style="--c:var(--tono-lavanda)"></span>Grassi<b class="num">${fmtNum(calc.grassi)} g</b></div>
-            </div>
+      ? html`<div class="card det-quantita">
+          <label class="field-label" for="mod-q">Quantità</label>
+          <div class="row-flex">
+            <input id="mod-q" class="field num-grande" inputmode="decimal" value=${q} onInput=${e => setQ(e.currentTarget.value)}
+              onFocus=${e => e.currentTarget.select()} aria-label=${'Quantità in ' + (cibo.unita || 'g')} />
+            <span class="t-headline secondary">${cibo.unita || 'g'}</span>
+          </div>
+          <div class="scelte mt-12">${pronte.map(g => html`<button type="button" class=${'scelta' + (qn === g ? ' on' : '')} onClick=${() => { aptico(); setQ(String(g)); }}>${fmtNum(g)} ${cibo.unita || 'g'}</button>`)}</div>
+        </div>
+        <${Valori} v=${calc} compatti />`
+      : modificaValori
+        ? html`<div class="griglia-macro">
+            ${[['kcal', 'Calorie', 'kcal'], ['prot', 'Proteine', 'g'], ['carb', 'Carboidrati', 'g'], ['grassi', 'Grassi', 'g']].map(([k, l, u]) => html`
+              <label class="campo-macro"><span>${l}</span><span class="row-flex gap-6"><input class="field num" inputmode="decimal" value=${v[k]} onInput=${set(k)} aria-label=${l} /><small>${u}</small></span></label>`)}
           </div>`
-      : html`<div class="griglia-macro">
-          ${[['kcal', 'Calorie', 'kcal'], ['prot', 'Proteine', 'g'], ['carb', 'Carboidrati', 'g'], ['grassi', 'Grassi', 'g']].map(([k, l, u]) => html`
-            <label class="campo-macro"><span>${l}</span><span class="row-flex gap-6"><input class="field num" inputmode="decimal" value=${v[k]} onInput=${set(k)} aria-label=${l} /><small>${u}</small></span></label>`)}
-        </div>`}
+        : html`<${ScegliPorzioni} valore=${porz} onCambia=${setPorz} />
+          <${Valori} v=${calc} compatti />
+          <button type="button" class="btn btn-plain btn-small" onClick=${() => { setV({ ...v, ...calc }); setModificaValori(true); }}>Scrivi calorie e macro a mano</button>`}
     <span class="field-label">Pasto</span>
     <div class="scelte">${PASTI.map(p => html`<button type="button" class=${'scelta' + (p.key === pasto ? ' on' : '')} onClick=${() => setPasto(p.key)}>${p.nome}</button>`)}</div>
     <div class="mt-8"><${Button} block onClick=${salva}>Salva<//></div>

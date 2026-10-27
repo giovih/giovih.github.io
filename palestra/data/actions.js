@@ -238,6 +238,7 @@ export function aggiungiCibo(giornoIso, pasto, item) {
     nome: item.nome || 'Alimento', descrizione: item.descrizione || '',
     kcal: Math.round(+item.kcal || 0), prot: r1(item.prot), carb: r1(item.carb), grassi: r1(item.grassi),
     quantita: item.quantita ?? null, unita: item.unita || null,
+    per100: item.per100 || null, porzioni: +item.porzioni > 0 ? +item.porzioni : null, base: item.base || null,
     fonte: item.fonte || 'manuale', rif: item.rif || null, barcode: item.barcode || null,
     foto: item.foto || null, ora: new Date().toISOString(),
   });

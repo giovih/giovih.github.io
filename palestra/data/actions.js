@@ -282,13 +282,19 @@ export function giorniAllenamento() {
   return out;
 }
 
-/** Una volta sola: gli allenamenti fatti prima dell'app (Hevy e settembre a giorni alterni). */
+/**
+ * Una volta sola: gli allenamenti fatti prima di registrarli nell'app.
+ * Settembre a giorni alterni, i giorni di Hevy e, dall'1 al 24 ottobre, la scheda (lunedì, mercoledì, venerdì, sabato).
+ */
 export async function importaStoricoAllenamenti() {
-  if (S.getMeta('storicoAllenamenti')) return;
+  if (S.getMeta('storicoAllenamenti2')) return;
   const giorni = new Set(['2026-09-21', '2026-09-30', '2026-10-02', '2026-10-05', '2026-10-07', '2026-10-12', '2026-10-14', '2026-10-16', '2026-10-19', '2026-10-22']);
-  for (let g = '2026-09-01'; g <= '2026-10-01'; g = addDaysIso(g, 2)) giorni.add(g);
+  for (let g = '2026-09-01'; g <= '2026-09-29'; g = addDaysIso(g, 2)) giorni.add(g);
+  for (let g = '2026-10-01'; g <= '2026-10-24'; g = addDaysIso(g, 1)) if ([1, 3, 5, 6].includes(weekdayIt(parseDay(g)))) giorni.add(g);
+  // la prima versione aveva segnato anche l'1 ottobre (giovedì): in ottobre c'era già la scheda
+  if (S.getMeta('storicoAllenamenti') && giorno('2026-10-01').allenato) segnaAllenamento('2026-10-01', false);
   for (const g of giorni) if (!giorno(g).allenato) segnaAllenamento(g, true);
-  await S.setMeta('storicoAllenamenti', true);
+  await S.setMeta('storicoAllenamenti2', true);
 }
 
 export function impostaCreatina(g, si) { S.modifica('giorno', g, d => ({ ...d, creatina: !!si }), giorno(g)); }

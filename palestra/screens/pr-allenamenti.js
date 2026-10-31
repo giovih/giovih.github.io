@@ -14,7 +14,7 @@ import { sedutaDelGiorno } from '../core/settings.js';
 import { puntiEsercizio, eserciziFatti, statistiche, serieFatte, serieMigliore, recordBattuti, forzaStimata } from '../core/progression.js';
 import { seriePerGruppo, giornoSeduta } from '../core/stats.js';
 import { fmtNum, fmtInt, fmtDelta, fmtMinutes, plural } from '../core/format.js';
-import { isoDay, parseDay, addDaysIso, mondayOf, formatDayShort, formatDayLong, cap, MESI, GIORNI_BREVI, weekdayIt } from '../core/dates.js';
+import { isoDay, parseDay, addDaysIso, mondayOf, formatDayShort, formatDayLong, cap, MESI, MESI_BREVI, GIORNI_BREVI, weekdayIt } from '../core/dates.js';
 import { normalizza } from '../core/foods.js';
 
 const ora = iso => new Date(iso).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
@@ -31,6 +31,7 @@ export function Allenamenti({ vai }) {
   }
   return html`
     <${Numeri} sedute=${sedute} oggi=${oggi} />
+    <${Anno} sedute=${sedute} oggi=${oggi} />
     <${Muscoli} sedute=${sedute} oggi=${oggi} />
     <${Esercizio} sedute=${sedute} oggi=${oggi} />
     <${Storico} sedute=${sedute} />`;
@@ -52,6 +53,80 @@ function Numeri({ sedute, oggi }) {
     <${StatTile} label="Settimana" value=${settimana} unit=${`di ${previste}`} />
     <${StatTile} label=${cap(MESI[parseDay(oggi).getMonth()])} value=${nelMese} unit=${nelMese === 1 ? 'seduta' : 'sedute'} />
     <${StatTile} label="Durata media" value=${media ? Math.round(media / 60) : '–'} unit=${media ? 'min' : ''} />
+  </div>`;
+}
+
+/* ---------- l'anno a colpo d'occhio: un pallino per giorno ---------- */
+
+/** Settimane di fila (fino a questa) in cui hai fatto tutti gli allenamenti previsti. */
+function settimaneDiFila(giorni, oggi, previste) {
+  const obiettivo = Math.max(1, previste);
+  const conta = lun => { let n = 0; for (let i = 0; i < 7; i++) if (giorni.has(addDaysIso(lun, i))) n++; return n; };
+  let lun = isoDay(mondayOf(parseDay(oggi)));
+  let fila = conta(lun) >= obiettivo ? 1 : 0; // la settimana in corso conta solo se è già completa
+  for (let k = 0; k < 520; k++) {
+    lun = addDaysIso(lun, -7);
+    if (conta(lun) < obiettivo) break;
+    fila++;
+  }
+  return fila;
+}
+
+function Anno({ sedute, oggi }) {
+  const imp = S.impostazioni();
+  const giorni = new Set(sedute.map(giornoSeduta));
+  const anni = [...new Set([...giorni].map(g => +g.slice(0, 4)))];
+  const annoOggi = +oggi.slice(0, 4);
+  if (!anni.includes(annoOggi)) anni.push(annoOggi);
+  anni.sort((a, b) => a - b);
+  const [anno, setAnno] = useState(annoOggi);
+  let previste = 0;
+  for (let d = 1; d <= 7; d++) if (sedutaDelGiorno(imp, d)) previste++;
+  const fila = settimaneDiFila(giorni, oggi, previste);
+
+  // colonne = settimane (da lunedì), righe = giorni
+  const primo = `${anno}-01-01`, ultimo = `${anno}-12-31`;
+  const inizio = isoDay(mondayOf(parseDay(primo)));
+  const colonne = [];
+  for (let lun = inizio; lun <= ultimo; lun = addDaysIso(lun, 7)) colonne.push(lun);
+  const P = 6.4, R = 2.25, W = colonne.length * P, H = 7 * P + 12;
+  const fatti = [...giorni].filter(g => g.startsWith(String(anno))).length;
+  const mesi = [];
+  colonne.forEach((lun, c) => {
+    const fine = addDaysIso(lun, 6);
+    const m = +fine.slice(5, 7) - 1;
+    if (fine.slice(0, 4) == anno && (!mesi.length || mesi[mesi.length - 1].m !== m) && +fine.slice(8) <= 7) mesi.push({ m, c });
+  });
+  const punti = [];
+  colonne.forEach((lun, c) => {
+    for (let r = 0; r < 7; r++) {
+      const g = addDaysIso(lun, r);
+      if (g < primo || g > ultimo) continue;
+      const classe = giorni.has(g) ? 'fatto' : g > oggi ? 'futuro' : 'riposo';
+      punti.push(html`<circle cx=${c * P + P / 2} cy=${12 + r * P + P / 2} r=${R} class=${classe + (g === oggi ? ' oggi' : '')} />`);
+    }
+  });
+  const i = anni.indexOf(anno);
+  return html`<div class="card anno-card">
+    <div class="row-flex">
+      <div class="grow">
+        <div class="t-title3 num">${anno}</div>
+        <div class="t-foot secondary">${plural(fatti, 'allenamento', 'allenamenti')}</div>
+      </div>
+      <div class="anno-fila" aria-label=${`${plural(fila, 'settimana', 'settimane')} di fila con tutti gli allenamenti`}>
+        <${Icon} name="flame" size=${20} /><span class="num">${fila}</span>
+      </div>
+      <${IconButton} icon="chevronLeft" label="Anno prima" disabled=${i <= 0} onClick=${() => setAnno(anni[i - 1])} />
+      <${IconButton} icon="chevronRight" label="Anno dopo" disabled=${i >= anni.length - 1} onClick=${() => setAnno(anni[i + 1])} />
+    </div>
+    <svg class="anno-griglia" viewBox=${`0 0 ${W} ${H}`} role="img" aria-label=${`${anno}: ${plural(fatti, 'giorno', 'giorni')} di allenamento`}>
+      ${mesi.map(({ m, c }) => html`<text x=${c * P + 1} y="7">${cap(MESI_BREVI[m])}</text>`)}
+      ${punti}
+    </svg>
+    <div class="anno-legenda t-cap secondary">
+      <span><i class="riposo"></i>Riposo</span><span><i class="fatto"></i>Allenamento</span>
+      <span class="grow"></span><span>${plural(fila, 'settimana', 'settimane')} di fila</span>
+    </div>
   </div>`;
 }
 

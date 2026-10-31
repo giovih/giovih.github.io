@@ -76,8 +76,8 @@ export function Button({ kind = 'primary', small, block, icon, children, onClick
 }
 export const PrimaryButton = p => Button({ ...p, kind: 'primary' });
 
-export function IconButton({ icon, onClick, label, class: cls, size = 20, style }) {
-  return html`<button type="button" class=${cx('icon-btn', cls)} style=${style} onClick=${e => { aptico(); onClick?.(e); }} aria-label=${label}>
+export function IconButton({ icon, onClick, label, class: cls, size = 20, style, disabled }) {
+  return html`<button type="button" class=${cx('icon-btn', cls)} style=${style} disabled=${disabled} onClick=${e => { aptico(); onClick?.(e); }} aria-label=${label}>
     <${Icon} name=${icon} size=${size} />
   </button>`;
 }

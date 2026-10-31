@@ -764,3 +764,4 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 .row .riga-numero { font-weight: 500; color: var(--label); min-width: 3.4rem; margin-right: 4px; }
 .row .riga-numero small { font-size: 0.765rem; color: var(--label-2); font-weight: 400; }
 .row .time-input { flex: none; }
+.icon-btn:disabled { opacity: 0.3; pointer-events: none; }

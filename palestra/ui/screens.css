@@ -262,6 +262,19 @@ button.card { display: block; width: 100%; text-align: left; color: inherit; }
 /* Allenamenti */
 .numeri-card { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 16px; }
 .numeri-card .stat-value { font-size: 1.47rem; }
+.anno-card { padding: 16px; }
+.anno-card .row-flex { gap: 6px; }
+.anno-fila { display: flex; align-items: center; gap: 3px; color: var(--tono-ambra); font-weight: 700; font-size: 1.12rem; margin-right: 4px; }
+.anno-griglia { display: block; width: 100%; height: auto; margin-top: 12px; }
+.anno-griglia text { font-size: 5.2px; fill: var(--label-2); }
+.anno-griglia circle.riposo { fill: var(--label-4); }
+.anno-griglia circle.futuro { fill: none; stroke: var(--label-4); stroke-width: 0.5; }
+.anno-griglia circle.fatto { fill: var(--accent); }
+.anno-griglia circle.oggi { stroke: var(--label); stroke-width: 0.8; }
+.anno-legenda { display: flex; gap: 12px; align-items: center; margin-top: 10px; }
+.anno-legenda i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: -0.5px; }
+.anno-legenda i.riposo { background: var(--label-4); }
+.anno-legenda i.fatto { background: var(--accent); }
 .naviga-sett { display: flex; align-items: center; gap: 6px; margin: -4px -4px 14px; }
 .naviga-sett .icon-btn { width: 32px; height: 32px; }
 .esercizio-card .scegli-esercizio { display: flex; align-items: center; gap: 10px; width: 100%; padding: 2px 2px 12px; border-bottom: 0.5px solid var(--separator); }

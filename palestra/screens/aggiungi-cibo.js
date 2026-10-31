@@ -379,12 +379,12 @@ function Aggiungi({ giorno, pasto: pastoIniziale, chiudi, vai }) {
       ${miei.length > 0 && html`<div class="section-label">I tuoi alimenti</div><div class="list">${miei.map(c => html`<${RigaAlimento}
         titolo=${c.nome} sotto=${[etichettaQuantita(c), c.prot ? `${fmtNum(c.prot)} g proteine` : null].filter(Boolean).join(' · ')} kcal=${c.kcal}
         immagine=${c.foto} onApri=${() => aggiungiDiretto(c)} onAggiungi=${() => aggiungiDiretto(c)} />`)}</div>`}
-      ${preset.length > 0 && html`<div class="section-label">Pasti della scheda</div><div class="list">${preset.map(p => html`<${RigaAlimento}
-        titolo=${p.nome} sotto=${p.descrizione} kcal=${p.kcal} icona=${PASTI.find(x => x.key === p.pasto)?.icona}
-        onApri=${() => aggiungiDiretto(p)} onAggiungi=${() => aggiungiDiretto(p)} />`)}</div>`}
       ${base.length > 0 && html`<div class="section-label">Alimenti · valori per 100 g</div><div class="list">${base.map(al => html`<${RigaAlimento}
         titolo=${al.nome} sotto=${`P ${fmtNum(al.prot)} · C ${fmtNum(al.carb)} · G ${fmtNum(al.grassi)}`} kcal=${al.kcal}
         onApri=${() => apriDettaglio(al)} />`)}</div>`}
+      ${preset.length > 0 && html`<div class="section-label">Pasti della scheda</div><div class="list">${preset.map(p => html`<${RigaAlimento}
+        titolo=${p.nome} sotto=${p.descrizione} kcal=${p.kcal} icona=${PASTI.find(x => x.key === p.pasto)?.icona}
+        onApri=${() => aggiungiDiretto(p)} onAggiungi=${() => aggiungiDiretto(p)} />`)}</div>`}
       <div class="section-label">Open Food Facts</div>
       ${off.stato === 'cerco' && html`<div class="list"><div class="row"><span class="spinner"></span><span class="secondary t-sub">Cerco nei prodotti del supermercato…</span></div></div>`}
       ${off.stato === 'offline' && html`<div class="list"><div class="row"><${Icon} name="cloudOff" size=${18} class="secondary" /><span class="secondary t-sub">Sei offline: cerco solo tra i tuoi alimenti.</span></div></div>`}

@@ -26,7 +26,7 @@ export function pastoPerOra(ora = new Date().getHours()) {
 }
 
 const a = (id, nome, kcal, prot, carb, grassi, porzioni = [], unita = 'g') =>
-  ({ id: 'db-' + id, nome, kcal, prot, carb, grassi, unita, porzioni, alias: ALIAS[id] || '', fonte: 'db' });
+  ({ id: 'db-' + id, nome, kcal, prot, carb, grassi, unita, porzioni, alias: ALIAS[id] || '', base: true, fonte: 'db' });
 
 // parole simili per trovare gli alimenti di base anche con altri nomi
 const ALIAS = {
@@ -177,6 +177,8 @@ export function cercaLocale(testo, lista = ALIMENTI, max = 20) {
       }
       if (n.startsWith(q)) score -= 1;
       else if (!pn[0].startsWith(parole[0]) && !radice(pn[0]).startsWith(radice(parole[0]))) score += 0.5;
+      if (x.piatto) score += 2; // prima i cibi semplici, poi i piatti pronti
+      if (x.base) score -= 1.6;  // e tra i semplici quelli di tutti i giorni (petto di pollo, riso bianco…)
       return { x, score: score + n.length / 100 };
     })
     .filter(Boolean)

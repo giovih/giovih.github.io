@@ -369,7 +369,15 @@ const R = [
   ['guacamole', 'Guacamole', 155, 2, 8.5, 13, 'Porzione:50', 'avocado salsa'],
 ];
 
+// piatti pronti e cucinati: nella ricerca vengono dopo i cibi semplici (pollo, riso, latte…)
+const da = (a, b) => R.slice(R.findIndex(r => r[0] === a), R.findIndex(r => r[0] === b) + 1).map(r => r[0]);
+const PIATTI = new Set([
+  ...da('pasta-pomodoro', 'onion-rings'),
+  'polpette', 'spezzatino', 'scaloppine', 'brasato', 'cotoletta-pollo', 'cotoletta-milanese', 'nuggets', 'kebab', 'kebab-piadina',
+  'calamari-fritti', 'frittura-mista', 'bastoncini-pesce', 'tramezzino', 'toast', 'panino-prosciutto', 'panino-cotoletta', 'porchetta',
+]);
+
 const porzioni = s => (s || '').split(';').filter(Boolean).map(p => { const [nome, g] = p.split(':'); return { nome, g: +g }; });
 
 export const ALIMENTI_EXTRA = R.map(([id, nome, kcal, prot, carb, grassi, por, alias, unita = 'g']) =>
-  ({ id: 'db-' + id, nome, kcal, prot, carb, grassi, unita, porzioni: porzioni(por), alias: alias || '', fonte: 'db' }));
+  ({ id: 'db-' + id, nome, kcal, prot, carb, grassi, unita, porzioni: porzioni(por), alias: alias || '', piatto: PIATTI.has(id), fonte: 'db' }));

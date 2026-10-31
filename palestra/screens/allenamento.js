@@ -271,11 +271,14 @@ function Riepilogo({ r, onFatto, conIntestazione }) {
         <span class="row-main"><span class="row-title">${x.ex}</span></span>
         <span class="row-detail num">${fmtNum(x.kg)} kg × ${x.reps}</span>
       </div>`)}</div>`}
-    <div class="section-label">Prossima volta</div>
-    <div class="list">${r.prossima.map(p => html`<div class="row">
+    <div class="section-label">Rispetto alla volta prima e prossima volta</div>
+    <div class="list">${r.prossima.map(p => html`<div class="row rp-esercizio">
       <span class="row-main">
         <span class="row-title">${p.ex}</span>
-        <span class="row-sub">${p.msg}</span>
+        ${p.confronto && html`<span class="row-sub num">${p.confronto.testo}</span>`}
+        <span class=${'rp-consiglio' + (p.tipo === 'sali' ? ' sali' : '')}>
+          ${p.tipo === 'sali' && html`<${Icon} name="arrowUp" size=${12} />`}${p.msg}
+        </span>
       </span>
       <span class="prossima-val num">${p.kg != null ? `${fmtNum(p.kg)} kg` : ''}<small>${p.reps.length} × ${p.reps[0]}</small></span>
     </div>`)}</div>

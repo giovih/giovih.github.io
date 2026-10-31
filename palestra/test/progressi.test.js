@@ -159,3 +159,24 @@ test('date sull\'asse orizzontale', () => {
   assert.ok(lunghi.some(t => t.etichetta.includes('27')));  // cambio d'anno
   assert.deepEqual(ticksGiorni('2026-10-23', '2026-10-23', 5).map(t => t.giorno), ['2026-10-23']);
 });
+
+test('confronto con la volta prima', async () => {
+  const { confronto } = await import('../core/progression.js');
+  const a = confronto([{ kg: 40, reps: 8 }, { kg: 40, reps: 8 }], [{ kg: 40, reps: 7 }, { kg: 40, reps: 6 }]);
+  assert.equal(a.dKg, 0); assert.equal(a.dReps, 3);
+  assert.equal(a.testo, 'Oggi 40 kg × 8/8 · prima 40 kg × 7/6 · +3 ripetizioni');
+  const b = confronto([{ kg: 42.5, reps: 6 }], [{ kg: 40, reps: 8 }]);
+  assert.equal(b.testo, 'Oggi 42,5 kg × 6 · prima 40 kg × 8 · +2,5 kg, −2 ripetizioni');
+  assert.equal(confronto([{ kg: 40, reps: 8 }], [{ kg: 40, reps: 8 }]).testo.endsWith('uguale alla volta prima'), true);
+  assert.equal(confronto([{ kg: 0, reps: 10 }], null).primaVolta, true);
+});
+
+test('massimo in tutte le serie: sali di peso (solo con tecnica pulita)', async () => {
+  const { suggerisci } = await import('../core/progression.js');
+  const riga = { serie: 3, min: 6, max: 8 };
+  const sets = [{ kg: 40, reps: 8 }, { kg: 40, reps: 8 }, { kg: 40, reps: 8 }];
+  const s = suggerisci(riga, [{ sets, pulita: true }], 'bil');
+  assert.equal(s.tipo, 'sali'); assert.ok(s.kg > 40); assert.match(s.msg, /sali di peso/);
+  const n = suggerisci(riga, [{ sets, pulita: false }], 'bil');
+  assert.equal(n.kg, 40); assert.match(n.msg, /tecnica pulita/);
+});

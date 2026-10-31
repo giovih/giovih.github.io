@@ -424,3 +424,7 @@ pre.dati-coach { margin: 12px 0 0; padding: 12px 14px; border-radius: 14px; back
 .passi li::before { content: counter(passo); width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--accent-soft); color: var(--accent);
   display: grid; place-items: center; font-size: 0.765rem; font-weight: 700; margin-top: 1px; }
 .ag-pill.segnato { --tono: var(--accent); display: inline-grid; place-items: center; color: var(--on-accent); background: var(--accent-fill); }
+.rp-esercizio .row-main { gap: 2px; }
+.rp-consiglio { display: flex; gap: 4px; align-items: baseline; font-size: 0.765rem; color: var(--label-2); line-height: 1.3; }
+.rp-consiglio.sali { color: var(--accent); font-weight: 600; }
+.rp-consiglio .icon { flex: none; align-self: center; }

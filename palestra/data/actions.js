@@ -5,7 +5,7 @@ import * as S from './store.js';
 import { uuid } from './store.js';
 import { isoDay, addDaysIso, weekdayIt, parseDay } from '../core/dates.js';
 import { settimanaProgramma } from '../core/cycle.js';
-import { storico, suggerisci, statistiche, recordBattuti } from '../core/progression.js';
+import { storico, suggerisci, statistiche, recordBattuti, serieFatte, confronto } from '../core/progression.js';
 import { attrezzoDi, gruppoDi, trovaEsercizio } from '../core/scheda.js';
 import { sedutaDelGiorno } from '../core/settings.js';
 import { totali } from '../core/nutrition.js';
@@ -219,10 +219,18 @@ export function riepilogo(s) {
   const imp = S.impostazioni();
   const sc = imp.schede[s.codice];
   const pers = esercizi();
-  const prossima = (sc?.righe || s.voci).map(r => {
-    const eq = attrezzoDi(r.ex, pers);
-    const sug = suggerisci({ serie: r.serie, min: r.min, max: r.max }, storico(sedute, r.ex), eq, false);
-    return { ex: r.ex, kg: sug.kg, reps: sug.reps, tipo: sug.tipo, msg: sug.msg, eq };
+  // la volta prima = la seduta finita più recente prima di questa con lo stesso esercizio
+  const precedenti = sedute.filter(x => x.fine && x.id !== s.id && x.data < s.data && !x.scarico);
+  const fatti = s.voci.filter(v => serieFatte(v).length);
+  const prossima = (fatti.length ? fatti : (sc?.righe || s.voci)).map(v => {
+    const r = sc?.righe.find(x => x.ex === v.ex) || v;
+    const eq = attrezzoDi(v.ex, pers);
+    const hist = storico(sedute.filter(x => x.data <= s.data), v.ex);
+    const sug = suggerisci({ serie: r.serie, min: r.min, max: r.max }, hist, eq, false);
+    const oggi = serieFatte(v);
+    let prima = null;
+    for (const x of precedenti) { const pv = x.voci.find(y => y.ex === v.ex); if (pv && serieFatte(pv).length) { prima = serieFatte(pv); break; } }
+    return { ex: v.ex, kg: sug.kg, reps: sug.reps, tipo: sug.tipo, msg: sug.msg, eq, confronto: oggi.length ? confronto(oggi, prima) : null };
   });
   return { sessione: s, stat: statistiche(s), record: recordBattuti(sedute, s), prossima };
 }

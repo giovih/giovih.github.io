@@ -71,7 +71,8 @@ export function suggerisci(riga, hist, eq = 'mac', scarico = false) {
   const ult = hist[0];
   if (ult) {
     const kg = kgTop(ult);
-    const tuttoMax = ult.sets.length >= serie && ult.sets.every(x => x.reps >= riga.max) && ult.pulita;
+    const massimo = ult.sets.length >= serie && ult.sets.every(x => x.reps >= riga.max);
+    const tuttoMax = massimo && ult.pulita;
     const fermo = hist.length >= 3
       && hist.slice(0, 3).every(h => kgTop(h) === kg)
       && totaleRip(hist[0]) <= totaleRip(hist[2]);
@@ -79,7 +80,7 @@ export function suggerisci(riga, hist, eq = 'mac', scarico = false) {
     if (tuttoMax) {
       out.kg = kg + A.passo;
       out.tipo = 'sali';
-      out.msg = `Massimo in tutte le serie: sali di peso (${A.consiglio}) e riparti da ${riga.min}.`;
+      out.msg = `Hai fatto ${riga.max} in tutte le serie: sali di peso, la prossima volta ${fmtNum(out.kg)} kg${kg === 0 ? ' di zavorra' : ''} e riparti da ${riga.min}.`;
     } else if (fermo && kg > 0) {
       out.kg = Math.max(0, Math.min(kg - A.arrot, arrotonda(kg * 0.9, A.arrot)));
       out.tipo = 'fermo';
@@ -95,6 +96,7 @@ export function suggerisci(riga, hist, eq = 'mac', scarico = false) {
       out.msg = migliorato
         ? 'Stesso peso, +1 ripetizione per serie.'
         : 'L\'ultima volta non hai aggiunto ripetizioni: stesso peso, riprova a fare +1.';
+      if (massimo) out.msg = 'Massimo in tutte le serie, ma non con tecnica pulita: stesso peso finché è pulita, poi sali.';
       if (eq === 'cl' && kg === 0) out.msg += ' Quando fai il massimo in tutte le serie si aggiunge zavorra.';
     }
   }
@@ -106,6 +108,29 @@ export function suggerisci(riga, hist, eq = 'mac', scarico = false) {
     out.msg = 'Settimana di scarico: metà serie e -10% di peso. ' + out.msg;
   }
   return out;
+}
+
+/**
+ * Confronto di un esercizio con la volta prima: peso più alto e ripetizioni totali.
+ * @param {{kg:number, reps:number}[]} oggi serie fatte oggi
+ * @param {{kg:number, reps:number}[]|null} prima serie fatte la volta prima
+ */
+export function confronto(oggi, prima) {
+  const top = sets => Math.max(0, ...sets.map(x => +x.kg || 0));
+  const rip = sets => sets.reduce((t, x) => t + (+x.reps || 0), 0);
+  const descr = sets => {
+    const kg = top(sets);
+    const reps = sets.map(x => x.reps).join('/');
+    return kg > 0 ? `${fmtNum(kg)} kg × ${reps}` : `${reps} ripetizioni`;
+  };
+  if (!prima?.length) return { primaVolta: true, dKg: 0, dReps: 0, oggi: descr(oggi), prima: null, testo: `Prima volta: ${descr(oggi)}` };
+  const dKg = Math.round((top(oggi) - top(prima)) * 10) / 10;
+  const dReps = rip(oggi) - rip(prima);
+  const parti = [];
+  if (dKg) parti.push(`${dKg > 0 ? '+' : '−'}${fmtNum(Math.abs(dKg))} kg`);
+  if (dReps) parti.push(`${dReps > 0 ? '+' : '−'}${Math.abs(dReps)} ${Math.abs(dReps) === 1 ? 'ripetizione' : 'ripetizioni'}`);
+  const esito = parti.length ? parti.join(', ') : 'uguale alla volta prima';
+  return { primaVolta: false, dKg, dReps, oggi: descr(oggi), prima: descr(prima), testo: `Oggi ${descr(oggi)} · prima ${descr(prima)} · ${esito}` };
 }
 
 /** Statistiche di una seduta. */

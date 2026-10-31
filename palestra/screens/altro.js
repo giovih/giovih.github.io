@@ -18,7 +18,7 @@ import { PaginaObiettivi, PaginaBlocco, PaginaPrivacy, PaginaCrediti } from './a
 import { fmtInt } from '../core/format.js';
 import { parseDay, formatDayShort, isoDay, mondayOf } from '../core/dates.js';
 
-export const VERSIONE_APP = '2.5.1';
+export const VERSIONE_APP = '2.6.0';
 
 /** Le sotto-pagine: titolo e componente. */
 const PAGINE = {

@@ -93,6 +93,7 @@ export function datiAgenda({ giorni, sessioni = [], pesi = [], cibi = [], giorni
       nota: r.nota || '',
       acquaMl: +r.acquaMl || 0,
       creatina: !!r.creatina,
+      allenato: !!r.allenato,
       futuro: g > oggi,
     });
   }
@@ -104,7 +105,7 @@ export function riassuntoMese(agenda) {
   let allenamenti = 0, pesate = 0, giorniCibo = 0, kcal = 0, prot = 0;
   for (const d of agenda.values()) {
     if (d.futuro) continue;
-    allenamenti += d.sedute.length;
+    allenamenti += d.sedute.length || (d.allenato ? 1 : 0);
     if (d.peso != null) pesate++;
     if (d.nCibi > 0) { giorniCibo++; kcal += d.kcal; prot += d.prot; }
   }

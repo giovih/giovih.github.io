@@ -25,7 +25,7 @@ export function Allenamenti({ vai }) {
   const oggi = useOggi();
   const sedute = A.sessioni().filter(s => s.fine);
   if (!sedute.length) {
-    return html`<${Card}><${EmptyState} icon="dumbbell" title="Ancora nessun allenamento"
+    return html`${A.giorniAllenamento().size > 0 && html`<${Anno} sedute=${sedute} oggi=${oggi} />`}<${Card}><${EmptyState} icon="dumbbell" title="Ancora nessun allenamento"
       text="Quando finisci il primo allenamento qui trovi la forza di ogni esercizio, le serie per muscolo e lo storico."
       action="Vai a Oggi" onAction=${() => vai('oggi')} /><//>`;
   }
@@ -58,12 +58,12 @@ function Numeri({ sedute, oggi }) {
 
 /* ---------- l'anno a colpo d'occhio: un pallino per giorno ---------- */
 
-/** Settimane di fila (fino a questa) in cui hai fatto tutti gli allenamenti previsti. */
-function settimaneDiFila(giorni, oggi, previste) {
-  const obiettivo = Math.max(1, previste);
+/** Settimane di fila con almeno un allenamento (come Hevy). La settimana in corso non interrompe la fila. */
+function settimaneDiFila(giorni, oggi) {
+  const obiettivo = 1;
   const conta = lun => { let n = 0; for (let i = 0; i < 7; i++) if (giorni.has(addDaysIso(lun, i))) n++; return n; };
   let lun = isoDay(mondayOf(parseDay(oggi)));
-  let fila = conta(lun) >= obiettivo ? 1 : 0; // la settimana in corso conta solo se è già completa
+  let fila = conta(lun) >= obiettivo ? 1 : 0;
   for (let k = 0; k < 520; k++) {
     lun = addDaysIso(lun, -7);
     if (conta(lun) < obiettivo) break;
@@ -74,15 +74,13 @@ function settimaneDiFila(giorni, oggi, previste) {
 
 function Anno({ sedute, oggi }) {
   const imp = S.impostazioni();
-  const giorni = new Set(sedute.map(giornoSeduta));
+  const giorni = new Set([...sedute.map(giornoSeduta), ...A.giorniAllenamento()]);
   const anni = [...new Set([...giorni].map(g => +g.slice(0, 4)))];
   const annoOggi = +oggi.slice(0, 4);
   if (!anni.includes(annoOggi)) anni.push(annoOggi);
   anni.sort((a, b) => a - b);
   const [anno, setAnno] = useState(annoOggi);
-  let previste = 0;
-  for (let d = 1; d <= 7; d++) if (sedutaDelGiorno(imp, d)) previste++;
-  const fila = settimaneDiFila(giorni, oggi, previste);
+  const fila = settimaneDiFila(giorni, oggi);
 
   // colonne = settimane (da lunedì), righe = giorni
   const primo = `${anno}-01-01`, ultimo = `${anno}-12-31`;
@@ -113,7 +111,7 @@ function Anno({ sedute, oggi }) {
         <div class="t-title3 num">${anno}</div>
         <div class="t-foot secondary">${plural(fatti, 'allenamento', 'allenamenti')}</div>
       </div>
-      <div class="anno-fila" aria-label=${`${plural(fila, 'settimana', 'settimane')} di fila con tutti gli allenamenti`}>
+      <div class="anno-fila" aria-label=${`${plural(fila, 'settimana', 'settimane')} di fila con almeno un allenamento`}>
         <${Icon} name="flame" size=${20} /><span class="num">${fila}</span>
       </div>
       <${IconButton} icon="chevronLeft" label="Anno prima" disabled=${i <= 0} onClick=${() => setAnno(anni[i - 1])} />

@@ -273,6 +273,24 @@ export function impostaAcqua(g, ml) {
   S.modifica('giorno', g, d => ({ ...d, acquaMl: Math.max(0, Math.min(8000, Math.round(ml))) }), giorno(g));
 }
 export const aggiungiAcqua = (g, delta) => impostaAcqua(g, giorno(g).acquaMl + delta);
+/** Allenamento fatto senza dettagli (per esempio prima di usare l'app): conta nel calendario. */
+export function segnaAllenamento(g, si) { S.modifica('giorno', g, d => ({ ...d, allenato: !!si }), giorno(g)); }
+/** Giorni con un allenamento: sedute finite più quelli segnati a mano. */
+export function giorniAllenamento() {
+  const out = new Set(S.lista('sessione').filter(s => s.fine && s.data).map(s => isoDay(new Date(s.data))));
+  for (const r of S.lista('giorno')) if (r.allenato) out.add(r.id);
+  return out;
+}
+
+/** Una volta sola: gli allenamenti fatti prima dell'app (Hevy e settembre a giorni alterni). */
+export async function importaStoricoAllenamenti() {
+  if (S.getMeta('storicoAllenamenti')) return;
+  const giorni = new Set(['2026-09-21', '2026-09-30', '2026-10-02', '2026-10-05', '2026-10-07', '2026-10-12', '2026-10-14', '2026-10-16', '2026-10-19', '2026-10-22']);
+  for (let g = '2026-09-01'; g <= '2026-10-01'; g = addDaysIso(g, 2)) giorni.add(g);
+  for (const g of giorni) if (!giorno(g).allenato) segnaAllenamento(g, true);
+  await S.setMeta('storicoAllenamenti', true);
+}
+
 export function impostaCreatina(g, si) { S.modifica('giorno', g, d => ({ ...d, creatina: !!si }), giorno(g)); }
 export function impostaNotaGiorno(g, nota) { S.modifica('giorno', g, d => ({ ...d, nota }), giorno(g)); }
 

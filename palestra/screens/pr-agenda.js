@@ -106,7 +106,7 @@ function Cella({ d, oggi, o, scelto, onScegli }) {
   const prevista = !fatta && (d.futuro || g === oggi) ? d.prevista : null;
   const descr = [
     cap(formatDayLong(parseDay(g))),
-    fatta ? `${fatta.nome} fatta` : prevista ? `${prevista} in programma` : null,
+    fatta ? `${fatta.nome} fatta` : d.allenato ? 'allenamento fatto' : prevista ? `${prevista} in programma` : null,
     d.peso != null ? `peso ${fmtKg1(d.peso)} chili` : null,
     d.nCibi ? `${d.kcal} calorie, ${d.prot} grammi di proteine` : null,
     d.nota ? 'con una nota' : null,
@@ -116,6 +116,7 @@ function Cella({ d, oggi, o, scelto, onScegli }) {
     <${AnelliGiorno} kcal=${kcal} prot=${prot} size=${32} traccia=${d.nCibi > 0}><span class="ag-n">${n}</span><//>
     <span class="ag-sotto">
       ${fatta ? html`<i class="ag-pill" style=${`--tono:${coloreTono(fatta.tono)}`}>${lettera(fatta)}${d.sedute.length > 1 ? '+' : ''}</i>`
+        : d.allenato ? html`<i class="ag-pill segnato"><${Icon} name="checkBold" size=${9} /></i>`
         : prevista ? html`<i class="ag-pill prevista">${prevista}</i>` : null}
     </span>
     <span class="ag-peso num">${d.peso != null ? fmtKg1(d.peso) : ''}</span>
@@ -153,7 +154,14 @@ function Dettaglio({ d, oggi, o, imp, vai }) {
       sotto=${`${fmtMinutes(stat.durata)} · ${plural(stat.serie, 'serie', 'serie')} · ${fmtInt(stat.volume)} kg`}
       onClick=${() => apriSeduta(s.id)} />`);
   }
-  if (!d.sedute.length) {
+  if (!d.sedute.length && d.allenato) {
+    righe.push(html`<${Riga} icona="dumbbell" tinta="var(--accent)" titolo="Allenamento fatto"
+      sotto="Segnato a mano. Tocca per toglierlo" onClick=${() => A.segnaAllenamento(g, false)} />`);
+  } else if (!d.sedute.length) {
+    if (passato && diff !== 0) {
+      righe.push(html`<${Riga} icona="plus" tinta="var(--accent)" titolo="Segna come allenamento fatto"
+        sotto="Per gli allenamenti che non hai registrato nell'app" onClick=${() => A.segnaAllenamento(g, true)} />`);
+    }
     if (nomePrevista) {
       righe.push(html`<${Riga} icona="dumbbell" tinta="var(--label-3)" titolo=${nomePrevista}
         sotto=${d.futuro ? 'In programma' : diff === 0 ? 'In programma oggi' : 'Non fatta'}

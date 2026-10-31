@@ -237,7 +237,7 @@ function BarraRecupero({ sessioneId }) {
       <button type="button" class="rb-btn" onClick=${() => { aptico(); R.aggiungi(-15); }} aria-label="Togli 15 secondi">−15</button>
       <button type="button" class="rb-btn" onClick=${() => { aptico(); R.aggiungi(15); }} aria-label="Aggiungi 15 secondi">+15</button>
       <button type="button" class="rb-btn skip" onClick=${() => { aptico(); R.salta(); }}>Salta</button>
-      <span class="rb-line" style=${`width:${quota * 100}%`}></span>`}
+      <span class="rb-line" style=${`transform:scaleX(${quota})`}></span>`}
   </div>`;
 }
 
@@ -401,7 +401,7 @@ export function Allenamento({ aperto, sessione, onChiudi }) {
         <${IconButton} icon="ellipsisCircle" label="Altre azioni" onClick=${menuTesta} class="plain" />
         <${Button} kind="tinted" small onClick=${fine}>Fine<//>
       </div>
-      <div class="wh-progress"><i style=${`width:${st.totali ? (st.serie / st.totali) * 100 : 0}%`}></i></div>
+      <div class="wh-progress"><i style=${`transform:translateX(${(st.totali ? st.serie / st.totali : 0) * 100 - 100}%)`}></i></div>
     </header>
     <div class="workout-body" ref=${corpo}>
       <div class="inner">

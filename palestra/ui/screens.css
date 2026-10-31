@@ -393,7 +393,7 @@ pre.dati-coach { margin: 12px 0 0; padding: 12px 14px; border-radius: 14px; back
 @keyframes sp-entra { from { transform: translateX(100%); } to { transform: none; } }
 @keyframes sp-esce { to { transform: translateX(100%); } }
 .seg-piccolo { width: 12rem; flex: none; }
-.seg-piccolo .segmented { height: 30px; }
+.seg-piccolo .segmented { height: 34px; }
 .tema-card { padding: 10px; }
 .versione { text-align: center; font-size: 0.706rem; color: var(--label-3); margin: 12px 0 0; }
 .link { color: var(--accent); font: inherit; padding: 0; }

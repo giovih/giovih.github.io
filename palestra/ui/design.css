@@ -462,7 +462,7 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 .ring .ring-center { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
 
 .bar { height: 6px; border-radius: 3px; background: var(--fill); overflow: hidden; }
-.bar > i { display: block; height: 100%; border-radius: 3px; background: var(--c, var(--accent)); transform-origin: left; transition: width 0.8s var(--spring); }
+.bar > i { display: block; height: 100%; border-radius: 3px; background: var(--c, var(--accent)); transition: transform 0.8s var(--spring); will-change: transform; } /* trasformazioni: animazioni fluide senza ricalcolare la pagina */
 
 .macro-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .macro { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -583,8 +583,8 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 .workout-head .wh-title { flex: 1; min-width: 0; text-align: center; }
 .workout-head .wh-title b { display: block; font-size: 1rem; font-weight: 600; letter-spacing: -0.024em; }
 .workout-head .wh-title span { font-size: 0.765rem; color: var(--label-2); font-variant-numeric: tabular-nums; }
-.workout-head .wh-progress { height: 3px; margin: 0 -8px; background: var(--fill-2); }
-.workout-head .wh-progress > i { display: block; height: 100%; background: var(--accent); transition: width 0.6s var(--spring); }
+.workout-head .wh-progress { height: 3px; margin: 0 -8px; background: var(--fill-2); overflow: hidden; }
+.workout-head .wh-progress > i { display: block; height: 100%; background: var(--accent); transition: transform 0.6s var(--spring); }
 .workout-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px var(--gutter) calc(var(--safe-bottom) + 120px); }
 .workout-body > .inner { max-width: 640px; margin: 0 auto; }
 
@@ -652,7 +652,7 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 .rest-bar .rb-btn { height: 38px; min-width: 50px; padding: 0 10px; border-radius: 19px; background: var(--fill-2); font-size: 0.882rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 .rest-bar .rb-btn.skip { background: var(--accent-fill); color: var(--on-accent); }
 .rest-bar .rb-btn:active { opacity: 0.6; }
-.rest-bar .rb-line { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--accent); transition: width 0.25s linear; }
+.rest-bar .rb-line { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--accent); transform-origin: left; transition: transform 0.25s linear; }
 
 /* Tastierino numerico */
 .keypad {
@@ -765,3 +765,24 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 .row .riga-numero small { font-size: 0.765rem; color: var(--label-2); font-weight: 400; }
 .row .time-input { flex: none; }
 .icon-btn:disabled { opacity: 0.3; pointer-events: none; }
+
+/* ---------- aree di tocco: almeno 44 punti come chiede Apple, senza cambiare l'aspetto ---------- */
+.icon-btn, .scelta, .btn-small, .check-tondo { position: relative; }
+.icon-btn::after, .check-tondo::after { content: ''; position: absolute; inset: -6px; }
+.scelta::after, .btn-small::after { content: ''; position: absolute; inset: -5px -2px; }
+.segmented { height: 36px; }
+.time-input { height: 38px; }
+
+/* schermi stretti (iPhone SE, mini): la colonna "Precedente" non si taglia */
+@media (max-width: 389px) {
+  .sets-head, .set-row { grid-template-columns: 1.8rem minmax(0, 1fr) 4.2rem 3.4rem 2.9rem; gap: 5px; }
+  .set-row .sr-prev { font-size: 0.8rem; letter-spacing: -0.01em; }
+}
+.stepper button { position: relative; }
+.stepper button::after { content: ''; position: absolute; inset: -6px 0; }
+
+/* nomi lunghi: fino a due righe invece di tagliarli con i puntini */
+.cibo-riga .row-title, .voce-cibo .row-title, .anteprima-riga > .ellipsis, .rp-esercizio .row-title {
+  white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; line-height: 1.25;
+}
+.cibo-riga .row-sub, .voce-cibo .row-sub { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }

@@ -117,7 +117,7 @@ export function ProgressRing({ value = 0, size = 64, stroke = 8, color = 'var(--
 export function Bar({ value = 0, color, label }) {
   const v = Math.max(0, Math.min(1, value || 0));
   return html`<div class="bar" role="progressbar" aria-label=${label} aria-valuemin="0" aria-valuemax="100" aria-valuenow=${Math.round(v * 100)}>
-    <i style=${`width:${v * 100}%;${color ? `--c:${color}` : ''}`}></i>
+    <i style=${`transform:translateX(${(v - 1) * 100}%);${color ? `--c:${color}` : ''}`}></i>
   </div>`;
 }
 

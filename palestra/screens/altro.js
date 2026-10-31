@@ -16,9 +16,10 @@ import { PaginaAccount, statoSync } from './al-account.js';
 import { PaginaPrepara } from './al-prepara.js';
 import { PaginaObiettivi, PaginaBlocco, PaginaPrivacy, PaginaCrediti } from './al-varie.js';
 import { fmtInt } from '../core/format.js';
+import { PALETTE } from '../core/settings.js';
 import { parseDay, formatDayShort, isoDay, mondayOf } from '../core/dates.js';
 
-export const VERSIONE_APP = '2.6.2';
+export const VERSIONE_APP = '2.7.0';
 
 /** Le sotto-pagine: titolo e componente. */
 const PAGINE = {
@@ -155,7 +156,15 @@ function Radice({ apri, vai }) {
       <${Segmented} label="Tema" value=${tema} onChange=${cambiaTema}
         options=${[{ value: 'auto', label: 'Automatico' }, { value: 'scuro', label: 'Scuro' }, { value: 'chiaro', label: 'Chiaro' }]} />
     </div>
-    <${SectionFoot}>Automatico segue il tema dell'iPhone.<//>
+    <div class="card palette-card mt-12" role="radiogroup" aria-label="Colori">
+      ${PALETTE.map(p => html`<button type="button" role="radio" aria-checked=${(imp.palette || 'classico') === p.id ? 'true' : 'false'}
+        class=${'palette-scelta' + ((imp.palette || 'classico') === p.id ? ' on' : '')}
+        onClick=${() => { aptico(); S.salvaImpostazioni(i => ({ ...i, palette: p.id })); }}>
+        <span class="ps-cerchio" style=${`--a:${p.accento};--s:${p.scuro}`}><${Icon} name="checkBold" size=${14} /></span>
+        <span class="ps-nome">${p.nome}</span>
+      </button>`)}
+    </div>
+    <${SectionFoot}>Automatico segue il tema dell'iPhone. I colori cambiano sfondi e accento; Classico è lo stile di prima.<//>
 
     <${SectionLabel}>Dati<//>
     <${List}>

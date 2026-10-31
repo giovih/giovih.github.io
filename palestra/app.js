@@ -12,7 +12,7 @@ async function avvia() {
   } catch (e) {
     console.error(e);
   }
-  applicaTema(S.impostazioni().tema);
+  applicaTema(S.impostazioni().tema, S.impostazioni().palette);
   import('./data/actions.js').then(A => A.importaStoricoAllenamenti()).catch(e => console.error(e));
   // link di conferma dell'email: l'app si apre già collegata (in Altro)
   try { C.leggiTokenDaIndirizzo(); } catch (e) { console.error(e); }

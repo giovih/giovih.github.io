@@ -3,6 +3,7 @@
 import { useState, useEffect } from '../lib/preact.js';
 import { isoDay } from '../core/dates.js';
 import * as S from '../data/store.js';
+import { PALETTE } from '../core/settings.js';
 
 /** Ora corrente che si aggiorna ogni `ms` (per orologi e conti alla rovescia). */
 export function useOra(ms = 1000, attivo = true) {
@@ -27,16 +28,19 @@ export function useOggi() {
 export const coloreTono = tono => `var(--tono-${tono || 'ambra'})`;
 
 /** Applica il tema (auto, scuro, chiaro) e il colore della barra di stato. */
-export function applicaTema(tema) {
+export function applicaTema(tema, palette = 'classico') {
   const root = document.documentElement;
   if (tema === 'scuro' || tema === 'chiaro') root.dataset.tema = tema;
   else delete root.dataset.tema;
+  const pal = PALETTE.find(p => p.id === palette) || PALETTE[0];
+  if (pal.id === 'classico') delete root.dataset.palette;
+  else root.dataset.palette = pal.id;
   const scuro = tema === 'scuro' || (tema !== 'chiaro' && matchMedia('(prefers-color-scheme: dark)').matches);
   for (const m of document.querySelectorAll('meta[name="theme-color"]')) {
     if (tema === 'auto') {
-      m.setAttribute('content', m.getAttribute('media')?.includes('dark') ? '#0b0b0d' : '#f2f2f7');
+      m.setAttribute('content', m.getAttribute('media')?.includes('dark') ? pal.scuro : pal.chiaro);
     } else {
-      m.setAttribute('content', scuro ? '#0b0b0d' : '#f2f2f7');
+      m.setAttribute('content', scuro ? pal.scuro : pal.chiaro);
     }
   }
 }

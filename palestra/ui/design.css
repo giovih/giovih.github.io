@@ -786,3 +786,113 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
   white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; line-height: 1.25;
 }
 .cibo-riga .row-sub, .voce-cibo .row-sub { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+
+/* =====================================================================
+   Palette (Altro, Aspetto). "Classico" e' lo stile di base qui sopra.
+   Ogni palette cambia sfondi, card e accento, con un bagliore colorato in alto.
+   ===================================================================== */
+.app, .workout, .sotto-pagina { background-image: var(--glow, none); background-repeat: no-repeat; }
+@media (prefers-color-scheme: dark) { :root[data-palette="energia"]:not([data-tema="chiaro"]) {
+  --bg: #140b07; --sheet: #1c120d; --card: #22160f; --card-2: #2e1e15; --card-3: #3a271c; --seg-on: #5a3d2c; --fumetto: #3a271c;
+  --material: rgba(30, 18, 12, 0.74); --material-strong: rgba(30, 18, 12, 0.88);
+  --accent: #ff7a3d; --accent-strong: #ff6a26; --accent-fill: #c2410c; --on-accent: #ffffff;
+  --accent-soft: rgba(255, 122, 61, 0.18); --accent-softer: rgba(255, 122, 61, 0.1);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(255, 122, 61, 0.24), rgba(255, 122, 61, 0) 70%);
+} }
+:root[data-palette="energia"][data-tema="scuro"] {
+  --bg: #140b07; --sheet: #1c120d; --card: #22160f; --card-2: #2e1e15; --card-3: #3a271c; --seg-on: #5a3d2c; --fumetto: #3a271c;
+  --material: rgba(30, 18, 12, 0.74); --material-strong: rgba(30, 18, 12, 0.88);
+  --accent: #ff7a3d; --accent-strong: #ff6a26; --accent-fill: #c2410c; --on-accent: #ffffff;
+  --accent-soft: rgba(255, 122, 61, 0.18); --accent-softer: rgba(255, 122, 61, 0.1);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(255, 122, 61, 0.24), rgba(255, 122, 61, 0) 70%);
+}
+@media (prefers-color-scheme: light) { :root[data-palette="energia"]:not([data-tema="scuro"]) {
+  --bg: #fbf3ee; --sheet: #fbf3ee; --card-2: #f8ece4; --card-3: #f0ddd0;
+  --accent: #c2410c; --accent-strong: #c2410c; --accent-fill: #c2410c;
+  --accent-soft: rgba(194, 65, 12, 0.12); --accent-softer: rgba(194, 65, 12, 0.07);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(194, 65, 12, 0.14), rgba(194, 65, 12, 0) 70%);
+} }
+:root[data-palette="energia"][data-tema="chiaro"] {
+  --bg: #fbf3ee; --sheet: #fbf3ee; --card-2: #f8ece4; --card-3: #f0ddd0;
+  --accent: #c2410c; --accent-strong: #c2410c; --accent-fill: #c2410c;
+  --accent-soft: rgba(194, 65, 12, 0.12); --accent-softer: rgba(194, 65, 12, 0.07);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(194, 65, 12, 0.14), rgba(194, 65, 12, 0) 70%);
+}
+@media (prefers-color-scheme: dark) { :root[data-palette="oceano"]:not([data-tema="chiaro"]) {
+  --bg: #04111b; --sheet: #081a28; --card: #0b2131; --card-2: #112c40; --card-3: #183850; --seg-on: #24506f; --fumetto: #183850;
+  --material: rgba(6, 22, 34, 0.74); --material-strong: rgba(6, 22, 34, 0.88);
+  --accent: #38bdf8; --accent-strong: #22acef; --accent-fill: #0369a1; --on-accent: #ffffff;
+  --accent-soft: rgba(56, 189, 248, 0.18); --accent-softer: rgba(56, 189, 248, 0.1);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(56, 189, 248, 0.24), rgba(56, 189, 248, 0) 70%);
+} }
+:root[data-palette="oceano"][data-tema="scuro"] {
+  --bg: #04111b; --sheet: #081a28; --card: #0b2131; --card-2: #112c40; --card-3: #183850; --seg-on: #24506f; --fumetto: #183850;
+  --material: rgba(6, 22, 34, 0.74); --material-strong: rgba(6, 22, 34, 0.88);
+  --accent: #38bdf8; --accent-strong: #22acef; --accent-fill: #0369a1; --on-accent: #ffffff;
+  --accent-soft: rgba(56, 189, 248, 0.18); --accent-softer: rgba(56, 189, 248, 0.1);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(56, 189, 248, 0.24), rgba(56, 189, 248, 0) 70%);
+}
+@media (prefers-color-scheme: light) { :root[data-palette="oceano"]:not([data-tema="scuro"]) {
+  --bg: #eef6fb; --sheet: #eef6fb; --card-2: #e6f1f8; --card-3: #d6e7f2;
+  --accent: #0369a1; --accent-strong: #0369a1; --accent-fill: #0369a1;
+  --accent-soft: rgba(3, 105, 161, 0.12); --accent-softer: rgba(3, 105, 161, 0.07);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(3, 105, 161, 0.14), rgba(3, 105, 161, 0) 70%);
+} }
+:root[data-palette="oceano"][data-tema="chiaro"] {
+  --bg: #eef6fb; --sheet: #eef6fb; --card-2: #e6f1f8; --card-3: #d6e7f2;
+  --accent: #0369a1; --accent-strong: #0369a1; --accent-fill: #0369a1;
+  --accent-soft: rgba(3, 105, 161, 0.12); --accent-softer: rgba(3, 105, 161, 0.07);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(3, 105, 161, 0.14), rgba(3, 105, 161, 0) 70%);
+}
+@media (prefers-color-scheme: dark) { :root[data-palette="viola"]:not([data-tema="chiaro"]) {
+  --bg: #0e0716; --sheet: #160d21; --card: #1b1128; --card-2: #261836; --card-3: #312045; --seg-on: #4b3368; --fumetto: #312045;
+  --material: rgba(22, 13, 33, 0.74); --material-strong: rgba(22, 13, 33, 0.88);
+  --accent: #c084fc; --accent-strong: #b06ef9; --accent-fill: #7c3aed; --on-accent: #ffffff;
+  --accent-soft: rgba(192, 132, 252, 0.18); --accent-softer: rgba(192, 132, 252, 0.1);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(192, 132, 252, 0.24), rgba(192, 132, 252, 0) 70%);
+} }
+:root[data-palette="viola"][data-tema="scuro"] {
+  --bg: #0e0716; --sheet: #160d21; --card: #1b1128; --card-2: #261836; --card-3: #312045; --seg-on: #4b3368; --fumetto: #312045;
+  --material: rgba(22, 13, 33, 0.74); --material-strong: rgba(22, 13, 33, 0.88);
+  --accent: #c084fc; --accent-strong: #b06ef9; --accent-fill: #7c3aed; --on-accent: #ffffff;
+  --accent-soft: rgba(192, 132, 252, 0.18); --accent-softer: rgba(192, 132, 252, 0.1);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(192, 132, 252, 0.24), rgba(192, 132, 252, 0) 70%);
+}
+@media (prefers-color-scheme: light) { :root[data-palette="viola"]:not([data-tema="scuro"]) {
+  --bg: #f6f1fc; --sheet: #f6f1fc; --card-2: #f1e9fa; --card-3: #e5d8f5;
+  --accent: #7c3aed; --accent-strong: #7c3aed; --accent-fill: #7c3aed;
+  --accent-soft: rgba(124, 58, 237, 0.12); --accent-softer: rgba(124, 58, 237, 0.07);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(124, 58, 237, 0.14), rgba(124, 58, 237, 0) 70%);
+} }
+:root[data-palette="viola"][data-tema="chiaro"] {
+  --bg: #f6f1fc; --sheet: #f6f1fc; --card-2: #f1e9fa; --card-3: #e5d8f5;
+  --accent: #7c3aed; --accent-strong: #7c3aed; --accent-fill: #7c3aed;
+  --accent-soft: rgba(124, 58, 237, 0.12); --accent-softer: rgba(124, 58, 237, 0.07);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(124, 58, 237, 0.14), rgba(124, 58, 237, 0) 70%);
+}
+@media (prefers-color-scheme: dark) { :root[data-palette="lime"]:not([data-tema="chiaro"]) {
+  --bg: #070906; --sheet: #0e120d; --card: #121812; --card-2: #1a221a; --card-3: #233023; --seg-on: #34472f; --fumetto: #233023;
+  --material: rgba(14, 18, 13, 0.74); --material-strong: rgba(14, 18, 13, 0.88);
+  --accent: #a3e635; --accent-strong: #94d82b; --accent-fill: #3f6212; --on-accent: #ffffff;
+  --accent-soft: rgba(163, 230, 53, 0.18); --accent-softer: rgba(163, 230, 53, 0.1);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(163, 230, 53, 0.24), rgba(163, 230, 53, 0) 70%);
+} }
+:root[data-palette="lime"][data-tema="scuro"] {
+  --bg: #070906; --sheet: #0e120d; --card: #121812; --card-2: #1a221a; --card-3: #233023; --seg-on: #34472f; --fumetto: #233023;
+  --material: rgba(14, 18, 13, 0.74); --material-strong: rgba(14, 18, 13, 0.88);
+  --accent: #a3e635; --accent-strong: #94d82b; --accent-fill: #3f6212; --on-accent: #ffffff;
+  --accent-soft: rgba(163, 230, 53, 0.18); --accent-softer: rgba(163, 230, 53, 0.1);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(163, 230, 53, 0.24), rgba(163, 230, 53, 0) 70%);
+}
+@media (prefers-color-scheme: light) { :root[data-palette="lime"]:not([data-tema="scuro"]) {
+  --bg: #f3f7ee; --sheet: #f3f7ee; --card-2: #edf3e6; --card-3: #dfe9d3;
+  --accent: #4d7c0f; --accent-strong: #4d7c0f; --accent-fill: #4d7c0f;
+  --accent-soft: rgba(77, 124, 15, 0.12); --accent-softer: rgba(77, 124, 15, 0.07);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(77, 124, 15, 0.14), rgba(77, 124, 15, 0) 70%);
+} }
+:root[data-palette="lime"][data-tema="chiaro"] {
+  --bg: #f3f7ee; --sheet: #f3f7ee; --card-2: #edf3e6; --card-3: #dfe9d3;
+  --accent: #4d7c0f; --accent-strong: #4d7c0f; --accent-fill: #4d7c0f;
+  --accent-soft: rgba(77, 124, 15, 0.12); --accent-softer: rgba(77, 124, 15, 0.07);
+  --glow: radial-gradient(130% 55% at 50% -12%, rgba(77, 124, 15, 0.14), rgba(77, 124, 15, 0) 70%);
+}

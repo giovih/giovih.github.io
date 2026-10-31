@@ -34,6 +34,7 @@ export function impostazioniIniziali() {
       acqua: { on: true, ore: ['10:30', '13:00', '16:30', '19:00'] },
     },
     tema: 'auto', // auto | scuro | chiaro
+    palette: 'classico', // classico | energia | oceano | viola | lime
   };
 }
 
@@ -68,6 +69,7 @@ export function normalizzaImpostazioni(salvate) {
   }
   if (![2, 4].includes(+s.avambracci.giorno)) s.avambracci.giorno = 2;
   if (!['auto', 'scuro', 'chiaro'].includes(s.tema)) s.tema = 'auto';
+  if (!PALETTE.some(p => p.id === s.palette)) s.palette = 'classico';
   return s;
 }
 
@@ -81,3 +83,12 @@ export function sedutaDelGiorno(imp, giornoSett) {
   if (imp?.avambracci?.attivo && +imp.avambracci.giorno === giornoSett) return 'F';
   return null;
 }
+
+/** Palette dei colori (Altro, Aspetto): sfondo scuro, sfondo chiaro e accento per l'anteprima. */
+export const PALETTE = [
+  { id: 'classico', nome: 'Classico', scuro: '#0b0b0d', chiaro: '#f2f2f7', accento: '#3d8bff' },
+  { id: 'energia', nome: 'Energia', scuro: '#140b07', chiaro: '#fbf3ee', accento: '#ff7a3d' },
+  { id: 'oceano', nome: 'Oceano', scuro: '#04111b', chiaro: '#eef6fb', accento: '#38bdf8' },
+  { id: 'viola', nome: 'Viola', scuro: '#0e0716', chiaro: '#f6f1fc', accento: '#c084fc' },
+  { id: 'lime', nome: 'Lime', scuro: '#070906', chiaro: '#f3f7ee', accento: '#a3e635' },
+];

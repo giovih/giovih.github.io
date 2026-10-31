@@ -55,11 +55,11 @@ export function AppShell() {
   const [scroll] = useState(() => ({}));
 
   const imp = S.impostazioni();
-  useEffect(() => applicaTema(imp.tema, imp.palette), [imp.tema, imp.palette]);
+  useEffect(() => applicaTema(imp.tema, imp.palette, imp.stile), [imp.tema, imp.palette, imp.stile]);
   useEffect(() => {
     if (imp.tema !== 'auto') return;
     const mq = matchMedia('(prefers-color-scheme: dark)');
-    const f = () => applicaTema('auto', S.impostazioni().palette);
+    const f = () => applicaTema('auto', S.impostazioni().palette, S.impostazioni().stile);
     mq.addEventListener?.('change', f);
     return () => mq.removeEventListener?.('change', f);
   }, [imp.tema]);

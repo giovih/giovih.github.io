@@ -175,6 +175,8 @@ export function cercaLocale(testo, lista = ALIMENTI, max = 20) {
         if (trova(p, pa)) { score += 2; continue; }
         return null;
       }
+      if (n === q || normalizza(x.nome.replace(/\s*\(.*\)$/, '')) === q) score -= 5; // il nome esatto vince sempre
+      else if (n.includes(q)) score -= 0.5;
       if (n.startsWith(q)) score -= 1;
       else if (!pn[0].startsWith(parole[0]) && !radice(pn[0]).startsWith(radice(parole[0]))) score += 0.5;
       if (x.piatto) score += 2; // prima i cibi semplici, poi i piatti pronti

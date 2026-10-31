@@ -35,6 +35,7 @@ export function impostazioniIniziali() {
     },
     tema: 'auto', // auto | scuro | chiaro
     palette: 'classico', // classico | energia | oceano | viola | lime
+    stile: 'sport', // sport | ios
   };
 }
 
@@ -70,6 +71,7 @@ export function normalizzaImpostazioni(salvate) {
   if (![2, 4].includes(+s.avambracci.giorno)) s.avambracci.giorno = 2;
   if (!['auto', 'scuro', 'chiaro'].includes(s.tema)) s.tema = 'auto';
   if (!PALETTE.some(p => p.id === s.palette)) s.palette = 'classico';
+  if (!['sport', 'ios'].includes(s.stile)) s.stile = 'sport';
   return s;
 }
 

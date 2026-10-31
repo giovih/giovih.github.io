@@ -28,8 +28,9 @@ export function useOggi() {
 export const coloreTono = tono => `var(--tono-${tono || 'ambra'})`;
 
 /** Applica il tema (auto, scuro, chiaro) e il colore della barra di stato. */
-export function applicaTema(tema, palette = 'classico') {
+export function applicaTema(tema, palette = 'classico', stile = 'sport') {
   const root = document.documentElement;
+  root.dataset.stile = stile === 'ios' ? 'ios' : 'sport';
   if (tema === 'scuro' || tema === 'chiaro') root.dataset.tema = tema;
   else delete root.dataset.tema;
   const pal = PALETTE.find(p => p.id === palette) || PALETTE[0];

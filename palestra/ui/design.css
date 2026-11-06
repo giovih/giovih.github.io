@@ -934,3 +934,7 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 }
 [data-stile="sport"] .tabbar button { border-radius: 26px; font-size: 0.647rem; font-weight: 600; transition: background-color 0.3s, color 0.3s; }
 [data-stile="sport"] .tabbar button[aria-selected="true"] { background: var(--accent-soft); }
+/* "Precedente": come Hevy, toccandolo si copiano peso e ripetizioni della volta prima */
+.set-row .sr-prev { color: var(--label-2); }
+.set-row button.sr-prev { text-align: left; min-height: 44px; padding: 0; border-radius: 8px; transition: background-color 0.2s; }
+.set-row button.sr-prev:active { background: var(--fill-2); }

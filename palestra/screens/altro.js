@@ -19,7 +19,7 @@ import { fmtInt } from '../core/format.js';
 import { PALETTE } from '../core/settings.js';
 import { parseDay, formatDayShort, isoDay, mondayOf } from '../core/dates.js';
 
-export const VERSIONE_APP = '2.8.0';
+export const VERSIONE_APP = '2.8.1';
 
 /** Le sotto-pagine: titolo e componente. */
 const PAGINE = {

@@ -22,10 +22,12 @@ const ICONA_TIPO = { sali: 'arrowUpRight', aggiungi: 'plus', ripeti: 'sync', fer
    Riga di una serie
    ===================================================================== */
 
-export function SetRow({ numero, prec, kg, reps, kgSugg, repsSugg, fatto, focus, onKg, onReps, onCheck, etichetta, unitaKg }) {
+export function SetRow({ numero, prec, kg, reps, kgSugg, repsSugg, fatto, focus, onKg, onReps, onCheck, onPrec, etichetta, unitaKg }) {
   return html`<div class=${'set-row' + (fatto ? ' done' : '')} role="group" aria-label=${etichetta}>
     <span class="sr-num" aria-hidden="true">${numero}</span>
-    <span class="sr-prev ellipsis" aria-label=${prec ? `Ultima volta ${prec}` : 'Nessun dato precedente'}>${prec || '–'}</span>
+    ${prec && onPrec
+      ? html`<button type="button" class="sr-prev ellipsis" onClick=${onPrec} aria-label=${`Ultima volta ${prec}. Tocca per usare gli stessi valori`}>${prec}</button>`
+      : html`<span class="sr-prev ellipsis" aria-label=${prec ? `Ultima volta ${prec}` : 'Nessun dato precedente'}>${prec || '–'}</span>`}
     <button type="button" class=${'sr-field' + (kgSugg ? ' sugg' : '') + (focus === 'kg' ? ' focus' : '')} onClick=${onKg}
       aria-label=${`${unitaKg}: ${kg ?? 'vuoto'}`}>${kg ?? '–'}</button>
     <button type="button" class=${'sr-field' + (repsSugg ? ' sugg' : '') + (focus === 'reps' ? ' focus' : '')} onClick=${onReps}
@@ -100,7 +102,8 @@ function EsercizioCard({ s, v, vi, sedute, settDrop, campo, onCampo }) {
           unitaKg=${A_.peso}
           etichetta=${`Serie ${si + 1} di ${v.ex}`}
           onKg=${() => apriCampo(si, 'kg')} onReps=${() => apriCampo(si, 'reps')}
-          onCheck=${() => onCampo(vi, si, 'check')} />
+          onCheck=${() => onCampo(vi, si, 'check')}
+          onPrec=${p && !x.fatto ? () => { aptico(); A.aggiornaSerie(s.id, vi, si, { kg: p.kg, reps: p.reps }); } : null} />
         ${drop && html`<div class="sr-drop-row"><${Icon} name="flame" size=${14} />Drop set: a cedimento, poi ${val.kg ? fmtNum(Math.round(val.kg * 0.75 * 2) / 2) + ' kg' : '-25%'} e di nuovo a cedimento. Segna solo la serie normale.</div>`}`;
     })}
     <div class="clean-row">

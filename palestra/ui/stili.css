@@ -1,0 +1,268 @@
+/* =====================================================================
+   Design alternativi (Altro, Aspetto, Design).
+   Ognuno ha i suoi colori, font, forme e animazioni: tema e palette non contano.
+   Neon, Brutale, Vetro, Atleta, Giocoso. "Sport" e "iOS" sono in design.css.
+   Font liberi (licenza SIL OFL) inclusi nell'app, così funzionano anche offline.
+   ===================================================================== */
+
+@font-face { font-family: "Space Grotesk"; font-weight: 500; font-display: swap; src: url(../fonts/space-grotesk-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Space Grotesk"; font-weight: 700; font-display: swap; src: url(../fonts/space-grotesk-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 500; font-display: swap; src: url(../fonts/jetbrains-mono-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 700; font-display: swap; src: url(../fonts/jetbrains-mono-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Archivo Black"; font-weight: 400; font-display: swap; src: url(../fonts/archivo-black-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Archivo"; font-weight: 500; font-display: swap; src: url(../fonts/archivo-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Archivo"; font-weight: 700; font-display: swap; src: url(../fonts/archivo-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Plus Jakarta Sans"; font-weight: 500; font-display: swap; src: url(../fonts/plus-jakarta-sans-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Plus Jakarta Sans"; font-weight: 800; font-display: swap; src: url(../fonts/plus-jakarta-sans-latin-800-normal.woff2) format("woff2"); }
+@font-face { font-family: "Bebas Neue"; font-weight: 400; font-display: swap; src: url(../fonts/bebas-neue-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 500; font-display: swap; src: url(../fonts/barlow-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 700; font-display: swap; src: url(../fonts/barlow-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Nunito"; font-weight: 600; font-display: swap; src: url(../fonts/nunito-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Nunito"; font-weight: 900; font-display: swap; src: url(../fonts/nunito-latin-900-normal.woff2) format("woff2"); }
+
+/* parti comuni: i design hanno un'animazione d'ingresso per ogni schermata */
+:root[data-stile="neon"] .page:not([hidden]) > .page-inner,
+:root[data-stile="brutale"] .page:not([hidden]) > .page-inner,
+:root[data-stile="vetro"] .page:not([hidden]) > .page-inner,
+:root[data-stile="atleta"] .page:not([hidden]) > .page-inner,
+:root[data-stile="giocoso"] .page:not([hidden]) > .page-inner { animation: var(--entra) both; }
+:root[data-stile="neon"], :root[data-stile="vetro"], :root[data-stile="atleta"],
+:root[data-stile="brutale"], :root[data-stile="giocoso"] { --tabbar-h: 66px; }
+:is([data-stile="neon"], [data-stile="brutale"], [data-stile="vetro"], [data-stile="atleta"], [data-stile="giocoso"]) .tabbar {
+  height: calc(66px + var(--safe-bottom));
+}
+
+/* =====================================================================
+   1. NEON: da videogioco. Nero, ciano e magenta che si illuminano, caratteri tecnici.
+   ===================================================================== */
+:root[data-stile="neon"] {
+  color-scheme: dark;
+  --bg: #04050a; --sheet: #080b14; --card: #0a0e19; --card-2: #111829; --card-3: #19223a;
+  --hairline: rgba(0, 240, 255, 0.16); --separator: rgba(0, 240, 255, 0.14);
+  --fill: rgba(0, 240, 255, 0.12); --fill-2: rgba(0, 240, 255, 0.07);
+  --material: rgba(6, 9, 18, 0.78); --material-strong: rgba(8, 12, 22, 0.92); --scrim: rgba(0, 0, 0, 0.6);
+  --shadow: 0 0 0 1px rgba(0, 240, 255, 0.2), 0 12px 40px rgba(0, 0, 0, 0.7); --shadow-small: 0 0 12px rgba(0, 240, 255, 0.15);
+  --knob: #ffffff; --seg-on: #0e3b47;
+  --label: #e9fbff; --label-2: rgba(200, 240, 255, 0.66); --label-3: rgba(200, 240, 255, 0.4); --label-4: rgba(200, 240, 255, 0.2);
+  --accent: #00f0ff; --accent-strong: #00d5e6; --accent-fill: #00e1f0; --on-accent: #001418;
+  --accent-soft: rgba(0, 240, 255, 0.16); --accent-softer: rgba(0, 240, 255, 0.08);
+  --magenta: #ff2bd6;
+  --danger: #ff4d6d; --danger-soft: rgba(255, 77, 109, 0.15);
+  --tono-ambra: #ffb547; --tono-teal: #2ef2c4; --tono-rosa: #ff5ca8; --tono-lavanda: #b18cff; --tono-sabbia: #e6d27a; --acqua: #5ad8ff;
+  --dato-prot: #2ef2c4; --dato-fascia: rgba(0, 240, 255, 0.08); --fumetto: #111829;
+  --font: "Space Grotesk", -apple-system, system-ui, sans-serif;
+  --font-rounded: "JetBrains Mono", ui-monospace, monospace;
+  --r-card: 14px; --r-ctrl: 10px;
+  --entra: neon-accende 0.55s steps(1, end);
+  --glow: radial-gradient(90% 40% at 50% -10%, rgba(255, 43, 214, 0.18), transparent 70%);
+}
+[data-stile="neon"] .app, [data-stile="neon"] .workout, [data-stile="neon"] .sotto-pagina { background-image: var(--glow); }
+[data-stile="neon"] .large-title h1 { font-family: var(--font); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  text-shadow: 0 0 14px rgba(0, 240, 255, 0.55), 0 0 2px rgba(0, 240, 255, 0.9); }
+[data-stile="neon"] .large-title .lt-caption { color: var(--magenta); text-shadow: 0 0 10px rgba(255, 43, 214, 0.6); letter-spacing: 0.12em; }
+[data-stile="neon"] .section-title h2 { text-transform: uppercase; letter-spacing: 0.06em; font-size: 1.06rem; }
+[data-stile="neon"] .section-label { color: var(--magenta); letter-spacing: 0.14em; }
+[data-stile="neon"] .card, [data-stile="neon"] .list, [data-stile="neon"] .ex-card {
+  border: 1px solid rgba(0, 240, 255, 0.22); box-shadow: inset 0 0 22px rgba(0, 240, 255, 0.05), 0 0 18px rgba(0, 240, 255, 0.06);
+}
+[data-stile="neon"] .btn-primary { color: var(--on-accent); background: var(--accent-fill); box-shadow: 0 0 18px rgba(0, 240, 255, 0.55);
+  animation: neon-respira 2.6s ease-in-out infinite; text-transform: uppercase; letter-spacing: 0.06em; }
+[data-stile="neon"] .btn-tinted { background: transparent; box-shadow: inset 0 0 0 1px var(--accent); }
+[data-stile="neon"] .stat .stat-value, [data-stile="neon"] .mini-val, [data-stile="neon"] .num-grande { font-weight: 700; }
+[data-stile="neon"] .segmented .seg-ind { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent), 0 0 12px rgba(0, 240, 255, 0.35); }
+[data-stile="neon"] .tabbar { border-top: 1px solid rgba(0, 240, 255, 0.35); box-shadow: 0 -6px 24px rgba(0, 240, 255, 0.08); }
+[data-stile="neon"] .tabbar button[aria-selected="true"] { color: var(--accent); filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.8)); }
+[data-stile="neon"] .set-row.done .sr-check { box-shadow: 0 0 14px rgba(0, 240, 255, 0.7); }
+[data-stile="neon"] .seduta::before { background: linear-gradient(120deg, color-mix(in srgb, var(--tono) 22%, transparent), transparent 55%); }
+@keyframes neon-accende { 0% { opacity: 0; } 20% { opacity: 0.8; } 30% { opacity: 0.2; } 45% { opacity: 1; } 55% { opacity: 0.6; } 70%, 100% { opacity: 1; } }
+@keyframes neon-respira { 50% { box-shadow: 0 0 28px rgba(0, 240, 255, 0.85), 0 0 4px rgba(255, 255, 255, 0.6) inset; } }
+
+/* =====================================================================
+   2. BRUTALE: da rivista. Carta, nero spesso, giallo, ombre nette, titoli enormi.
+   ===================================================================== */
+:root[data-stile="brutale"] {
+  color-scheme: light;
+  --bg: #f3efe4; --sheet: #f3efe4; --card: #ffffff; --card-2: #f6f2e8; --card-3: #e9e3d3;
+  --hairline: #111111; --separator: rgba(17, 17, 17, 0.18);
+  --fill: rgba(17, 17, 17, 0.1); --fill-2: rgba(17, 17, 17, 0.06);
+  --material: rgba(243, 239, 228, 0.94); --material-strong: rgba(243, 239, 228, 0.98); --scrim: rgba(17, 17, 17, 0.35);
+  --shadow: 5px 5px 0 #111111; --shadow-small: 3px 3px 0 #111111;
+  --knob: #ffffff; --seg-on: #ffd400;
+  --label: #111111; --label-2: rgba(17, 17, 17, 0.7); --label-3: rgba(17, 17, 17, 0.48); --label-4: rgba(17, 17, 17, 0.24);
+  --accent: #c23a00; --accent-strong: #a83200; --accent-fill: #ffd400; --on-accent: #111111;
+  --accent-soft: rgba(255, 212, 0, 0.35); --accent-softer: rgba(255, 212, 0, 0.18);
+  --danger: #c4001a; --danger-soft: rgba(196, 0, 26, 0.1);
+  --tono-ambra: #b86a12; --tono-teal: #0f7c6c; --tono-rosa: #c2364c; --tono-lavanda: #5b3fc4; --tono-sabbia: #8a7330; --acqua: #0a7fbf;
+  --dato-prot: #0f7c6c; --dato-fascia: rgba(17, 17, 17, 0.08); --fumetto: #ffffff;
+  --font: "Archivo", -apple-system, system-ui, sans-serif;
+  --font-rounded: "Archivo Black", "Archivo", sans-serif;
+  --r-card: 6px; --r-ctrl: 6px; --r-field: 4px;
+  --entra: brutale-sbatte 0.32s steps(4, end);
+}
+[data-stile="brutale"] .large-title h1 { font-family: "Archivo Black", sans-serif; font-weight: 400; font-size: 2.6rem; text-transform: uppercase; letter-spacing: -0.02em; line-height: 1; }
+[data-stile="brutale"] .large-title .lt-caption { color: var(--label); background: var(--accent-fill); display: inline-block; padding: 2px 6px; border: 2px solid #111; }
+[data-stile="brutale"] .section-title h2 { font-family: "Archivo Black", sans-serif; font-weight: 400; text-transform: uppercase; }
+[data-stile="brutale"] .section-label { color: var(--label); font-weight: 700; letter-spacing: 0.1em; }
+[data-stile="brutale"] .card, [data-stile="brutale"] .list, [data-stile="brutale"] .ex-card {
+  border: 2px solid #111; box-shadow: 5px 5px 0 #111; }
+[data-stile="brutale"] .card .card, [data-stile="brutale"] .card .list { box-shadow: none; }
+[data-stile="brutale"] .btn { border: 2px solid #111; box-shadow: 4px 4px 0 #111; text-transform: uppercase; font-weight: 700; letter-spacing: 0.04em;
+  transition: transform 0.08s steps(2), box-shadow 0.08s steps(2); }
+[data-stile="brutale"] .btn:active { transform: translate(4px, 4px); box-shadow: 0 0 0 #111; opacity: 1; }
+[data-stile="brutale"] .btn-tinted { background: #fff; color: #111; }
+[data-stile="brutale"] .icon-btn { border-radius: 6px; border: 2px solid #111; background: #fff; color: #111; }
+[data-stile="brutale"] .scelta { border-radius: 6px; border: 2px solid #111; background: #fff; }
+[data-stile="brutale"] .scelta.on { background: var(--accent-fill); color: #111; }
+[data-stile="brutale"] .segmented { border: 2px solid #111; border-radius: 6px; background: #fff; }
+[data-stile="brutale"] .segmented .seg-ind { border-radius: 3px; box-shadow: none; border: 2px solid #111; }
+[data-stile="brutale"] .stat .stat-value, [data-stile="brutale"] .mini-val { font-family: "Archivo Black", sans-serif; font-weight: 400; }
+[data-stile="brutale"] .row-icon { border-radius: 4px; border: 2px solid #111; }
+[data-stile="brutale"] .tabbar { background: #fff; border-top: 3px solid #111; -webkit-backdrop-filter: none; backdrop-filter: none; }
+[data-stile="brutale"] .tabbar button { color: #111; font-weight: 700; text-transform: uppercase; }
+[data-stile="brutale"] .tabbar button[aria-selected="true"] { background: var(--accent-fill); color: #111; box-shadow: inset 0 0 0 2px #111; }
+[data-stile="brutale"] .set-row .sr-field { border: 2px solid #111; border-radius: 4px; }
+[data-stile="brutale"] .set-row.done .sr-check { border: 2px solid #111; }
+[data-stile="brutale"] .sheet { border-top: 3px solid #111; }
+[data-stile="brutale"] .seduta::before { background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--tono) 14%, transparent) 0 10px, transparent 10px 20px); }
+@keyframes brutale-sbatte { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* =====================================================================
+   3. VETRO: vetro smerigliato su colori vivi che sfumano. Morbido ed elegante.
+   ===================================================================== */
+:root[data-stile="vetro"] {
+  color-scheme: dark;
+  --bg: #120d2e; --sheet: rgba(30, 22, 64, 0.92); --card: rgba(255, 255, 255, 0.09); --card-2: rgba(255, 255, 255, 0.12); --card-3: rgba(255, 255, 255, 0.18);
+  --hairline: rgba(255, 255, 255, 0.2); --separator: rgba(255, 255, 255, 0.14);
+  --fill: rgba(255, 255, 255, 0.16); --fill-2: rgba(255, 255, 255, 0.1);
+  --material: rgba(40, 28, 84, 0.55); --material-strong: rgba(36, 26, 76, 0.82); --scrim: rgba(10, 6, 30, 0.5);
+  --shadow: 0 16px 50px rgba(8, 4, 30, 0.45); --shadow-small: 0 4px 14px rgba(8, 4, 30, 0.3);
+  --knob: #ffffff; --seg-on: rgba(255, 255, 255, 0.3);
+  --label: #ffffff; --label-2: rgba(255, 255, 255, 0.74); --label-3: rgba(255, 255, 255, 0.5); --label-4: rgba(255, 255, 255, 0.26);
+  --accent: #ffd27a; --accent-strong: #ffc34d; --accent-fill: #7a3cff; --on-accent: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.18); --accent-softer: rgba(255, 255, 255, 0.1);
+  --danger: #ff8a9a; --danger-soft: rgba(255, 138, 154, 0.16);
+  --tono-ambra: #ffc36b; --tono-teal: #6bf0d2; --tono-rosa: #ff9ccd; --tono-lavanda: #c9b4ff; --tono-sabbia: #f2dc9a; --acqua: #8fe3ff;
+  --dato-prot: #6bf0d2; --dato-fascia: rgba(255, 255, 255, 0.1); --fumetto: #2c2160;
+  --font: "Plus Jakarta Sans", -apple-system, system-ui, sans-serif;
+  --font-rounded: "Plus Jakarta Sans", -apple-system, system-ui, sans-serif;
+  --r-card: 30px; --r-ctrl: 999px;
+  --entra: vetro-emerge 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --sfondo-vetro: radial-gradient(60% 45% at 15% 10%, #7a3cff 0%, transparent 70%), radial-gradient(55% 40% at 90% 25%, #ff4fa3 0%, transparent 70%),
+    radial-gradient(70% 50% at 50% 100%, #1f7bff 0%, transparent 70%), #120d2e;
+}
+[data-stile="vetro"] .app, [data-stile="vetro"] .workout, [data-stile="vetro"] .sotto-pagina { background: var(--sfondo-vetro); background-attachment: fixed; }
+[data-stile="vetro"] .card, [data-stile="vetro"] .list, [data-stile="vetro"] .ex-card {
+  -webkit-backdrop-filter: blur(16px) saturate(150%); backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 34px rgba(8, 4, 30, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.18); }
+[data-stile="vetro"] .card .card, [data-stile="vetro"] .card .list { -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
+[data-stile="vetro"] .large-title h1 { font-weight: 800; font-size: 2.3rem; letter-spacing: -0.03em; }
+[data-stile="vetro"] .large-title .lt-caption { color: var(--accent); }
+[data-stile="vetro"] .section-title h2 { font-weight: 800; letter-spacing: -0.02em; }
+[data-stile="vetro"] .section-label { color: rgba(255, 255, 255, 0.8); }
+[data-stile="vetro"] .stat .stat-value, [data-stile="vetro"] .mini-val { font-weight: 800; }
+[data-stile="vetro"] .btn-primary { background: linear-gradient(120deg, #7a3cff, #ff4fa3); box-shadow: 0 10px 28px rgba(255, 79, 163, 0.35); }
+[data-stile="vetro"] .scelta.on, [data-stile="vetro"] .set-row.done .sr-check, [data-stile="vetro"] .keypad .kp-key.next { background: linear-gradient(120deg, #7a3cff, #ff4fa3); border-color: transparent; }
+[data-stile="vetro"] .segmented .seg-ind { background: rgba(255, 255, 255, 0.28); border-radius: 999px; }
+[data-stile="vetro"] .segmented { border-radius: 999px; }
+[data-stile="vetro"] .tabbar { left: 14px; right: 14px; bottom: max(8px, calc(var(--safe-bottom) - 18px)); height: 66px; padding: 6px;
+  border-radius: 33px; border: 1px solid rgba(255, 255, 255, 0.22); box-shadow: 0 14px 40px rgba(8, 4, 30, 0.4); }
+[data-stile="vetro"] .tabbar button { border-radius: 27px; color: rgba(255, 255, 255, 0.6); }
+[data-stile="vetro"] .tabbar button[aria-selected="true"] { background: rgba(255, 255, 255, 0.2); color: #fff; }
+@keyframes vetro-emerge { from { opacity: 0; transform: translateY(14px) scale(0.98); filter: blur(8px); } to { opacity: 1; transform: none; filter: none; } }
+
+/* =====================================================================
+   4. ATLETA: da campione sportivo. Nero assoluto, giallo fluo, titoli alti e stretti.
+   ===================================================================== */
+:root[data-stile="atleta"] {
+  color-scheme: dark;
+  --bg: #000000; --sheet: #0d0d0d; --card: #121212; --card-2: #1c1c1c; --card-3: #262626;
+  --hairline: rgba(255, 255, 255, 0.08); --separator: rgba(255, 255, 255, 0.1);
+  --fill: rgba(255, 255, 255, 0.14); --fill-2: rgba(255, 255, 255, 0.08);
+  --material: rgba(0, 0, 0, 0.82); --material-strong: rgba(10, 10, 10, 0.94); --scrim: rgba(0, 0, 0, 0.6);
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.7); --shadow-small: 0 2px 10px rgba(0, 0, 0, 0.5);
+  --knob: #000000; --seg-on: #d4ff00;
+  --label: #ffffff; --label-2: rgba(255, 255, 255, 0.64); --label-3: rgba(255, 255, 255, 0.42); --label-4: rgba(255, 255, 255, 0.2);
+  --accent: #d4ff00; --accent-strong: #c2ee00; --accent-fill: #d4ff00; --on-accent: #000000;
+  --accent-soft: rgba(212, 255, 0, 0.16); --accent-softer: rgba(212, 255, 0, 0.08);
+  --danger: #ff4d3d; --danger-soft: rgba(255, 77, 61, 0.15);
+  --tono-ambra: #ffa63d; --tono-teal: #3de0c0; --tono-rosa: #ff5f7a; --tono-lavanda: #a98bff; --tono-sabbia: #e3cf7d; --acqua: #4cc9ff;
+  --dato-prot: #3de0c0; --dato-fascia: rgba(255, 255, 255, 0.07); --fumetto: #1c1c1c;
+  --font: "Barlow", -apple-system, system-ui, sans-serif;
+  --font-rounded: "Bebas Neue", "Barlow", sans-serif;
+  --r-card: 4px; --r-ctrl: 4px; --r-field: 4px;
+  --entra: atleta-scatta 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+[data-stile="atleta"] .large-title h1 { font-family: "Bebas Neue", sans-serif; font-weight: 400; font-size: 3.3rem; line-height: 0.92; letter-spacing: 0.01em; text-transform: uppercase; }
+[data-stile="atleta"] .large-title .lt-caption { color: var(--accent); font-weight: 700; letter-spacing: 0.14em; }
+[data-stile="atleta"] .section-title h2 { font-family: "Bebas Neue", sans-serif; font-weight: 400; font-size: 1.75rem; letter-spacing: 0.02em; text-transform: uppercase; }
+[data-stile="atleta"] .section-label { color: var(--accent); font-weight: 700; letter-spacing: 0.16em; }
+[data-stile="atleta"] .stat .stat-value, [data-stile="atleta"] .mini-val, [data-stile="atleta"] .ex-head .ex-name { font-family: "Bebas Neue", sans-serif; font-weight: 400; letter-spacing: 0.02em; }
+[data-stile="atleta"] .stat .stat-value { font-size: 2rem; }
+[data-stile="atleta"] .ex-head .ex-name { font-size: 1.6rem; text-transform: uppercase; }
+[data-stile="atleta"] .card, [data-stile="atleta"] .list, [data-stile="atleta"] .ex-card { border: 0; border-left: 3px solid var(--accent); }
+[data-stile="atleta"] .card .card, [data-stile="atleta"] .card .list { border-left: 0; }
+[data-stile="atleta"] .btn { text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; border-radius: 4px; }
+[data-stile="atleta"] .btn-primary { transform: skewX(-8deg); }
+[data-stile="atleta"] .btn-primary > * { transform: skewX(8deg); }
+[data-stile="atleta"] .icon-btn { border-radius: 4px; }
+[data-stile="atleta"] .scelta { border-radius: 4px; }
+[data-stile="atleta"] .segmented .seg-ind { border-radius: 2px; }
+[data-stile="atleta"] .segmented button[aria-pressed="true"] { color: #000; font-weight: 700; }
+[data-stile="atleta"] .tabbar { background: #000; border-top: 1px solid #222; }
+[data-stile="atleta"] .tabbar button { text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; position: relative; }
+[data-stile="atleta"] .tabbar button[aria-selected="true"]::before { content: ""; position: absolute; top: 0; left: 28%; right: 28%; height: 3px; background: var(--accent); }
+[data-stile="atleta"] .seduta::before { background: repeating-linear-gradient(115deg, color-mix(in srgb, var(--tono) 18%, transparent) 0 2px, transparent 2px 14px); }
+@keyframes atleta-scatta { from { opacity: 0; transform: translateX(-28px) skewX(-6deg); } to { opacity: 1; transform: none; } }
+
+/* =====================================================================
+   5. GIOCOSO: allegro come un gioco. Chiaro, colori pieni, pulsanti 3D che rimbalzano.
+   ===================================================================== */
+:root[data-stile="giocoso"] {
+  color-scheme: light;
+  --bg: #f7f7f2; --sheet: #f7f7f2; --card: #ffffff; --card-2: #f1f3f6; --card-3: #e5e9ef;
+  --hairline: #e3e6ea; --separator: #e9ecef;
+  --fill: rgba(60, 70, 90, 0.1); --fill-2: rgba(60, 70, 90, 0.06);
+  --material: rgba(255, 255, 255, 0.92); --material-strong: rgba(255, 255, 255, 0.97); --scrim: rgba(30, 40, 60, 0.3);
+  --shadow: 0 6px 0 #e3e6ea, 0 12px 30px rgba(30, 40, 60, 0.1); --shadow-small: 0 3px 0 #e3e6ea;
+  --knob: #ffffff; --seg-on: #ffffff;
+  --label: #3c3c3c; --label-2: rgba(60, 60, 60, 0.72); --label-3: rgba(60, 60, 60, 0.5); --label-4: rgba(60, 60, 60, 0.24);
+  --accent: #1667c7; --accent-strong: #0f58ad; --accent-fill: #2e8b00; --on-accent: #ffffff;
+  --accent-soft: rgba(28, 176, 246, 0.16); --accent-softer: rgba(28, 176, 246, 0.08);
+  --danger: #d4202f; --danger-soft: rgba(255, 75, 75, 0.12);
+  --tono-ambra: #e08a00; --tono-teal: #00a38a; --tono-rosa: #e0457b; --tono-lavanda: #8549ba; --tono-sabbia: #a88a2d; --acqua: #1cb0f6;
+  --dato-prot: #00a38a; --dato-fascia: rgba(60, 70, 90, 0.08); --fumetto: #ffffff;
+  --font: "Nunito", -apple-system, system-ui, sans-serif;
+  --font-rounded: "Nunito", ui-rounded, sans-serif;
+  --r-card: 22px; --r-ctrl: 16px;
+  --entra: giocoso-salta 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+[data-stile="giocoso"] body, [data-stile="giocoso"] .app { font-weight: 600; }
+[data-stile="giocoso"] .large-title h1 { font-weight: 900; font-size: 2.3rem; letter-spacing: -0.01em; }
+[data-stile="giocoso"] .large-title .lt-caption { color: var(--tono-ambra); font-weight: 900; }
+[data-stile="giocoso"] .section-title h2, [data-stile="giocoso"] .ex-head .ex-name, [data-stile="giocoso"] .t-headline { font-weight: 900; }
+[data-stile="giocoso"] .section-label { color: var(--label-3); font-weight: 900; letter-spacing: 0.08em; }
+[data-stile="giocoso"] .stat .stat-value, [data-stile="giocoso"] .mini-val { font-weight: 900; }
+[data-stile="giocoso"] .card, [data-stile="giocoso"] .list, [data-stile="giocoso"] .ex-card { border: 2px solid #e3e6ea; box-shadow: 0 4px 0 #e3e6ea; }
+[data-stile="giocoso"] .card .card, [data-stile="giocoso"] .card .list { box-shadow: none; }
+[data-stile="giocoso"] .btn { border-radius: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; transition: transform 0.15s, box-shadow 0.15s; }
+[data-stile="giocoso"] .btn-primary { box-shadow: 0 5px 0 #236b00; }
+[data-stile="giocoso"] .btn-primary:active { transform: translateY(5px); box-shadow: 0 0 0 #236b00; opacity: 1; }
+[data-stile="giocoso"] .btn-tinted { background: #fff; border: 2px solid #e3e6ea; box-shadow: 0 4px 0 #e3e6ea; color: var(--accent); }
+[data-stile="giocoso"] .icon-btn { background: #fff; border: 2px solid #e3e6ea; box-shadow: 0 3px 0 #e3e6ea; }
+[data-stile="giocoso"] .scelta { background: #fff; border: 2px solid #e3e6ea; box-shadow: 0 3px 0 #e3e6ea; font-weight: 800; }
+[data-stile="giocoso"] .scelta.on { background: #ddf4ff; border-color: #84d8ff; color: #1667c7; box-shadow: 0 3px 0 #84d8ff; }
+[data-stile="giocoso"] .segmented { background: #e9edf2; }
+[data-stile="giocoso"] .segmented button[aria-pressed="true"] { font-weight: 900; }
+[data-stile="giocoso"] .row-icon { border-radius: 12px; }
+[data-stile="giocoso"] .set-row.done .sr-check { animation: giocoso-salta 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+[data-stile="giocoso"] .set-row .sr-field { border: 2px solid #e3e6ea; }
+[data-stile="giocoso"] .tabbar { background: #fff; border-top: 2px solid #e3e6ea; -webkit-backdrop-filter: none; backdrop-filter: none; }
+[data-stile="giocoso"] .tabbar button { font-weight: 900; color: #a5abb3; }
+[data-stile="giocoso"] .tabbar button .icon { padding: 3px; border-radius: 10px; width: 34px; height: 30px; }
+[data-stile="giocoso"] .tabbar button[aria-selected="true"] { color: #1667c7; }
+[data-stile="giocoso"] .tabbar button[aria-selected="true"] .icon { background: #ddf4ff; box-shadow: inset 0 0 0 2px #84d8ff; }
+@keyframes giocoso-salta { 0% { opacity: 0; transform: scale(0.92); } 60% { opacity: 1; transform: scale(1.02); } 100% { transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-stile] .page:not([hidden]) > .page-inner, [data-stile="neon"] .btn-primary { animation: none !important; }
+}

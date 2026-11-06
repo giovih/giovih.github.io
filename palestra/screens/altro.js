@@ -16,10 +16,10 @@ import { PaginaAccount, statoSync } from './al-account.js';
 import { PaginaPrepara } from './al-prepara.js';
 import { PaginaObiettivi, PaginaBlocco, PaginaPrivacy, PaginaCrediti } from './al-varie.js';
 import { fmtInt } from '../core/format.js';
-import { PALETTE } from '../core/settings.js';
+import { PALETTE, STILI } from '../core/settings.js';
 import { parseDay, formatDayShort, isoDay, mondayOf } from '../core/dates.js';
 
-export const VERSIONE_APP = '2.8.1';
+export const VERSIONE_APP = '2.9.0';
 
 /** Le sotto-pagine: titolo e componente. */
 const PAGINE = {
@@ -113,6 +113,7 @@ function Radice({ apri, vai }) {
   useEffect(() => C.ascolta(setCloud), []);
   const sync = statoSync();
   const tema = imp.tema;
+  const stile = STILI.find(x => x.id === imp.stile) || STILI[0];
   const cambiaTema = v => S.salvaImpostazioni(i => ({ ...i, tema: v }));
   const giorniPalestra = [1, 2, 3, 4, 5, 6, 7].filter(g => imp.calendario[g]).length;
   const inizio = parseDay(imp.inizioProgramma);
@@ -151,14 +152,24 @@ function Radice({ apri, vai }) {
       <${ListRow} icon="bell" tile="#ff3b30" title="Notifiche" detail=${riassuntoNotifiche(imp)} chevron onClick=${() => apri('notifiche')} />
     <//>
 
-    <${SectionLabel}>Aspetto<//>
+    <${SectionLabel}>Design<//>
+    <div class="stili-griglia" role="radiogroup" aria-label="Design dell'app">
+      ${STILI.map(x => html`<button type="button" role="radio" aria-checked=${stile.id === x.id ? 'true' : 'false'}
+        class=${'stile-scelta' + (stile.id === x.id ? ' on' : '') + (x.chiaro ? ' chiaro' : '')}
+        style=${`--s-sfondo:${x.sfondo};--s-accento:${x.accento};--s-font:${x.font}`}
+        onClick=${() => { aptico('successo'); S.salvaImpostazioni(i => ({ ...i, stile: x.id })); }}>
+        <span class="ss-anteprima"><b>Aa</b><i></i><i></i></span>
+        <span class="ss-nome">${x.nome}</span>
+        <span class="ss-descr">${x.descr}</span>
+        ${stile.id === x.id && html`<span class="ss-spunta"><${Icon} name="checkBold" size=${12} /></span>`}
+      </button>`)}
+    </div>
+    <${SectionFoot}>Ogni design cambia colori, caratteri, forme e animazioni. Provali tutti: si cambia subito e non si perde niente.<//>
+
+    ${!stile.colori ? html`<${SectionLabel}>Tema e colori<//>
     <div class="card tema-card">
       <${Segmented} label="Tema" value=${tema} onChange=${cambiaTema}
         options=${[{ value: 'auto', label: 'Automatico' }, { value: 'scuro', label: 'Scuro' }, { value: 'chiaro', label: 'Chiaro' }]} />
-    </div>
-    <div class="card tema-card mt-12">
-      <${Segmented} label="Stile" value=${imp.stile || 'sport'} onChange=${v => S.salvaImpostazioni(i => ({ ...i, stile: v }))}
-        options=${[{ value: 'sport', label: 'Sport' }, { value: 'ios', label: 'iOS (com\'era)' }]} />
     </div>
     <div class="card palette-card mt-12" role="radiogroup" aria-label="Colori">
       ${PALETTE.map(p => html`<button type="button" role="radio" aria-checked=${(imp.palette || 'classico') === p.id ? 'true' : 'false'}
@@ -168,7 +179,8 @@ function Radice({ apri, vai }) {
         <span class="ps-nome">${p.nome}</span>
       </button>`)}
     </div>
-    <${SectionFoot}>Automatico segue il tema dell'iPhone. Stile Sport: titoli grossi, card sfumate e barra flottante. iOS è lo stile di prima. I colori cambiano sfondi e accento.<//>
+    <${SectionFoot}>Automatico segue il tema dell'iPhone. I colori cambiano sfondi e accento.<//>`
+    : html`<${SectionFoot}>${stile.nome} ha già i suoi colori: tema e palette tornano attivi con Sport o iOS.<//>`}
 
     <${SectionLabel}>Dati<//>
     <${List}>

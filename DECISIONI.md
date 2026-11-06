@@ -155,3 +155,10 @@ Kcal e proteine sono quelli della tua scheda; carboidrati e grassi li ho stimati
   e la scheda "Foto AI" nell'aggiunta del cibo. Ho eliminato anche la funzione `ai` dal progetto Supabase.
 - Il codice resta nel repository (`screens/coach.js`, `data/ai.js`, `supabase/functions/ai/`): se un giorno servisse si rimette in pochi minuti.
 - I consigli importanti (calorie, scarico, pesata, diario) restano in Oggi, sezione "Per te".
+
+## 13. Design da scegliere
+- In Altro, Design: Sport (predefinito), iOS (lo stile di prima) e cinque design completamente diversi: Neon, Brutale, Vetro, Atleta, Giocoso.
+  Ognuno cambia colori, caratteri, forme, barra in basso e animazione d'ingresso delle schermate. Tema e palette valgono solo per Sport e iOS.
+- I caratteri (Space Grotesk, JetBrains Mono, Archivo, Plus Jakarta Sans, Bebas Neue, Barlow, Nunito) sono liberi (licenza SIL OFL),
+  presi dai pacchetti Fontsource e inclusi nell'app (`palestra/fonts`, 270 KB): funzionano anche senza internet.
+- La barra flottante di Sport ora sta più in basso, vicino al bordo dello schermo.

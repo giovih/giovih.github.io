@@ -928,7 +928,7 @@ textarea.field { height: auto; min-height: 90px; padding: 12px 14px; resize: non
 [data-stile="sport"] .row-icon { border-radius: 50%; }
 /* barra delle schede flottante a pillola */
 [data-stile="sport"] .tabbar {
-  left: 14px; right: 14px; bottom: calc(var(--safe-bottom) + 8px); height: 64px; padding: 6px; gap: 4px;
+  left: 14px; right: 14px; bottom: max(8px, calc(var(--safe-bottom) - 18px)); height: 64px; padding: 6px; gap: 4px; /* più in basso, vicino al bordo */
   border-radius: 32px; border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--separator));
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.32);
 }

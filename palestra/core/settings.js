@@ -35,7 +35,7 @@ export function impostazioniIniziali() {
     },
     tema: 'auto', // auto | scuro | chiaro
     palette: 'classico', // classico | energia | oceano | viola | lime
-    stile: 'sport', // sport | ios
+    stile: 'sport', // sport | ios | neon | brutale | vetro | atleta | giocoso
   };
 }
 
@@ -71,7 +71,7 @@ export function normalizzaImpostazioni(salvate) {
   if (![2, 4].includes(+s.avambracci.giorno)) s.avambracci.giorno = 2;
   if (!['auto', 'scuro', 'chiaro'].includes(s.tema)) s.tema = 'auto';
   if (!PALETTE.some(p => p.id === s.palette)) s.palette = 'classico';
-  if (!['sport', 'ios'].includes(s.stile)) s.stile = 'sport';
+  if (!STILI.some(x => x.id === s.stile)) s.stile = 'sport';
   return s;
 }
 
@@ -93,4 +93,15 @@ export const PALETTE = [
   { id: 'oceano', nome: 'Oceano', scuro: '#04111b', chiaro: '#eef6fb', accento: '#38bdf8' },
   { id: 'viola', nome: 'Viola', scuro: '#0e0716', chiaro: '#f6f1fc', accento: '#c084fc' },
   { id: 'lime', nome: 'Lime', scuro: '#070906', chiaro: '#f3f7ee', accento: '#a3e635' },
+];
+
+/** Design dell'app (Altro, Aspetto). I primi due usano tema e palette; gli altri hanno i loro colori. */
+export const STILI = [
+  { id: 'sport', nome: 'Sport', descr: 'Titoli grossi, barra flottante', sfondo: '#0b0b0d', accento: '#3d8bff', font: '-apple-system, system-ui', colori: false },
+  { id: 'ios', nome: 'iOS', descr: 'Lo stile di prima, sobrio', sfondo: '#18181b', accento: '#3d8bff', font: '-apple-system, system-ui', colori: false },
+  { id: 'neon', nome: 'Neon', descr: 'Da videogioco, luci che brillano', sfondo: '#04050a', accento: '#00f0ff', font: '"Space Grotesk"', colori: true },
+  { id: 'brutale', nome: 'Brutale', descr: 'Da rivista: carta, nero e giallo', sfondo: '#f3efe4', accento: '#ffd400', font: '"Archivo Black"', colori: true, chiaro: true },
+  { id: 'vetro', nome: 'Vetro', descr: 'Vetro sfumato su colori vivi', sfondo: '#3a1f8a', accento: '#ff4fa3', font: '"Plus Jakarta Sans"', colori: true },
+  { id: 'atleta', nome: 'Atleta', descr: 'Nero e giallo fluo, da campione', sfondo: '#000000', accento: '#d4ff00', font: '"Bebas Neue"', colori: true },
+  { id: 'giocoso', nome: 'Giocoso', descr: 'Allegro, pulsanti che rimbalzano', sfondo: '#f7f7f2', accento: '#2e8b00', font: '"Nunito"', colori: true, chiaro: true },
 ];

@@ -1,13 +1,13 @@
 // Service worker: l'app funziona senza internet e riceve le notifiche push.
 // Aggiorna VERSIONE a ogni pubblicazione: il telefono scarica la nuova versione da solo.
 
-const VERSIONE = '2.8.1';
+const VERSIONE = '2.9.0';
 const CACHE = 'pal2-' + VERSIONE;
 
 const FILE = [
   './', 'index.html', 'manifest.webmanifest', 'app.js',
   'lib/preact.js', 'lib/zxing.js',
-  'ui/design.css', 'ui/screens.css', 'ui/icons.js', 'ui/kit.js', 'ui/overlay.js', 'ui/haptics.js', 'ui/charts.js', 'ui/keypad.js', 'ui/scanner.js',
+  'ui/design.css', 'ui/screens.css', 'ui/stili.css', 'ui/icons.js', 'ui/kit.js', 'ui/overlay.js', 'ui/haptics.js', 'ui/charts.js', 'ui/keypad.js', 'ui/scanner.js',
   'core/dates.js', 'core/format.js', 'core/scheda.js', 'core/cycle.js', 'core/progression.js', 'core/nutrition.js',
   'core/foods.js', 'core/alimenti-extra.js', 'core/settings.js', 'core/reminders.js', 'core/migrate.js', 'core/sync-merge.js', 'core/coach.js', 'core/stats.js',
   'data/idb.js', 'data/store.js', 'data/actions.js', 'data/cloud.js', 'data/sync.js', 'data/push.js', 'data/off.js', 'data/ai.js', 'data/rest.js',

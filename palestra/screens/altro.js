@@ -19,7 +19,7 @@ import { fmtInt } from '../core/format.js';
 import { PALETTE, STILI } from '../core/settings.js';
 import { parseDay, formatDayShort, isoDay, mondayOf } from '../core/dates.js';
 
-export const VERSIONE_APP = '2.9.0';
+export const VERSIONE_APP = '2.9.1';
 
 /** Le sotto-pagine: titolo e componente. */
 const PAGINE = {
@@ -199,6 +199,8 @@ function Radice({ apri, vai }) {
     <${List}>
       <${ListRow} icon="shield" tile="#34c759" title="Privacy e dati" chevron onClick=${() => apri('privacy')} />
       <${ListRow} icon="heart" tile="#ff2d55" title="Crediti" chevron onClick=${() => apri('crediti')} />
+      <${ListRow} icon="sync" tile="#007aff" title="Aggiorna l'app" sub=${`Versione ${VERSIONE_APP} · scarica l'ultima dal sito`}
+        onClick=${() => { toast('Aggiorno…', 'sync'); import('../data/aggiorna.js').then(m => m.aggiornaOra()); }} />
     <//>
 
     <div class="center mt-24"><button type="button" class="btn btn-plain danger" onClick=${apriCancella}>Cancella tutti i dati</button></div>

@@ -1,7 +1,7 @@
 // Service worker: l'app funziona senza internet e riceve le notifiche push.
 // Aggiorna VERSIONE a ogni pubblicazione: il telefono scarica la nuova versione da solo.
 
-const VERSIONE = '2.9.0';
+const VERSIONE = '2.9.1';
 const CACHE = 'pal2-' + VERSIONE;
 
 const FILE = [
@@ -10,7 +10,7 @@ const FILE = [
   'ui/design.css', 'ui/screens.css', 'ui/stili.css', 'ui/icons.js', 'ui/kit.js', 'ui/overlay.js', 'ui/haptics.js', 'ui/charts.js', 'ui/keypad.js', 'ui/scanner.js',
   'core/dates.js', 'core/format.js', 'core/scheda.js', 'core/cycle.js', 'core/progression.js', 'core/nutrition.js',
   'core/foods.js', 'core/alimenti-extra.js', 'core/settings.js', 'core/reminders.js', 'core/migrate.js', 'core/sync-merge.js', 'core/coach.js', 'core/stats.js',
-  'data/idb.js', 'data/store.js', 'data/actions.js', 'data/cloud.js', 'data/sync.js', 'data/push.js', 'data/off.js', 'data/ai.js', 'data/rest.js',
+  'data/idb.js', 'data/store.js', 'data/actions.js', 'data/cloud.js', 'data/sync.js', 'data/push.js', 'data/aggiorna.js', 'data/off.js', 'data/ai.js', 'data/rest.js',
   'screens/app-shell.js', 'screens/oggi.js', 'screens/allenamento.js', 'screens/cibo.js', 'screens/aggiungi-cibo.js',
   'screens/progressi.js', 'screens/pr-corpo.js', 'screens/pr-allenamenti.js', 'screens/pr-agenda.js', 'screens/pr-diario.js',
   'screens/coach.js', 'screens/altro.js', 'screens/al-programma.js', 'screens/al-notifiche.js', 'screens/al-account.js', 'screens/al-prepara.js', 'screens/al-varie.js',
@@ -103,4 +103,5 @@ self.addEventListener('notificationclick', e => {
 
 self.addEventListener('message', e => {
   if (e.data?.tipo === 'versione') e.source?.postMessage({ tipo: 'versione', versione: VERSIONE });
+  if (e.data?.tipo === 'attiva') self.skipWaiting();
 });

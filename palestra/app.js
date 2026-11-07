@@ -47,15 +47,24 @@ function avviaNotifiche(P) {
 
 function registraServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
-  navigator.serviceWorker.register('sw.js').catch(e => console.warn('Service worker', e));
-  // Nuova versione installata: ricarico solo se non c'è un allenamento in corso.
+  const reg = navigator.serviceWorker.register('sw.js').catch(e => console.warn('Service worker', e));
+  // iOS riprende l'app senza ricaricarla: quando torni nell'app controllo se c'è una versione nuova
+  const controlla = () => reg.then(r => r?.update()).catch(() => {});
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) controlla(); });
+  setInterval(controlla, 30 * 60 * 1000);
+  // Nuova versione installata: ricarico subito, oppure (durante un allenamento) appena esci dall'app,
+  // così non ti interrompe; l'allenamento in corso riprende da dove era.
   let ricaricato = false;
+  let inAttesa = false;
   const avevaVersione = !!navigator.serviceWorker.controller; // al primo avvio non serve ricaricare
+  const ricarica = () => { if (!ricaricato) { ricaricato = true; location.reload(); } };
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (ricaricato || !avevaVersione) return;
+    if (!avevaVersione) return;
     const inCorso = S.lista('sessione').some(s => !s.fine);
-    if (!inCorso) { ricaricato = true; location.reload(); }
+    if (!inCorso || document.hidden) ricarica();
+    else inAttesa = true;
   });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && inAttesa) ricarica(); });
 }
 
 avvia();

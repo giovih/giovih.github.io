@@ -9,8 +9,25 @@
 // Ogni famiglia vive in famiglie/<id>/..., dove <id> si ricava dalla password
 // (vedi chiaveFamiglia): senza la password non si sa dove sono i dati.
 
-const FIREBASE_VER = "10.12.2";
-const BASE = `https://www.gstatic.com/firebasejs/${FIREBASE_VER}/`;
+// Il "motore" di Firebase sta dentro l'app (lib/firebase/, versione 10.12.2), così
+// non dipende dal sito di Google (che su alcuni telefoni viene bloccato).
+// Se per qualche motivo non si carica, si prova anche da Google.
+const FONTI = ["./lib/firebase/", "https://www.gstatic.com/firebasejs/10.12.2/"];
+
+async function caricaFirebase() {
+  let errore;
+  for (const base of FONTI) {
+    try {
+      const app = await import(base + "firebase-app.js");
+      const fs = await import(base + "firebase-firestore.js");
+      return { app, fs };
+    } catch (e) {
+      console.error("Firebase non caricato da " + base, e);
+      errore = e;
+    }
+  }
+  throw errore;
+}
 
 // Password -> id della famiglia (64 caratteri esadecimali), con PBKDF2 lento apposta.
 export async function chiaveFamiglia(password) {
@@ -23,23 +40,17 @@ export async function chiaveFamiglia(password) {
   return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
+// Con Firebase impostato, se non si riesce a collegarlo NON si passa di nascosto alla
+// lista locale (sembrerebbe "password sbagliata"): l'errore arriva all'app, che lo mostra.
 export async function apriServer(firebase) {
-  if (firebase) {
-    try {
-      return await serverFirebase(firebase);
-    } catch (e) {
-      console.error("Firebase non disponibile, uso il salvataggio locale", e);
-    }
-  }
-  return serverLocale();
+  return firebase ? serverFirebase(firebase) : serverLocale();
 }
 
 // Prova un collegamento a Firebase prima di salvarlo. Restituisce "" se va,
 // altrimenti un messaggio da mostrare.
 export async function provaFirebase(firebase) {
   try {
-    const { initializeApp, deleteApp } = await import(BASE + "firebase-app.js");
-    const fs = await import(BASE + "firebase-firestore.js");
+    const { app: { initializeApp, deleteApp }, fs } = await caricaFirebase();
     const app = initializeApp(firebase, "prova-" + Date.now());
     try {
       const db = fs.getFirestore(app);
@@ -63,12 +74,19 @@ export async function provaFirebase(firebase) {
 }
 
 async function serverFirebase(firebase) {
-  const { initializeApp } = await import(BASE + "firebase-app.js");
-  const fs = await import(BASE + "firebase-firestore.js");
+  const { app: { initializeApp }, fs } = await caricaFirebase();
   const app = initializeApp(firebase);
-  const db = fs.initializeFirestore(app, {
-    localCache: fs.persistentLocalCache({ tabManager: fs.persistentMultipleTabManager() })
-  });
+  let db;
+  try {
+    // copia sul telefono: la lista si vede e si modifica anche senza internet
+    db = fs.initializeFirestore(app, {
+      localCache: fs.persistentLocalCache({ tabManager: fs.persistentMultipleTabManager() })
+    });
+  } catch (e) {
+    // browser senza spazio per la copia (es. navigazione privata): funziona lo stesso, solo online
+    console.error("Copia offline non disponibile", e);
+    db = fs.getFirestore(app);
+  }
   const segno = id => fs.doc(db, "famiglie", id, "info", "famiglia");
 
   return {
@@ -76,7 +94,11 @@ async function serverFirebase(firebase) {
     nome: firebase.projectId,
     async esiste(id) {
       try {
-        return (await fs.getDocFromServer(segno(id))).exists();
+        const doc = await Promise.race([
+          fs.getDocFromServer(segno(id)),
+          new Promise((_, no) => setTimeout(() => no({ code: "tempo", message: "il server non risponde" }), 15000))
+        ]);
+        return doc.exists();
       } catch (e) {
         // server "bloccato" su un'altra famiglia: per noi è una password sbagliata
         if (e.code === "permission-denied") return false;

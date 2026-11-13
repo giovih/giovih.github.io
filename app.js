@@ -1060,6 +1060,23 @@ function mostraErrore(err) {
   disegna();
 }
 
+// Il server non si è collegato: lo diciamo chiaramente, con il motivo e "Riprova".
+function mostraErroreServer(err) {
+  const d = $("#accesso");
+  const dettaglio = String((err && (err.message || err.code)) || err || "errore sconosciuto").slice(0, 200);
+  riempi(d,
+    h("img", { class: "logo-grande", src: "icons/icon-512.png", alt: "" }),
+    h("h2", {}, "Non riesco a collegarmi"),
+    h("p", { class: "sotto-titolo" }, navigator.onLine
+      ? "L'app non riesce a raggiungere il server della famiglia. Controlla la connessione e riprova. Se usi un blocco della pubblicità o una VPN, prova a disattivarli."
+      : "Il telefono non è connesso a internet. Collegati al Wi-Fi o ai dati e riprova."),
+    h("button", { type: "button", class: "btn primario largo", onclick: () => location.reload() }, "Riprova"),
+    h("p", { class: "errore-dettaglio" }, "Dettaglio per chi ti aiuta: " + dettaglio)
+  );
+  d.addEventListener("cancel", e => e.preventDefault());
+  d.showModal();
+}
+
 async function avvia() {
   const daHash = location.hash.slice(1);
   pagina = daHash === "tutti" || persona(daHash) ? daHash : (io() || "tutti");
@@ -1067,7 +1084,12 @@ async function avvia() {
   // link d'invito aperto con l'app già aperta: ricarica col nuovo server
   addEventListener("hashchange", () => { if (location.hash.startsWith("#invito=")) { leggiInvito(); location.reload(); } });
 
-  server = await apriServer(serverSalvato() || CONFIG.firebase);
+  try {
+    server = await apriServer(serverSalvato() || CONFIG.firebase);
+  } catch (err) {
+    mostraErroreServer(err);
+    return;
+  }
   disegnaStato();
   disegnaIo();
   addEventListener("online", disegnaStato);

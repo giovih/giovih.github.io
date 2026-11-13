@@ -2,6 +2,9 @@ import { CONFIG } from "./config.js";
 import { apriServer, provaFirebase, chiaveFamiglia } from "./store.js";
 import { REPARTI, reparto, indovinaReparto } from "./reparti.js";
 
+// cambia a ogni pubblicazione: compare in fondo alla schermata della password
+const VERSIONE = "9";
+
 const PERSONE = CONFIG.persone;
 const persona = id => PERSONE.find(p => p.id === id);
 const $ = s => document.querySelector(s);
@@ -1019,7 +1022,8 @@ function chiediPassword() {
           server.condiviso
             ? [h("span", { class: "punto" }), `Server collegato · ${server.nome}`]
             : [icona("telefono"), "Server non collegato · ", h("button", { type: "button", onclick: () => apriServer2() }, "Collega")]
-        )
+        ),
+        h("div", { class: "versione" }, "versione " + VERSIONE)
       );
       setTimeout(() => p1.inp.focus(), 50);
     }

@@ -1,7 +1,7 @@
 // Service worker: l'app funziona senza internet e riceve le notifiche push.
 // Aggiorna VERSIONE a ogni pubblicazione: il telefono scarica la nuova versione da solo.
 
-const VERSIONE = '2.10.0';
+const VERSIONE = '2.10.2';
 const CACHE = 'pal2-' + VERSIONE;
 
 const FILE = [
@@ -76,8 +76,10 @@ self.addEventListener('push', e => {
   const titolo = d.titolo || 'Palestra';
   e.waitUntil(self.registration.showNotification(titolo, {
     body: d.testo || '',
-    tag: d.tag || undefined,
-    renotify: !!d.tag,
+    // il recupero sostituisce il recupero precedente; ogni promemoria invece è una notifica a sé (con lo stesso tag
+    // iPhone può sostituire la precedente in silenzio)
+    tag: d.tag === 'recupero' ? 'recupero' : undefined,
+    renotify: d.tag === 'recupero',
     icon: 'icons/icon-192.png',
     badge: 'icons/icon-96.png',
     data: { url: d.url || './' },

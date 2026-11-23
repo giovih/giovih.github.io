@@ -87,6 +87,8 @@ export function PaginaPrepara() {
       'Apri la funzione, Details, spegni Enforce JWT verification e salva. La funzione controlla già da sola chi la chiama.',
     ]} /><//>
 
+    <${SectionFoot}>Funzione già creata e va aggiornata? Su Supabase: Edge Functions, push, Code. Cancella tutto, incolla la funzione push copiata qui sopra e premi Deploy.<//>
+
     <${SectionLabel}>4. Indirizzo dell'app<//>
     <${List}>
       <${RigaCopia} titolo="Site URL" testo=${sito} cosa="Indirizzo" />

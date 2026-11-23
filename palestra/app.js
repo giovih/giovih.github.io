@@ -43,6 +43,17 @@ function avviaNotifiche(P) {
   };
   C.ascolta(iscrivi);
   iscrivi();
+
+  // iPhone riprende l'app senza riavviarla: ogni volta che torni (e quando torna la rete) controllo che l'iscrizione alle notifiche
+  // sia ancora valida e rinnovo i promemoria dei prossimi 14 giorni. Al massimo una volta ogni 20 minuti.
+  let ultimoControllo = Date.now();
+  const rinnova = () => {
+    if (!C.collegato() || P.permesso() !== 'granted' || Date.now() - ultimoControllo < 20 * 60 * 1000) return;
+    ultimoControllo = Date.now();
+    P.iscrivi().then(() => P.programmaPromemoria(true)).catch(e => { ultimoControllo = 0; console.warn('push', e); });
+  };
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) rinnova(); });
+  addEventListener('online', rinnova);
 }
 
 function registraServiceWorker() {

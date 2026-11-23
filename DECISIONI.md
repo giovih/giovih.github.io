@@ -176,3 +176,13 @@ Kcal e proteine sono quelli della tua scheda; carboidrati e grassi li ho stimati
 - **Offline**: l'app era già offline-first (IndexedDB + service worker). Provato con un finto server: allenamento, cibo, acqua e peso fatti senza rete restano sul telefono
   anche chiudendo e riaprendo l'app, e partono da soli appena torna la rete, senza doppioni. Aggiunto un limite di 25 s alle richieste
   (con il segnale debole non restano appese) e il segno "fatto" dei dati importati si scrive solo dopo che i dati sono salvati su disco.
+
+## 15. Notifiche che a volte non arrivano
+- Cause trovate nel codice (non posso leggere i registri del server): (1) una notifica veniva segnata "inviata" anche se Apple rispondeva con
+  un errore passeggero (429, 5xx, rete), quindi si perdeva; (2) ogni errore passeggero contava verso 20 "errori" dell'iscrizione, che poi
+  veniva cancellata per sempre; (3) le notifiche non urgenti (pasti, creatina, acqua, pesata) usavano la priorità "normale", che iPhone può ritardare;
+  (4) i promemoria della stessa categoria avevano lo stesso "tag" e potevano sostituirsi in silenzio.
+- Correzioni: la funzione `push` riprova (ogni 2 minuti, fino alla scadenza) se l'errore è passeggero e non lo conta come errore dell'iscrizione;
+  tutte con priorità alta e limite di 10 s verso Apple. Nell'app: ogni promemoria è una notifica a sé, e quando torni nell'app (o torna la rete)
+  si controlla l'iscrizione e si rinnovano i promemoria (al massimo ogni 20 minuti).
+- La funzione va **aggiornata a mano su Supabase** (token revocato): Altro, Salvataggio online, Aggiorna il server, "Copia la funzione push".

@@ -109,7 +109,7 @@ export async function inviaA(s: Iscrizione, dati: unknown, v: Vapid, opz: { ttl:
     Authorization: `vapid t=${jwt}, k=${v.pubblica}`,
   };
   if (opz.argomento) h.Topic = opz.argomento;
-  const r = await fetch(s.endpoint, { method: "POST", headers: h, body: corpo });
+  const r = await fetch(s.endpoint, { method: "POST", headers: h, body: corpo, signal: AbortSignal.timeout(10000) });
   await r.body?.cancel();
   return r.status;
 }
@@ -189,23 +189,30 @@ Deno.serve(async (req) => {
       const lista: { id: number; tag: string; categoria: string; titolo: string; testo: string; url: string; scade: string; iscrizioni: Iscrizione[] }[] =
         await rpc("push_da_inviare", { p_limite: 100 });
       let consegnate = 0;
+      const daSegnare: number[] = [];
       await Promise.all(lista.map(async (n) => {
         const dati = { titolo: n.titolo, testo: n.testo, tag: n.tag.split(":")[0], url: n.url };
         const ttl = (new Date(n.scade).getTime() - Date.now()) / 1000;
+        let consegnata = false;
+        let passeggero = false; // errore del servizio push o della rete: vale la pena riprovare
         await Promise.all(n.iscrizioni.map(async (s) => {
           let stato = 0;
           try {
-            stato = await inviaA(s, dati, v, { ttl, urgente: n.categoria === "recupero", argomento: argomento(n.tag) });
+            // tutte con priorità alta: a "normale" iPhone può ritardarle (risparmio batteria)
+            stato = await inviaA(s, dati, v, { ttl, urgente: true, argomento: argomento(n.tag) });
           } catch (e) {
             console.error("push", e);
           }
-          if (stato >= 200 && stato < 300) consegnate++;
+          if (stato >= 200 && stato < 300) { consegnata = true; consegnate++; }
           else if (stato === 404 || stato === 410) await rpc("push_iscrizione_errore", { p_endpoint: s.endpoint, p_elimina: true });
+          else if (stato === 0 || stato === 429 || stato >= 500) passeggero = true; // non conta come errore dell'iscrizione
           else await rpc("push_iscrizione_errore", { p_endpoint: s.endpoint, p_elimina: false });
         }));
+        // se non è partita per un problema passeggero NON la segno come inviata: il database la riprende dopo 2 minuti, finché non scade
+        if (consegnata || !passeggero) daSegnare.push(n.id);
       }));
-      if (lista.length) await rpc("push_segna_inviate", { p_ids: lista.map((n) => n.id) });
-      return risposta({ inviate: lista.length, consegnate });
+      if (daSegnare.length) await rpc("push_segna_inviate", { p_ids: daSegnare });
+      return risposta({ inviate: daSegnare.length, consegnate, daRiprovare: lista.length - daSegnare.length });
     }
 
     return risposta({ message: "Azione sconosciuta." }, 400);

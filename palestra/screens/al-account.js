@@ -148,6 +148,7 @@ function Collegato({ cloud, sync, apri }) {
     <${SectionFoot}>La sincronizzazione è automatica: quando c'è rete l'app manda le modifiche e riceve quelle degli altri dispositivi.<//>
     <${List}>
       <${ListRow} icon="bell" tile="#ff3b30" title="Notifiche" chevron onClick=${() => apri('notifiche')} />
+      <${ListRow} icon="sliders" tile="#5856d6" title="Aggiorna il server" sub="Se ti chiedo di aggiornare la funzione delle notifiche" chevron onClick=${() => apri('prepara')} />
     <//>
     <div class="center mt-24"><button type="button" class="btn btn-plain danger" onClick=${esci}>Esci dall'account</button></div>`;
 }

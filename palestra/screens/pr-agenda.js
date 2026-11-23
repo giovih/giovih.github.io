@@ -29,7 +29,7 @@ export function Agenda({ vai }) {
   const celle = grigliaMese(mese.a, mese.m);
   const giorni = celle.filter(Boolean);
   const agenda = datiAgenda({
-    giorni, sessioni: A.sessioni(), pesi: A.pesi(), cibi: S.lista('cibo'), giorniRec: S.lista('giorno'), imp, oggi,
+    giorni, sessioni: A.sessioniVere(), pesi: A.pesi(), cibi: S.lista('cibo'), giorniRec: S.lista('giorno'), imp, oggi,
   });
   const r = riassuntoMese(agenda);
   const dOggi = parseDay(oggi);

@@ -20,7 +20,7 @@ function datiCoach(oggi) {
   return {
     oggi,
     imp: S.impostazioni(),
-    sessioni: A.sessioni(),
+    sessioni: A.sessioniVere(),
     cibi: S.lista('cibo'),
     giorni: S.lista('giorno'),
     pesi: A.pesi(),

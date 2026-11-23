@@ -133,6 +133,39 @@ export function confronto(oggi, prima) {
   return { primaVolta: false, dKg, dReps, oggi: descr(oggi), prima: descr(prima), testo: `Oggi ${descr(oggi)} · prima ${descr(prima)} · ${esito}` };
 }
 
+/** Dopo una pausa: quanta parte del carico di prima si usa nelle prime 3 settimane (1: 70%, 2: 85-90%, 3: 100%). */
+export const RAMPA_RIENTRO = { 1: 0.7, 2: 0.875, 3: 1 };
+
+/**
+ * Suggerimento dopo una pausa: carico di prima ridotto (settimana 1 circa 70%, 2 circa 85-90%, 3 il 100%).
+ * Dalla settimana 4 si torna alla progressione normale.
+ * @param {{serie:number, min:number, max:number, ex?:string}} riga
+ * @param {ReturnType<typeof storico>} histPrima  storico di prima della pausa (dal più recente)
+ * @param {string} eq  attrezzo
+ * @param {number} n  settimana del programma (1, 2, 3…)
+ * @returns {{kg:number, reps:number[], tipo:string, msg:string}|null} null se non serve (nessun carico di prima, o settimana > 3)
+ */
+export function rampaRientro(riga, histPrima, eq, n) {
+  const f = RAMPA_RIENTRO[n];
+  const hist = (histPrima || []).filter(h => kgTop(h) > 0);
+  if (!f || !hist.length) return null;
+  const A = ATTREZZI[eq] || ATTREZZI.mac;
+  const serie = Math.max(1, riga.serie | 0);
+  const rif = kgTop(hist[0]);
+  const kg = Math.max(A.arrot, arrotonda(rif * f, A.arrot));
+  const normale = suggerisci(riga, hist, eq, false);
+  const reps = n === 3
+    ? (normale.tipo === 'sali' ? Array(serie).fill(riga.min) : normale.reps)
+    : Array.from({ length: serie }, (_, i) => {
+      const prec = (hist[0].sets[i] ?? hist[0].sets[hist[0].sets.length - 1]).reps;
+      return Math.max(riga.min, Math.min(prec, riga.max));
+    });
+  const msg = n === 3
+    ? `Rientro, settimana 3 di 3: oggi torni al carico di prima, ${fmtNum(kg)} kg.`
+    : `Rientro dopo la pausa, settimana ${n} di 3: oggi prova ${fmtNum(kg)} kg (circa ${n === 1 ? '70' : '85-90'}% di ${fmtNum(rif)} kg). Puoi cambiarlo.`;
+  return { kg, reps, tipo: 'rampa', msg };
+}
+
 /** Statistiche di una seduta. */
 export function statistiche(s) {
   let serie = 0, totali = 0, volume = 0, ripetizioni = 0;

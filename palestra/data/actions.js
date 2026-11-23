@@ -5,7 +5,7 @@ import * as S from './store.js';
 import { uuid } from './store.js';
 import { isoDay, addDaysIso, weekdayIt, parseDay } from '../core/dates.js';
 import { settimanaProgramma } from '../core/cycle.js';
-import { storico, suggerisci, statistiche, recordBattuti, serieFatte, confronto } from '../core/progression.js';
+import { storico, suggerisci, statistiche, recordBattuti, serieFatte, confronto, rampaRientro } from '../core/progression.js';
 import { attrezzoDi, gruppoDi, trovaEsercizio } from '../core/scheda.js';
 import { sedutaDelGiorno } from '../core/settings.js';
 import { totali } from '../core/nutrition.js';
@@ -20,6 +20,8 @@ export const esercizi = () => S.lista('esercizio');
 export function sessioni() {
   return [...S.lista('sessione')].sort((a, b) => (b.data || '').localeCompare(a.data || ''));
 }
+/** Sedute vere: senza i carichi di riferimento inseriti a mano (servono solo come "serie precedente"). */
+export const sessioniVere = () => sessioni().filter(s => !s.riferimento);
 export const sessioneAttiva = () => sessioni().find(s => !s.fine) || null;
 export const sessioniDelGiorno = giorno => sessioni().filter(s => s.fine && isoDay(new Date(s.data)) === giorno);
 
@@ -72,9 +74,20 @@ export function recenti(max = 25) {
 /** Recupero da usare per il timer: media dell'intervallo, arrotondata a 15 s. */
 export const recuperoSecondi = v => Math.round(((+v.recMin || 90) + (+v.recMax || +v.recMin || 90)) / 2 / 15) * 15;
 
-function creaVoce(r, sedute, scarico, pers) {
+/** Cosa fare oggi per un esercizio: nelle prime 3 settimane dopo una pausa la rampa dei carichi, poi la progressione normale. */
+function suggerimento(riga, nome, eq, sedute, n, scarico) {
+  if (n <= 3 && !scarico) {
+    const inizio = S.impostazioni().inizioProgramma;
+    const prima = storico(sedute.filter(s => s.data && isoDay(new Date(s.data)) < inizio), nome);
+    const rampa = rampaRientro(riga, prima, eq, n);
+    if (rampa) return rampa;
+  }
+  return suggerisci(riga, storico(sedute, nome), eq, scarico);
+}
+
+function creaVoce(r, sedute, w, pers) {
   const eq = attrezzoDi(r.ex, pers);
-  const sug = suggerisci(r, storico(sedute, r.ex), eq, scarico);
+  const sug = suggerimento(r, r.ex, eq, sedute, w.n, w.scarico);
   return {
     ex: r.ex, eq, gruppo: gruppoDi(r.ex, pers),
     serie: r.serie, min: r.min, max: r.max, recMin: r.recMin, recMax: r.recMax,
@@ -99,7 +112,7 @@ export function avviaAllenamento(codice) {
   S.salva('sessione', id, {
     data: new Date().toISOString(), fine: null, codice, nome: sc.nome, tono: sc.tono,
     settimana: w.n, ciclo: w.ciclo, scarico: w.scarico,
-    voci: sc.righe.map(r => creaVoce(r, sedute, w.scarico, pers)),
+    voci: sc.righe.map(r => creaVoce(r, sedute, w, pers)),
   });
   return id;
 }
@@ -175,7 +188,7 @@ export function sostituisciEsercizio(id, vi, nome, ancheScheda = false) {
   modSessione(id, s => {
     const v = s.voci[vi];
     const eq = attrezzoDi(nome, pers);
-    const sug = suggerisci({ serie: v.sets.length, min: v.min, max: v.max }, storico(sedute, nome), eq, s.scarico);
+    const sug = suggerimento({ serie: v.sets.length, min: v.min, max: v.max }, nome, eq, sedute, s.settimana || settimana().n, s.scarico);
     Object.assign(v, { ex: nome, eq, gruppo: gruppoDi(nome, pers), sugKg: sug.kg, sugReps: sug.reps, msg: sug.msg, tipo: sug.tipo });
     v.sets = v.sets.map(x => (x.fatto ? x : { kg: null, reps: null, fatto: false }));
   });
@@ -225,8 +238,7 @@ export function riepilogo(s) {
   const prossima = (fatti.length ? fatti : (sc?.righe || s.voci)).map(v => {
     const r = sc?.righe.find(x => x.ex === v.ex) || v;
     const eq = attrezzoDi(v.ex, pers);
-    const hist = storico(sedute.filter(x => x.data <= s.data), v.ex);
-    const sug = suggerisci({ serie: r.serie, min: r.min, max: r.max }, hist, eq, false);
+    const sug = suggerimento({ serie: r.serie, min: r.min, max: r.max }, v.ex, eq, sedute.filter(x => x.data <= s.data), s.settimana || settimana().n, false);
     const oggi = serieFatte(v);
     let prima = null;
     for (const x of precedenti) { const pv = x.voci.find(y => y.ex === v.ex); if (pv && serieFatte(pv).length) { prima = serieFatte(pv); break; } }
@@ -285,7 +297,7 @@ export const aggiungiAcqua = (g, delta) => impostaAcqua(g, giorno(g).acquaMl + d
 export function segnaAllenamento(g, si) { S.modifica('giorno', g, d => ({ ...d, allenato: !!si }), giorno(g)); }
 /** Giorni con un allenamento: sedute finite più quelli segnati a mano. */
 export function giorniAllenamento() {
-  const out = new Set(S.lista('sessione').filter(s => s.fine && s.data).map(s => isoDay(new Date(s.data))));
+  const out = new Set(S.lista('sessione').filter(s => s.fine && s.data && !s.riferimento).map(s => isoDay(new Date(s.data))));
   for (const r of S.lista('giorno')) if (r.allenato) out.add(r.id);
   return out;
 }
@@ -302,6 +314,7 @@ export async function importaStoricoAllenamenti() {
   // la prima versione aveva segnato anche l'1 ottobre (giovedì): in ottobre c'era già la scheda
   if (S.getMeta('storicoAllenamenti') && giorno('2026-10-01').allenato) segnaAllenamento('2026-10-01', false);
   for (const g of giorni) if (!giorno(g).allenato) segnaAllenamento(g, true);
+  await S.scriviOra();
   await S.setMeta('storicoAllenamenti2', true);
 }
 
@@ -357,4 +370,50 @@ export async function eliminaFoto(id) {
   S.elimina('foto', id);
   await S.eliminaBlob(`foto/${id}`);
   await S.eliminaBlob(`foto/${id}_t`);
+}
+
+/* =====================================================================
+   Ripartenza dopo una pausa
+   ===================================================================== */
+
+const DATA_RIPARTENZA = '2026-11-23';
+
+/** Una volta sola: il programma riparte dalla settimana 1 (dopo circa un mese di pausa). */
+export function ripartiProgramma(data = DATA_RIPARTENZA) {
+  if (S.impostazioni().ripartenza === data) return false;
+  S.salvaImpostazioni(i => ({ ...i, inizioProgramma: data, ripartenza: data }));
+  return true;
+}
+
+/** Carichi veri di prima (da Hevy), come "serie precedente". Gli altri esercizi restano vuoti. */
+const CARICHI_HEVY = [
+  ['Panca piana', [[35, 6], [35, 6], [35, 6], [35, 6]]],
+  ['Rematore con bilanciere', [[42.5, 8], [32.5, 10], [32.5, 10], [40, 10]]],
+  ['Military press manubri', [[10, 10], [12, 6], [10, 10]]],
+  ['Lat machine presa larga', [[50, 8], [50, 6], [50, 8]]],   // "lat pulldown"
+  ['Curl EZ', [[20, 8], [17.5, 9]]],
+];
+
+/** Una volta sola: li salva come una seduta "di riferimento" (non conta nelle statistiche né nel calendario). */
+export async function importaCarichiPartenza() {
+  if (S.getMeta('caricoPartenzaHevy')) return false;
+  const pers = esercizi();
+  const imp = S.impostazioni();
+  const voci = CARICHI_HEVY.map(([ex, serie]) => {
+    const riga = Object.values(imp.schede).flatMap(sc => sc.righe).find(r => r.ex === ex);
+    return {
+      ex, eq: attrezzoDi(ex, pers), gruppo: gruppoDi(ex, pers),
+      serie: serie.length, min: riga?.min ?? 6, max: riga?.max ?? 10, recMin: riga?.recMin ?? 90, recMax: riga?.recMax ?? 90,
+      ss: null, drop: false, pulita: true, nota: '',
+      sets: serie.map(([kg, reps]) => ({ kg, reps, fatto: true })),
+    };
+  });
+  const data = '2026-11-22T12:00:00.000Z';
+  S.salva('sessione', 'riferimento-hevy', {
+    data, fine: data, codice: 'A', nome: 'Carichi di partenza (Hevy)', tono: imp.schede.A?.tono || 'ambra',
+    settimana: 0, ciclo: 0, scarico: false, riferimento: true, voci,
+  });
+  await S.scriviOra(); // prima i dati su disco, poi il segno "fatto": se l'app si chiude nel mezzo si rifà
+  await S.setMeta('caricoPartenzaHevy', true);
+  return true;
 }

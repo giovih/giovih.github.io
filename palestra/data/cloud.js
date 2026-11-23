@@ -71,11 +71,14 @@ async function richiesta(percorso, { metodo = 'GET', corpo, conToken = true, int
     body = JSON.stringify(corpo);
   }
   let r;
+  // con il segnale debole una richiesta può restare appesa: dopo un po' la considero "senza rete" e riprovo al giro dopo
+  const ctrl = new AbortController();
+  const scade = setTimeout(() => ctrl.abort(), body instanceof Blob ? 90000 : 25000);
   try {
-    r = await fetch(cfg.url + percorso, { method: metodo, headers: h, body });
+    r = await fetch(cfg.url + percorso, { method: metodo, headers: h, body, signal: ctrl.signal });
   } catch {
     throw new ErroreCloud('Nessuna connessione a internet.', 'offline', 0);
-  }
+  } finally { clearTimeout(scade); }
   if (r.status === 401 && conToken && sess?.refresh_token && tentativo === 0) {
     await rinnova().catch(() => null);
     return richiesta(percorso, { metodo, corpo, conToken, intestazioni, grezzo, tentativo: 1 });

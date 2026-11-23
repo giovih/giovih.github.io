@@ -13,7 +13,7 @@ async function avvia() {
     console.error(e);
   }
   applicaTema(S.impostazioni().tema, S.impostazioni().palette, S.impostazioni().stile);
-  import('./data/actions.js').then(A => A.importaStoricoAllenamenti()).catch(e => console.error(e));
+  import('./data/actions.js').then(async A => { await A.importaStoricoAllenamenti(); await A.importaCarichiPartenza(); A.ripartiProgramma(); }).catch(e => console.error(e));
   // link di conferma dell'email: l'app si apre già collegata (in Altro)
   try { C.leggiTokenDaIndirizzo(); } catch (e) { console.error(e); }
   render(html`<${AppShell} />`, document.getElementById('app'));

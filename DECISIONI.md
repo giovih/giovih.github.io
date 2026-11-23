@@ -162,3 +162,17 @@ Kcal e proteine sono quelli della tua scheda; carboidrati e grassi li ho stimati
 - I caratteri (Space Grotesk, JetBrains Mono, Archivo, Plus Jakarta Sans, Bebas Neue, Barlow, Nunito) sono liberi (licenza SIL OFL),
   presi dai pacchetti Fontsource e inclusi nell'app (`palestra/fonts`, 270 KB): funzionano anche senza internet.
 - La barra flottante di Sport ora sta più in basso, vicino al bordo dello schermo.
+
+## 14. Ripartenza dopo la pausa (23 novembre 2026)
+- **Carichi di partenza**: i carichi di Hevy (panca, rematore, military press manubri, lat machine, curl EZ) sono una seduta "di riferimento"
+  del 22/11/2026 (`riferimento: true`). Serve solo come "serie precedente" e per calcolare i suggerimenti: non compare nello storico,
+  nel calendario, nei grafici, nelle serie per muscolo né nelle settimane di fila. Il "Lat pulldown" è la "Lat machine presa larga" della scheda.
+  Gli altri esercizi sono rimasti vuoti. Si importa una sola volta; se compare ancora una vecchia seduta con "0 ×", si toglie dallo Storico.
+- **Ripartenza**: "Inizio programma" = lunedì 23/11/2026, settimana 1 di 8 (una volta sola, segnato nelle impostazioni).
+- **Rampa dei carichi** (`rampaRientro` in `core/progression.js`): settimane 1, 2 e 3 dopo la partenza, il peso suggerito è circa il 70%,
+  l'85-90% (87,5%) e il 100% del carico di prima della pausa (primo set dell'ultima seduta prima della ripartenza), arrotondato ai passi
+  dell'attrezzo (bilanciere 2,5 kg, manubri 1 kg). Dalla settimana 4 torna la progressione normale. È un suggerimento in grigio
+  sotto l'esercizio ("Oggi prova 25 kg"): si può sempre cambiare. Senza un carico di prima l'esercizio resta "prima volta".
+- **Offline**: l'app era già offline-first (IndexedDB + service worker). Provato con un finto server: allenamento, cibo, acqua e peso fatti senza rete restano sul telefono
+  anche chiudendo e riaprendo l'app, e partono da soli appena torna la rete, senza doppioni. Aggiunto un limite di 25 s alle richieste
+  (con il segnale debole non restano appese) e il segno "fatto" dei dati importati si scrive solo dopo che i dati sono salvati su disco.

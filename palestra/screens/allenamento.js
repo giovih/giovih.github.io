@@ -16,7 +16,7 @@ import { ultimaVolta, statistiche } from '../core/progression.js';
 import { normalizza } from '../core/foods.js';
 
 const PASSO_KG = { bil: 2.5, man: 1, mac: 2.5, cav: 2.5, cl: 1.25 };
-const ICONA_TIPO = { sali: 'arrowUpRight', aggiungi: 'plus', ripeti: 'sync', fermo: 'arrowDownRight', scarico: 'moonZ', primo: 'sparkles' };
+const ICONA_TIPO = { rampa: 'arrowUpRight', sali: 'arrowUpRight', aggiungi: 'plus', ripeti: 'sync', fermo: 'arrowDownRight', scarico: 'moonZ', primo: 'sparkles' };
 
 /* =====================================================================
    Riga di una serie

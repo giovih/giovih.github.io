@@ -35,6 +35,7 @@ export function impostazioniIniziali() {
     },
     tema: 'auto', // auto | scuro | chiaro
     palette: 'classico', // classico | energia | oceano | viola | lime
+    ripartenza: null, // data di una ripartenza del programma già applicata (es. dopo una pausa)
     stile: 'sport', // sport | ios | neon | brutale | vetro | atleta | giocoso
   };
 }

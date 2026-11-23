@@ -180,3 +180,32 @@ test('massimo in tutte le serie: sali di peso (solo con tecnica pulita)', async 
   const n = suggerisci(riga, [{ sets, pulita: false }], 'bil');
   assert.equal(n.kg, 40); assert.match(n.msg, /tecnica pulita/);
 });
+
+test('rampa dopo la pausa: 70%, 85-90%, 100%, poi progressione normale', async () => {
+  const { rampaRientro } = await import('../core/progression.js');
+  const riga = { serie: 4, min: 6, max: 8 };
+  const prima = [{ data: '2026-11-22', pulita: true, sets: [{ kg: 35, reps: 6 }, { kg: 35, reps: 6 }, { kg: 35, reps: 6 }, { kg: 35, reps: 6 }] }];
+  const s1 = rampaRientro(riga, prima, 'bil', 1);
+  assert.equal(s1.kg, 25);                       // 35 × 0,70 = 24,5 → 25 (bilanciere a passi da 2,5)
+  assert.deepEqual(s1.reps, [6, 6, 6, 6]);
+  assert.match(s1.msg, /oggi prova 25 kg/);
+  assert.equal(rampaRientro(riga, prima, 'bil', 2).kg, 30);   // 35 × 0,875 = 30,6 → 30
+  assert.equal(rampaRientro(riga, prima, 'bil', 3).kg, 35);   // 100%
+  assert.equal(rampaRientro(riga, prima, 'bil', 4), null);    // dalla settimana 4 si torna alla progressione normale
+  // manubri: passi da 1 kg
+  const man = [{ data: 'x', pulita: true, sets: [{ kg: 10, reps: 10 }, { kg: 12, reps: 6 }, { kg: 10, reps: 10 }] }];
+  assert.equal(rampaRientro({ serie: 3, min: 8, max: 10 }, man, 'man', 1).kg, 7);
+  assert.equal(rampaRientro({ serie: 3, min: 8, max: 10 }, man, 'man', 3).kg, 10);
+  // senza carichi di prima (o con 0 kg) niente rampa: vale il suggerimento normale
+  assert.equal(rampaRientro(riga, [], 'bil', 1), null);
+  assert.equal(rampaRientro(riga, [{ data: 'x', pulita: true, sets: [{ kg: 0, reps: 6 }] }], 'bil', 1), null);
+});
+
+test('il ciclo riparte dalla settimana 1 dal 23/11/2026', async () => {
+  const { settimanaProgramma } = await import('../core/cycle.js');
+  assert.equal(settimanaProgramma('2026-11-23', '2026-11-23').n, 1);
+  assert.equal(settimanaProgramma('2026-11-23', '2026-11-29').n, 1);
+  assert.equal(settimanaProgramma('2026-11-23', '2026-12-07').n, 3);
+  assert.equal(settimanaProgramma('2026-11-23', '2026-12-14').n, 4);
+  assert.equal(settimanaProgramma('2026-11-23', '2026-11-23').scarico, false);
+});

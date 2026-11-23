@@ -23,7 +23,7 @@ const setsTesto = sets => sets.map(x => (x.kg > 0 ? `${fmtNum(x.kg)} × ${x.reps
 
 export function Allenamenti({ vai }) {
   const oggi = useOggi();
-  const sedute = A.sessioni().filter(s => s.fine);
+  const sedute = A.sessioniVere().filter(s => s.fine);
   if (!sedute.length) {
     return html`${A.giorniAllenamento().size > 0 && html`<${Anno} sedute=${sedute} oggi=${oggi} />`}<${Card}><${EmptyState} icon="dumbbell" title="Ancora nessun allenamento"
       text="Quando finisci il primo allenamento qui trovi la forza di ogni esercizio, le serie per muscolo e lo storico."

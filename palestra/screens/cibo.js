@@ -55,6 +55,7 @@ function Pasto({ p, giorno, vai, allenamento }) {
   const voci = A.cibiDelGiorno(giorno).filter(c => c.pasto === p.key);
   const t = totali(voci);
   const ieri = voci.length ? [] : A.pastoDiIeri(giorno, p.key);
+  const solito = A.solito(p.key);
   const sotto = p.key === 'pranzo' ? (allenamento ? 'Pre-allenamento' : null) : p.key === 'merenda' ? (allenamento ? 'Post-allenamento' : null) : null;
   return html`<section class="card flush pasto" aria-label=${p.nome}>
     <div class="pasto-testa">
@@ -73,6 +74,22 @@ function Pasto({ p, giorno, vai, allenamento }) {
       </span>
       <span class="cr-kcal num">${fmtInt(c.kcal)}</span>
     </button>`)}
+    ${!voci.length && solito && html`<button type="button" class="row copia solito" onClick=${() => {
+      aptico('successo');
+      const n = A.aggiungiSolito(giorno, p.key);
+      toast(`Aggiunto il solito: ${n} ${n === 1 ? 'alimento' : 'alimenti'}`, 'checkCircle');
+    }}>
+      <${Icon} name="plus" size=${18} class="accent" />
+      <span class="row-main"><span class="row-title accent">Aggiungi il solito</span><span class="row-sub">${solito.voci.map(c => c.nome).join(', ')} · ${fmtInt(totali(solito.voci).kcal)} kcal</span></span>
+    </button>`}
+    ${voci.length > 0 && !A.soloUgualeAlSolito(giorno, p.key) && html`<button type="button" class="row copia" onClick=${() => {
+      aptico('successo');
+      const n = A.salvaSolito(giorno, p.key);
+      toast(`Salvato come il solito (${n} ${n === 1 ? 'alimento' : 'alimenti'})`, 'checkCircle');
+    }}>
+      <${Icon} name="star" size=${18} class="accent" />
+      <span class="row-main"><span class="row-title accent">${solito ? 'Aggiorna il solito' : 'Salva come il solito'}</span><span class="row-sub">Così la prossima volta lo rimetti con un tocco</span></span>
+    </button>`}
     ${!voci.length && ieri.length > 0 && html`<button type="button" class="row copia" onClick=${() => {
       aptico('successo');
       const n = A.copiaPasto(addDaysIso(giorno, -1), giorno, p.key);

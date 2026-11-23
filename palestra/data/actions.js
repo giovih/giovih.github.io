@@ -417,3 +417,33 @@ export async function importaCarichiPartenza() {
   await S.setMeta('caricoPartenzaHevy', true);
   return true;
 }
+
+/* =====================================================================
+   "Il solito": i cibi di un pasto salvati per rimetterli con un tocco
+   ===================================================================== */
+
+const COPIA_SOLITO = ['nome', 'descrizione', 'kcal', 'prot', 'carb', 'grassi', 'quantita', 'unita', 'per100', 'porzioni', 'base', 'fonte', 'rif', 'barcode'];
+const firmaSolito = lista => JSON.stringify((lista || []).map(c => [c.nome, c.quantita ?? null, c.porzioni ?? null, c.kcal]));
+
+/** Il solito di un pasto (colazione, pranzo…) o null. */
+export const solito = pasto => S.leggi('solito', pasto);
+
+/** Salva i cibi che hai messo oggi in quel pasto come "il solito". */
+export function salvaSolito(giornoIso, pasto) {
+  const voci = cibiDelGiorno(giornoIso).filter(c => c.pasto === pasto)
+    .map(c => Object.fromEntries(COPIA_SOLITO.filter(k => c[k] != null).map(k => [k, c[k]])));
+  if (!voci.length) return 0;
+  S.salva('solito', pasto, { pasto, voci });
+  return voci.length;
+}
+
+/** Il solito è già uguale a quello che c'è oggi nel pasto? */
+export const soloUgualeAlSolito = (giornoIso, pasto) =>
+  firmaSolito(solito(pasto)?.voci) === firmaSolito(cibiDelGiorno(giornoIso).filter(c => c.pasto === pasto));
+
+/** Rimette tutti i cibi del solito in quel pasto. Restituisce quanti. */
+export function aggiungiSolito(giornoIso, pasto) {
+  const s = solito(pasto);
+  for (const v of s?.voci || []) aggiungiCibo(giornoIso, pasto, v);
+  return s?.voci?.length || 0;
+}

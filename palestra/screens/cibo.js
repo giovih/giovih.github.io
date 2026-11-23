@@ -9,7 +9,7 @@ import { aptico } from '../ui/haptics.js';
 import { useOggi } from './comuni.js';
 import { AcquaCreatina } from './oggi.js';
 import { apriAggiungi, apriModificaCibo } from './aggiungi-cibo.js';
-import { PASTI, nomePasto } from '../core/foods.js';
+import { PASTI, nomePasto, obiettivoPasto } from '../core/foods.js';
 import { quota, totali } from '../core/nutrition.js';
 import { fmtInt, fmtNum } from '../core/format.js';
 import { addDaysIso, parseDay, weekdayIt, GIORNI, MESI, cap, daysBetween, isoDay } from '../core/dates.js';
@@ -56,13 +56,23 @@ function Pasto({ p, giorno, vai, allenamento }) {
   const t = totali(voci);
   const ieri = voci.length ? [] : A.pastoDiIeri(giorno, p.key);
   const solito = A.solito(p.key);
+  const ob = obiettivoPasto(p.key, S.impostazioni().obiettivi);
   const sotto = p.key === 'pranzo' ? (allenamento ? 'Pre-allenamento' : null) : p.key === 'merenda' ? (allenamento ? 'Post-allenamento' : null) : null;
   return html`<section class="card flush pasto" aria-label=${p.nome}>
     <div class="pasto-testa">
       <span class="pasto-icona"><${Icon} name=${p.icona} size=${18} /></span>
       <div class="grow">
         <div class="t-headline">${p.nome}</div>
-        ${(sotto || voci.length > 0) && html`<div class="t-foot secondary num">${[sotto, voci.length ? `${fmtInt(t.kcal)} kcal · ${fmtInt(t.prot)} g proteine` : null].filter(Boolean).join(' · ')}</div>`}
+        <div class="t-foot secondary num pasto-sotto">
+          ${sotto && html`<span>${sotto}</span>`}
+          ${voci.length
+            ? html`<span>${fmtInt(t.kcal)} di ${fmtInt(ob.kcal)} kcal</span><span>${fmtInt(t.prot)} di ${ob.prot} g prot.</span>`
+            : html`<span>Obiettivo ${fmtInt(ob.kcal)} kcal</span><span>${ob.prot} g prot.</span>`}
+        </div>
+      </div>
+      <div class="pasto-anelli">
+        <${ProgressRing} value=${quota(t.kcal, ob.kcal)} size=${38} stroke=${5} color="var(--accent)" label=${`Calorie del pasto: ${fmtInt(t.kcal)} su ${fmtInt(ob.kcal)}`}><span class="pa-lettera">K</span><//>
+        <${ProgressRing} value=${quota(t.prot, ob.prot)} size=${38} stroke=${5} color="var(--dato-prot)" label=${`Proteine del pasto: ${fmtInt(t.prot)} su ${ob.prot} grammi`}><span class="pa-lettera">P</span><//>
       </div>
       <${IconButton} icon="plus" label=${'Aggiungi a ' + p.nome} onClick=${() => apriAggiungi(giorno, p.key, vai)} />
     </div>

@@ -413,3 +413,13 @@ test('sincronizzazione: vince il più recente, i doppioni identici non contano',
   assert.ok(uguali({ a: [1, { b: 2 }] }, { a: [1, { b: 2 }] }));
   assert.ok(!uguali({ a: [1, 2] }, { a: [2, 1] }));
 });
+
+test('obiettivo di ogni pasto: la somma è l\'obiettivo del giorno', async () => {
+  const { obiettivoPasto, PASTI } = await import('../core/foods.js');
+  const ob = { kcalMin: 3000, proteine: 120 };
+  const t = PASTI.map(p => obiettivoPasto(p.key, ob));
+  assert.ok(Math.abs(t.reduce((s, x) => s + x.kcal, 0) - 3000) <= 30);
+  assert.ok(Math.abs(t.reduce((s, x) => s + x.prot, 0) - 120) <= 3);
+  assert.ok(obiettivoPasto('pranzo', ob).kcal > obiettivoPasto('notte', ob).kcal);
+  assert.ok(obiettivoPasto('colazione', ob).kcal > 500 && obiettivoPasto('colazione', ob).kcal < 650);
+});

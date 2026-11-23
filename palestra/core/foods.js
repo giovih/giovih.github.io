@@ -149,6 +149,19 @@ export const PRESET = [
   m('notte', 3, 'Pane, burro d\'arachidi e latte', '1 fetta di pane, 15 g di burro d\'arachidi, 200 ml di latte', 300, 13, 31, 14),
 ];
 
+/**
+ * Quanto dovresti mangiare in un pasto: l'obiettivo del giorno diviso come nei pasti della scheda
+ * (colazione, spuntino, pranzo, merenda, cena, prima di dormire). La somma dei pasti è l'obiettivo del giorno.
+ * @param {string} pasto chiave del pasto
+ * @param {{kcalMin:number, proteine:number}} ob obiettivi del giorno
+ * @returns {{kcal:number, prot:number}}
+ */
+export function obiettivoPasto(pasto, ob) {
+  const media = (p, k) => { const l = PRESET.filter(x => x.pasto === p); return l.reduce((t, x) => t + x[k], 0) / (l.length || 1); };
+  const quota = k => media(pasto, k) / PASTI.reduce((t, x) => t + media(x.key, k), 0);
+  return { kcal: Math.round((ob.kcalMin * quota('kcal')) / 10) * 10, prot: Math.round(ob.proteine * quota('prot')) };
+}
+
 /** Toglie accenti e maiuscole per la ricerca. */
 export const normalizza = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 
